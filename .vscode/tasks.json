@@ -1,0 +1,46 @@
+{
+    "version": "0.1.0",
+    "command": "dotnet",
+    "isShellCommand": true,
+    "args": [],
+    "tasks": [
+        {
+            "taskName": "build",
+            "args": [
+                "${workspaceRoot}/Ooui.sln"
+            ],
+            "isBuildCommand": true,
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "taskName": "test",
+            "args": [
+                "${workspaceRoot}/Tests/Tests.csproj"
+            ],
+            "isTestCommand": true,
+            "showOutput": "silent",
+            "problemMatcher": {
+                "owner": "external",
+                "fileLocation": "absolute",
+                "severity": "error",
+                "pattern": [
+                    {
+                        "regexp": "^Error Message:\\s*$"
+                    },
+                    {
+                        "regexp": "^\\s*(.*)$",
+                        "message": 1
+                    },
+                    {
+                        "regexp": "^Stack Trace:\\s*$"
+                    },
+                    {
+                        "regexp": "^\\s*at (.*\\(\\)) in (.*):line (\\d+)$",
+                        "file": 2,
+                        "location": 3
+                    }
+                ]
+            }
+        }
+    ]
+}

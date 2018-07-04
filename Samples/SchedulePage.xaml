@@ -1,0 +1,6 @@
+<ContentPage x:Class="Samples.SchedulePage"
+    xmlns="http://xamarin.com/schemas/2014/forms"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:forms="clr-namespace:Xamarin.Forms;assembly=Xamarin.Forms.Core">
+    <Label Text="Welcome to ScheduledPage!" FontAttributes="Bold" Margin="10,10,10,50" HorizontalOptions="Center" />
+</ContentPage>

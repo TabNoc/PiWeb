@@ -1,0 +1,110 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <EnableDefaultEmbeddedResourceItems>False</EnableDefaultEmbeddedResourceItems>
+  </PropertyGroup>
+	
+  <ItemGroup>
+    <ProjectReference Include="..\Ooui\Ooui.csproj" />
+    <ProjectReference Include="..\Ooui.Forms\Ooui.Forms.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Xamarin.Forms" Version="2.5.0.122203" />
+  </ItemGroup>
+	
+  <ItemGroup>
+    <EmbeddedResource Include="**/*.xaml" />
+    <EmbeddedResource Remove="Dictionary1.xaml" />
+    <EmbeddedResource Remove="SchedulePage.xaml" />
+    <EmbeddedResource Remove="TodayPage.xaml" />
+    <EmbeddedResource Remove="UserControl.xaml" />
+    <EmbeddedResource Include="BugSweeper\Images\RedBug.png" />
+    <EmbeddedResource Include="BugSweeper\Images\Xamarin120.png" />
+    <EmbeddedResource Include="Monkeys\Images\Baboon.jpg" />
+    <EmbeddedResource Include="Monkeys\Images\BlueMonkey.jpg" />
+    <EmbeddedResource Include="Monkeys\Images\Capuchin.jpg" />
+    <EmbeddedResource Include="Monkeys\Images\GoldenLionTamarin.jpg" />
+    <EmbeddedResource Include="Monkeys\Images\Howler.jpg" />
+    <EmbeddedResource Include="Monkeys\Images\Squirrel.jpg" />
+  </ItemGroup>
+	
+  <ItemGroup>
+    <Compile Update="ButtonXamlPage - Kopieren.xaml.cs">
+      <DependentUpon>ButtonXamlPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="ButtonXamlPage.xaml.cs">
+      <DependentUpon>ButtonXamlPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="DisplayAlertPage.xaml.cs">
+      <DependentUpon>DisplayAlertPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Update="ListView\RefreshListView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+	
+  <ItemGroup>
+    <EmbeddedResource Update="test.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="ButtonXamlPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="DisplayAlertPage.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="DotMatrixClock\DotMatrixClockPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="ListView\RefreshListView.xaml">
+      <Generator>MSBuild:UpdateDesignTimeXaml</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Monkeys\MonkeysView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="TipCalc\TipCalcPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="WeatherApp\WeatherPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+    
+  <ItemGroup>
+    <None Remove="BugSweeper\Images\RedBug.png" />
+    <None Remove="BugSweeper\Images\Xamarin120.png" />
+    <None Remove="DotMatrixClock\DotMatrixClockPage.xaml" />
+    <None Remove="ListView\RefreshListView.xaml" />
+    <None Remove="Monkeys\Images\Baboon.jpg" />
+    <None Remove="Monkeys\Images\BlueMonkey.jpg" />
+    <None Remove="Monkeys\Images\Capuchin.jpg" />
+    <None Remove="Monkeys\Images\GoldenLionTamarin.jpg" />
+    <None Remove="Monkeys\Images\Howler.jpg" />
+    <None Remove="Monkeys\Images\Squirrel.jpg" />
+    <None Remove="Monkeys\MonkeysView.xaml" />
+    <None Remove="TipCalc\TipCalcPage.xaml" />
+    <None Remove="WeatherApp\WeatherPage.xaml" />
+  </ItemGroup>
+    
+  <ItemGroup>
+    <Page Include="Dictionary1.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SchedulePage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="TodayPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UserControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <RuntimeIdentifiers>win10-x64;osx.10.11-x64</RuntimeIdentifiers>
+  </PropertyGroup>
+
+</Project>

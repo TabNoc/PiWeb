@@ -1,0 +1,11 @@
+<TabbedPage xmlns="http://xamarin.com/schemas/2014/forms"
+            xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+            xmlns:samples="clr-namespace:Samples;assembly=Samples"
+            x:Class="ButtonXaml.TestXamlPage">
+    <samples:TodayPage />
+    <NavigationPage Title="Schedule">
+        <x:Arguments>
+            <samples:SchedulePage />
+        </x:Arguments>
+    </NavigationPage>
+</TabbedPage>
