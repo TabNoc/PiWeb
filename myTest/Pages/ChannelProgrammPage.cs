@@ -72,16 +72,16 @@ namespace TabNoc.Ooui.Pages
 
 			#region TextInputGroup StartZeit
 
-			_startTimeInputGroup = new TextInputGroup("StartZeit", "N/A", labelSize);
+			_startTimeInputGroup = new TextInputGroup("StartZeit", "N/A", labelSize, "", "Zeitformat ist hh:mm:ss");
 			_startTimeInputGroup.AddStyling(StylingOption.MarginBottom, 2);
-			_startTimeInputGroup.TextInput.Value = channelProgram.StartDateTime.ToLongTimeString();
+			_startTimeInputGroup.TextInput.Value = channelProgram.StartTime.ToString();
 			grid.AddRow().AppendCollum(_startTimeInputGroup);
 
 			#endregion TextInputGroup StartZeit
 
 			#region TextInputGroup Dauer
 
-			_durationInputGroup = new TextInputGroup("Dauer", "N/A", labelSize);
+			_durationInputGroup = new TextInputGroup("Dauer", "N/A", labelSize, "", "Zeitformat ist hh:mm:ss");
 			_durationInputGroup.AddStyling(StylingOption.MarginBottom, 2);
 			_durationInputGroup.TextInput.Value = channelProgram.Duration.ToString();
 			grid.AddRow().AppendCollum(_durationInputGroup);
@@ -206,11 +206,48 @@ namespace TabNoc.Ooui.Pages
 		{
 			_channelProgram.ActivateWeatherInfo = _weatherInfo.FirstButtonActive;
 			_channelProgram.ChoosenWeekdays = GetWeekdays();
+
 			string[] durationStrings = _durationInputGroup.TextInput.Value.Split(":");
-			_channelProgram.Duration = new TimeSpan(int.Parse(durationStrings[0]), int.Parse(durationStrings[1]), int.Parse(durationStrings[2]));
+			if (durationStrings.Length != 3 || _durationInputGroup.TextInput.Value.Contains("."))
+			{
+				_durationInputGroup.SetValidation(false, true);
+			}
+			else
+			{
+				try
+				{
+					_channelProgram.Duration = new TimeSpan(int.Parse(durationStrings[0]), int.Parse(durationStrings[1]), int.Parse(durationStrings[2]));
+					_durationInputGroup.SetValidation(false, false);
+				}
+				catch (Exception e)
+				{
+					Console.WriteLine(e);
+					_durationInputGroup.SetValidation(false, true);
+				}
+			}
+
 			_channelProgram.EnableMasterChannel = _activateMasterChannel.FirstButtonActive;
 			_channelProgram.Enabled = _programmEnabled.FirstButtonActive;
-			_channelProgram.StartDateTime = DateTime.Parse(_startTimeInputGroup.TextInput.Value);
+
+			string[] startTimeStrings = _startTimeInputGroup.TextInput.Value.Split(":");
+			if (startTimeStrings.Length != 3 || _startTimeInputGroup.TextInput.Value.Contains("."))
+			{
+				_startTimeInputGroup.TextInput.SetValidation(false, true);
+			}
+			else
+			{
+				try
+				{
+					_channelProgram.StartTime = new TimeSpan(int.Parse(startTimeStrings[0]), int.Parse(startTimeStrings[1]), int.Parse(startTimeStrings[2]));
+					_startTimeInputGroup.TextInput.SetValidation(false, false);
+				}
+				catch (Exception e)
+				{
+					Console.WriteLine(e);
+					_startTimeInputGroup.SetValidation(false, true);
+				}
+			}
+
 			_channelProgram.Description = _descriptionInputGroup.TextArea.Value;
 			_channelProgram.Name = _programmNameInputGroup.TextInput.Value;
 		}

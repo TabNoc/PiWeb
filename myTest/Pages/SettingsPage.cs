@@ -1,16 +1,18 @@
 ﻿using Ooui;
 using System.Collections.Generic;
+using TabNoc.Ooui.Interfaces.AbstractObjects;
 using TabNoc.Ooui.Interfaces.Enums;
 using TabNoc.Ooui.Storage;
 using TabNoc.Ooui.UiComponents;
 using TabNoc.Ooui.UiComponents.FormControl.InputGroups;
+using Button = TabNoc.Ooui.HtmlElements.Button;
 
 namespace TabNoc.Ooui.Pages
 {
-	internal class SettingsPage : Element
+	internal class SettingsPage : StylableElement
 	{
 		private readonly Settings _settingsData;
-		private readonly VerticalPillNavigation _pillNavigation = new VerticalPillNavigation();
+		private readonly VerticalPillNavigation _pillNavigation = new VerticalPillNavigation("col-3", "col-9");
 
 		public SettingsPage(Settings settingsData) : base("div")
 		{
@@ -20,9 +22,11 @@ namespace TabNoc.Ooui.Pages
 			InputGroup inputGroup = new InputGroup("Automatik", enabledButtonGroup);
 			inputGroup.AddStyling(StylingOption.MarginBottom, 2);
 			inputGroup.AddStyling(StylingOption.MarginTop, 2);
-			AppendChild(inputGroup);
+			Row row = new Row();
+			row.AppendCollum(inputGroup, autoSize:true);
+			AppendChild(row);
 
-			HtmlElements.Button addChannel = new HtmlElements.Button(asOutline: true);
+			HtmlElements.Button addChannel = new HtmlElements.Button(asOutline: true, size:Button.ButtonSize.Small);
 			addChannel.Click += (sender, args) =>
 			{
 				ChannelData channelData = ChannelData.CreateNew();

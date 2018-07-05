@@ -142,7 +142,25 @@ namespace Ooui
                     messagesToSend.AddRange (queuedMessages);
                     queuedMessages.Clear ();
 
-                    if (messagesToSend.Count == 0)
+					#region Bugfix
+
+					// currently at some point the send handler is attatched multiple time, so multiple identical message are queued
+					// when these messages where send to the client, there seems to be an exception and everything after the first doubled message is dorpped
+					Dictionary<string, Message> newMessagesToSend = new Dictionary<string, Message>();
+	                foreach (Message message in messagesToSend)
+	                {
+		                string key = message.ToString();
+		                if(newMessagesToSend.ContainsKey(key) == false)
+		                {
+							newMessagesToSend.Add(key,message);
+		                }
+	                }
+
+	                messagesToSend = newMessagesToSend.Select(pair => pair.Value).ToList();
+
+					#endregion Bugfix
+
+					if (messagesToSend.Count == 0)
                         return;
 
                     //

@@ -6,7 +6,7 @@ using TabNoc.Ooui.Interfaces.Enums;
 
 namespace TabNoc.Ooui.Interfaces.AbstractObjects
 {
-	internal abstract class StylableElement : Element, IStylableElement
+	internal class StylableTextInput : TextInput, IStylableElement
 	{
 		private string _className = "";
 		private BorderKind _borderKind;
@@ -14,13 +14,7 @@ namespace TabNoc.Ooui.Interfaces.AbstractObjects
 		private bool _isValid = false;
 		private bool _isInvalid = false;
 
-		public bool IsDisabled
-		{
-			get => GetBooleanAttribute("disabled");
-			set => SetBooleanAttributeProperty("disabled", value);
-		}
-
-		protected StylableElement(string tagName) : base(tagName)
+		public StylableTextInput() : base()
 		{
 			_borderKind = BorderKind.Rounded_0;
 			_borderStylingColor = StylingColor.Info;
@@ -166,40 +160,6 @@ namespace TabNoc.Ooui.Interfaces.AbstractObjects
 			this._isInvalid = isInvalid;
 
 			CalculateClassName();
-		}
-
-		//public void SetBreakPoint(BreakPoint breakPoint, int value = 0)
-		//{
-		//	if (value > 5 || value < 0)
-		//	{
-		//		throw new ArgumentOutOfRangeException(nameof(value));
-		//	}
-		//	_stylingDictionary.Add(styling, value);
-		//	CalculateClassName();
-		//}
-	}
-
-	internal enum BreakPoint
-	{
-		None,
-		ExtraSmall,
-		Small,
-		Medium,
-		Large,
-		ExtraLarge
-	}
-
-	internal class Style
-	{
-		internal readonly StylingOption StylingOption;
-		internal readonly int Amount;
-		internal readonly BreakPoint StylingBreakpoint;
-
-		public Style(StylingOption stylingOption, int amount, BreakPoint stylingBreakpoint)
-		{
-			StylingOption = stylingOption;
-			Amount = amount;
-			StylingBreakpoint = stylingBreakpoint;
 		}
 	}
 }

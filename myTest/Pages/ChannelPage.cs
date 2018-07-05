@@ -61,7 +61,9 @@ namespace TabNoc.Ooui.Pages
 			}
 			tabRow.AppendCollum(_tabNavigation);
 
-			Button addTabButton = new Button(StylingColor.Success, false, Button.ButtonSize.Normal, false, "+");
+			#region Add Channel Programm Button
+
+			Button addTabButton = new Button(StylingColor.Primary, true, Button.ButtonSize.Small, false, "+");
 			addTabButton.Click += (sender, args) =>
 			{
 				ChannelProgramData channelProgramData = ChannelProgramData.CreateNew(channel.ProgramList.Count + 1);
@@ -70,9 +72,14 @@ namespace TabNoc.Ooui.Pages
 				_channelProgrammPages.Add(channelProgrammPage);
 				_tabNavigation.AddTab(channelProgramData.Id.ToString(), channelProgrammPage, channelProgramData.Id == 1);
 			};
+			addTabButton.AddStyling(StylingOption.MarginTop, 1);
 			tabRow.AppendCollum(addTabButton, autoSize: true);
 
+			#endregion Add Channel Programm Button
+
 			grid.AddRow().AppendCollum(tabRow);
+
+			#region SaveChannel Button
 
 			Button saveButton = new Button(StylingColor.Success, true, Button.ButtonSize.Normal, false, "Speichern");
 			saveButton.AddStyling(StylingOption.MarginTop, 4);
@@ -80,6 +87,9 @@ namespace TabNoc.Ooui.Pages
 			saveButton.AddStyling(StylingOption.MarginBottom, 1);
 			saveButton.Click += SaveButton_Click;
 			grid.AddRow().AppendCollum(saveButton);
+
+			#endregion SaveChannel Button
+
 			AppendChild(grid);
 		}
 

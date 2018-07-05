@@ -10,7 +10,7 @@ namespace TabNoc.Ooui.Storage
 		public bool Enabled;
 		public bool EnableMasterChannel;
 		public bool ActivateWeatherInfo;
-		public DateTime StartDateTime;
+		public TimeSpan StartTime;
 		public TimeSpan Duration;
 
 		public Weekdays ChoosenWeekdays;
@@ -36,7 +36,7 @@ namespace TabNoc.Ooui.Storage
 			EnableMasterChannel = true,
 			ActivateWeatherInfo = false,
 			Id = id,
-			StartDateTime = DateTime.Now,
+			StartTime = DateTime.Now.TimeOfDay,
 			Name = id.ToString(),
 			Description = ""
 		};

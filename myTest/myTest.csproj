@@ -18,7 +18,7 @@
   </PropertyGroup>
   
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="if /I $(ConfigurationName) EQU Release (&#xD;&#xA;    cd $(ProjectDir)&#xD;&#xA;    dotnet publish -r linux-arm&#xD;&#xA;)" />
+    <Exec Command="if /I $(ConfigurationName) EQU Release (&#xD;&#xA;    cd $(ProjectDir)&#xD;&#xA;    dotnet publish -r linux-arm&#xD;&#xA;    &quot;C:\_\winscp577\publish.bat&quot;&#xD;&#xA;)" />
   </Target>
   
   <ItemGroup>

@@ -3,6 +3,7 @@ using Ooui;
 using System.IO;
 using TabNoc.Ooui.Interfaces;
 using TabNoc.Ooui.Interfaces.AbstractObjects;
+using TabNoc.Ooui.Interfaces.Enums;
 using TabNoc.Ooui.Pages;
 using TabNoc.Ooui.UiComponents;
 
@@ -18,7 +19,10 @@ namespace TabNoc.Ooui
 		{
 			Storage.Settings.Instance.Initialize(LoadDataCallback, SaveDataCallback);
 			Grid grid = new Grid();
-			grid.AddRow().AppendCollum(new SettingsPage(TabNoc.Ooui.Storage.Settings.Instance), 8);
+			SettingsPage settingsPage = new SettingsPage(Storage.Settings.Instance);
+			settingsPage.AddStyling(StylingOption.MarginRight, 5);
+			settingsPage.ClassName += " col-xl-10";
+			grid.AddRow().AppendCollum(settingsPage);
 			Console.WriteLine(grid.OuterHtml.Length);
 			return grid;
 		}

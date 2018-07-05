@@ -30,16 +30,16 @@ namespace TabNoc.Ooui.UiComponents
 		private readonly Div _contentDiv;
 		private bool _hasActivePill = false;
 
-		public VerticalPillNavigation() : base("div")
+		//("col-3", "col-9")
+		public VerticalPillNavigation(string navigationDivWrapperClassName, string contentDivWrapperClassName) : base("div")
 		{
 			ClassName = "row";
 
-			Div innerDiv = new Div
+			Div navigationDivWrapper = new Div
 			{
-				// possible changeable
-				ClassName = "col-3"
+				ClassName = navigationDivWrapperClassName
 			};
-			AppendChild(innerDiv);
+			AppendChild(navigationDivWrapper);
 
 			_navigationDiv = new Div
 			{
@@ -47,20 +47,19 @@ namespace TabNoc.Ooui.UiComponents
 			};
 			_navigationDiv.SetAttribute("role", "tablist");
 			_navigationDiv.SetAttribute("aria-orientation", "vertical");
-			innerDiv.AppendChild(_navigationDiv);
+			navigationDivWrapper.AppendChild(_navigationDiv);
 
-			Div innerDiv2 = new Div
+			Div contentDivWrapper = new Div
 			{
-				// possible changeable
-				ClassName = "col-9"
+				ClassName = contentDivWrapperClassName
 			};
-			AppendChild(innerDiv2);
+			AppendChild(contentDivWrapper);
 
 			_contentDiv = new Div
 			{
 				ClassName = "tab-content"
 			};
-			innerDiv2.AppendChild(_contentDiv);
+			contentDivWrapper.AppendChild(_contentDiv);
 		}
 
 		public Anchor AddPill(string pillName, Element content, bool active)

@@ -1,14 +1,13 @@
 ﻿using Ooui;
 using TabNoc.Ooui.Interfaces.AbstractObjects;
-using Button = TabNoc.Ooui.HtmlElements.Button;
 
 namespace TabNoc.Ooui.UiComponents.FormControl.InputGroups
 {
 	internal class TextInputGroup : InputGroupControl
 	{
-		public readonly TextInput TextInput;
+		public readonly StylableTextInput TextInput;
 
-		public TextInputGroup(string labelText, string textBoxDescriptionMessage, int sizeInPx = -1)
+		public TextInputGroup(string labelText, string textBoxDescriptionMessage, int sizeInPx = -1, string validFeedback = "", string inValidFeedback = "", bool feedbackAsTooltip = false)
 		{
 			ClassName = "input-group";
 
@@ -25,8 +24,7 @@ namespace TabNoc.Ooui.UiComponents.FormControl.InputGroups
 				Text = labelText
 			};
 			div1.AppendChild(div2);
-
-			TextInput = new TextInput();
+			TextInput = new StylableTextInput();
 			TextInput.SetAttribute("type", "text");
 			TextInput.ClassName = "form-control";
 			TextInput.SetAttribute("placeholder", textBoxDescriptionMessage);
@@ -34,6 +32,7 @@ namespace TabNoc.Ooui.UiComponents.FormControl.InputGroups
 			TextInput.SetAttribute("aria-describedby", div2.Id);
 
 			AppendChild(TextInput);
+			ValidationFeedback.AppendValidationFeedbackElements(this, validFeedback, inValidFeedback, feedbackAsTooltip);
 		}
 
 		public void AddFormElement(StylableElement content)
