@@ -36,7 +36,7 @@ namespace TabNoc.Ooui.Storage
 			EnableMasterChannel = true,
 			ActivateWeatherInfo = false,
 			Id = id,
-			StartTime = DateTime.Now.TimeOfDay,
+			StartTime = TimeSpan.Zero,
 			Name = id.ToString(),
 			Description = ""
 		};

@@ -31,13 +31,13 @@ namespace TabNoc.Ooui.UiComponents
 		private bool _hasActivePill = false;
 
 		//("col-3", "col-9")
-		public VerticalPillNavigation(string navigationDivWrapperClassName, string contentDivWrapperClassName) : base("div")
+		public VerticalPillNavigation(string navigationDivWrapperClassName, string contentDivWrapperClassName, bool asCardStyle = false) : base("div")
 		{
 			ClassName = "row";
 
 			Div navigationDivWrapper = new Div
 			{
-				ClassName = navigationDivWrapperClassName
+				ClassName = navigationDivWrapperClassName + (asCardStyle ? " card text-center card-header rounded":"")
 			};
 			AppendChild(navigationDivWrapper);
 

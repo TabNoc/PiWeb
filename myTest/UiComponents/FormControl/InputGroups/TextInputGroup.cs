@@ -7,7 +7,7 @@ namespace TabNoc.Ooui.UiComponents.FormControl.InputGroups
 	{
 		public readonly StylableTextInput TextInput;
 
-		public TextInputGroup(string labelText, string textBoxDescriptionMessage, int sizeInPx = -1, string validFeedback = "", string inValidFeedback = "", bool feedbackAsTooltip = false)
+		public TextInputGroup(string labelText, string textBoxDescriptionMessage, int sizeInPx = -1, string validFeedback = "", string inValidFeedback = "", bool feedbackAsTooltip = false, bool centeredText = false)
 		{
 			ClassName = "input-group";
 
@@ -26,7 +26,7 @@ namespace TabNoc.Ooui.UiComponents.FormControl.InputGroups
 			div1.AppendChild(div2);
 			TextInput = new StylableTextInput();
 			TextInput.SetAttribute("type", "text");
-			TextInput.ClassName = "form-control";
+			TextInput.ClassName = "form-control" + (centeredText ? " text-center"  :"");
 			TextInput.SetAttribute("placeholder", textBoxDescriptionMessage);
 			TextInput.SetAttribute("aria-label", textBoxDescriptionMessage);
 			TextInput.SetAttribute("aria-describedby", div2.Id);

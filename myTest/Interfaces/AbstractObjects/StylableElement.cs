@@ -40,7 +40,14 @@ namespace TabNoc.Ooui.Interfaces.AbstractObjects
 
 		public void AddStyling(StylingOption styling, int value = 0, BreakPoint breakPoint = BreakPoint.None)
 		{
-			if (value > 5 || value < 0)
+			if (styling == StylingOption.Height || styling == StylingOption.Widith)
+			{
+				if (value > 100 || value < 0)
+				{
+					throw new ArgumentOutOfRangeException(nameof(value));
+				}
+			}
+			else if (value > 5 || value < 0)
 			{
 				throw new ArgumentOutOfRangeException(nameof(value));
 			}
@@ -94,6 +101,12 @@ namespace TabNoc.Ooui.Interfaces.AbstractObjects
 						returnval += " pl";
 						break;
 
+					case StylingOption.Height:
+						returnval += " h";
+						break;
+					case StylingOption.Widith:
+						returnval += " w";
+						break;
 					default:
 						throw new ArgumentOutOfRangeException();
 				}

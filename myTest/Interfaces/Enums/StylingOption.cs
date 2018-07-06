@@ -9,6 +9,8 @@
 		PaddingTop,
 		PaddingBottom,
 		PaddingRight,
-		PaddingLeft
+		PaddingLeft,
+		Height,
+		Widith
 	}
 }

@@ -1,7 +1,6 @@
-﻿using System;
-using Ooui;
+﻿using Ooui;
+using System;
 using System.IO;
-using TabNoc.Ooui.Interfaces;
 using TabNoc.Ooui.Interfaces.AbstractObjects;
 using TabNoc.Ooui.Interfaces.Enums;
 using TabNoc.Ooui.Pages;
@@ -18,7 +17,16 @@ namespace TabNoc.Ooui
 		protected override Element PopulateAppElement()
 		{
 			Storage.Settings.Instance.Initialize(LoadDataCallback, SaveDataCallback);
+
 			Grid grid = new Grid();
+
+			NavigationBar navBar = new NavigationBar("Demo", "/settings");
+			navBar.AddElement(true, "Settings", "/settings");
+			navBar.AddElement(false, "test", "/test");
+			navBar.AddElement(false, "tabTest", "/tabTest");
+			navBar.AddElement(false, "buttonTest", "/buttonTest");
+			grid.AddRow().AppendCollum(navBar);
+
 			SettingsPage settingsPage = new SettingsPage(Storage.Settings.Instance);
 			settingsPage.AddStyling(StylingOption.MarginRight, 5);
 			settingsPage.ClassName += " col-xl-10";
@@ -41,7 +49,6 @@ namespace TabNoc.Ooui
 		{
 			if (File.Exists("demo.json"))
 			{
-
 				FileInfo fileInfo = new FileInfo("demo.json");
 				return fileInfo.OpenText().ReadToEnd();
 			}

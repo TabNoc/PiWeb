@@ -12,7 +12,7 @@ namespace TabNoc.Ooui.Pages
 	internal class SettingsPage : StylableElement
 	{
 		private readonly Settings _settingsData;
-		private readonly VerticalPillNavigation _pillNavigation = new VerticalPillNavigation("col-3", "col-9");
+		private readonly VerticalPillNavigation _pillNavigation = new VerticalPillNavigation("col-3", "col-9", true);
 
 		public SettingsPage(Settings settingsData) : base("div")
 		{
@@ -23,10 +23,10 @@ namespace TabNoc.Ooui.Pages
 			inputGroup.AddStyling(StylingOption.MarginBottom, 2);
 			inputGroup.AddStyling(StylingOption.MarginTop, 2);
 			Row row = new Row();
-			row.AppendCollum(inputGroup, autoSize:true);
+			row.AppendCollum(inputGroup, autoSize: true);
 			AppendChild(row);
 
-			HtmlElements.Button addChannel = new HtmlElements.Button(asOutline: true, size:Button.ButtonSize.Small);
+			HtmlElements.Button addChannel = new HtmlElements.Button(asOutline: true, size: Button.ButtonSize.Small);
 			addChannel.Click += (sender, args) =>
 			{
 				ChannelData channelData = ChannelData.CreateNew();
@@ -34,6 +34,7 @@ namespace TabNoc.Ooui.Pages
 				AddChannel(channelData.Name, channelData, false);
 			};
 			addChannel.Text = "Neuen Kanal hinzufügen";
+			addChannel.AddStyling(StylingOption.MarginTop, 2);
 
 			AddChannel("Master", settingsData.SettingsData.MasterChannel, true);
 
@@ -66,7 +67,6 @@ namespace TabNoc.Ooui.Pages
 		{
 			_settingsData.SettingsData.Channels.Remove(channel);
 			_pillNavigation.RemovePill(channel.Name, channelPage);
-			
 		}
 	}
 }

@@ -2,12 +2,12 @@
 using System;
 using System.Linq;
 using TabNoc.Ooui.HtmlElements;
-using TabNoc.Ooui.Interfaces.AbstractObjects;
-using TabNoc.Ooui.Pages;
+using TabNoc.Ooui.Interfaces.Enums;
+using Button = TabNoc.Ooui.HtmlElements.Button;
 
 namespace TabNoc.Ooui.UiComponents
 {
-	public class TabNavigation : Element
+	internal class TabNavigation : Element
 	{
 		/*
 			 <nav>
@@ -23,17 +23,24 @@ namespace TabNoc.Ooui.UiComponents
 			  <div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">...</div>
 			</div>
 			 */
+		public readonly Button AddButton;
 		private readonly Div _navigationDiv;
 		private readonly Div _contentDiv;
 		private bool _hasActiveTab = false;
 
-		public TabNavigation() : base("div")
+		public TabNavigation(bool asCardStyle = false, bool includeAddButton = false) : base("div")
 		{
 			Nav navElement = new Nav();
 			_navigationDiv = new Div
 			{
 				ClassName = "nav nav-tabs"
 			};
+			if (asCardStyle)
+			{
+				ClassName = "card text-center";
+				navElement.ClassName = "card-header";
+				_navigationDiv.ClassName += " card-header-tabs";
+			}
 			_navigationDiv.SetAttribute("role", "tablist");
 			navElement.AppendChild(_navigationDiv);
 
@@ -44,9 +51,18 @@ namespace TabNoc.Ooui.UiComponents
 
 			base.AppendChild(navElement);
 			base.AppendChild(_contentDiv);
+
+			if (includeAddButton)
+			{
+				AddButton = new Button(StylingColor.Primary, true, Button.ButtonSize.Small, false, "+");
+				AddButton.AddStyling(StylingOption.MarginTop, 1);
+				AddButton.AddStyling(StylingOption.MarginRight, 3);
+				AddButton.AddStyling(StylingOption.Height, 50);
+				_navigationDiv.AppendChild(AddButton);
+			}
 		}
 
-		public void AddTab(string tabName, Element content, bool active)
+		public Anchor AddTab(string tabName, Element content, bool active)
 		{
 			if (_hasActiveTab == true && active == true)
 			{
@@ -76,6 +92,8 @@ namespace TabNoc.Ooui.UiComponents
 			anchor.HRef = "#" + div.Id;
 
 			_contentDiv.AppendChild(div);
+
+			return anchor;
 		}
 
 		public void RemoveTab(string tabName, Element content)

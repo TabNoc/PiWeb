@@ -35,12 +35,11 @@ namespace TabNoc.Ooui.Pages
 		public ChannelProgrammPage(ChannelProgramData channelProgram, ChannelPage parentChannelPage, bool isMasterChannel) : base("div")
 		{
 			const int labelSize = 235;
+			_channelProgram = channelProgram;
+			_parentChannelPage = parentChannelPage;
 
 			#region Initialize Grid
 
-			SetBorder(BorderKind.Rounded, StylingColor.Secondary);
-			_channelProgram = channelProgram;
-			_parentChannelPage = parentChannelPage;
 			Grid grid = new Grid();
 			grid.AddStyling(StylingOption.MarginRight, 2);
 			grid.AddStyling(StylingOption.MarginLeft, 2);
@@ -51,10 +50,10 @@ namespace TabNoc.Ooui.Pages
 
 			#region TextInputGroup ProgrammName
 
-			_programmNameInputGroup = new TextInputGroup("ProgrammName", "N/A", labelSize);
+			_programmNameInputGroup = new TextInputGroup("ProgrammName", "N/A", labelSize, centeredText: true);
 			_programmNameInputGroup.AddStyling(StylingOption.MarginBottom, 2);
 			_programmNameInputGroup.TextInput.Value = channelProgram.Name;
-			_deleteProgrammButton = new HtmlElements.Button(StylingColor.Danger, text: "Programm Löschen");
+			_deleteProgrammButton = new HtmlElements.Button(StylingColor.Danger, asOutline: true, text: "Programm Löschen");
 			_deleteProgrammButton.Click += DeleteProgrammButtonOnClick;
 			_programmNameInputGroup.AddFormElement(_deleteProgrammButton);
 			grid.AddRow().AppendCollum(_programmNameInputGroup);
@@ -72,7 +71,7 @@ namespace TabNoc.Ooui.Pages
 
 			#region TextInputGroup StartZeit
 
-			_startTimeInputGroup = new TextInputGroup("StartZeit", "N/A", labelSize, "", "Zeitformat ist hh:mm:ss");
+			_startTimeInputGroup = new TextInputGroup("StartZeit", "N/A", labelSize, "", "Das angegebene Zeitformat passt nicht. Bitte Zeiten im Format  hh:mm:ss  angeben.");
 			_startTimeInputGroup.AddStyling(StylingOption.MarginBottom, 2);
 			_startTimeInputGroup.TextInput.Value = channelProgram.StartTime.ToString();
 			grid.AddRow().AppendCollum(_startTimeInputGroup);
@@ -81,7 +80,7 @@ namespace TabNoc.Ooui.Pages
 
 			#region TextInputGroup Dauer
 
-			_durationInputGroup = new TextInputGroup("Dauer", "N/A", labelSize, "", "Zeitformat ist hh:mm:ss");
+			_durationInputGroup = new TextInputGroup("Dauer", "N/A", labelSize, "", "Das angegebene Zeitformat passt nicht. Bitte Zeiten im Format  hh:mm:ss  angeben.");
 			_durationInputGroup.AddStyling(StylingOption.MarginBottom, 2);
 			_durationInputGroup.TextInput.Value = channelProgram.Duration.ToString();
 			grid.AddRow().AppendCollum(_durationInputGroup);
@@ -250,6 +249,8 @@ namespace TabNoc.Ooui.Pages
 
 			_channelProgram.Description = _descriptionInputGroup.TextArea.Value;
 			_channelProgram.Name = _programmNameInputGroup.TextInput.Value;
+
+			_parentChannelPage.ApplyName(_channelProgram);
 		}
 
 		private ChannelProgramData.Weekdays GetWeekdays()
