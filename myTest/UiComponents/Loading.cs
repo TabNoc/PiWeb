@@ -41,10 +41,9 @@ namespace TabNoc.Ooui.UiComponents
 			Div headerWrapper = new Div() { ClassName = "modal-header" };
 			contentWrapper.AppendChild(headerWrapper);
 
-			H5 loadingText = new H5
+			Heading loadingText = new Heading(5,text)
 			{
-				ClassName = "modal-title",
-				Text = text
+				ClassName = "modal-title"
 			};
 			headerWrapper.AppendChild(loadingText);
 

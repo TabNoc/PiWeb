@@ -17,6 +17,8 @@ namespace TabNoc.Ooui
 			new TabTest("/tabTest").Publish();
 			new ButtonTest("/buttonTest").Publish();
 			new SettingsPagePublisher("/settings").Publish();
+			new HomePagePublisher("/home").Publish();
+			new OverviewPagePublisher("/overview").Publish();
 			//UI.Present("/test");
 
 			Console.ReadLine();

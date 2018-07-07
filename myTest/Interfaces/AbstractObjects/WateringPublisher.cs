@@ -1,5 +1,6 @@
 ﻿using Ooui;
 using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using TabNoc.Ooui.UiComponents;
 
@@ -15,10 +16,13 @@ namespace TabNoc.Ooui.Interfaces.AbstractObjects
 		}
 
 		protected abstract void Initialize();
+
 		protected abstract Element CreatePage();
 
 		protected override Element PopulateAppElement()
 		{
+			Stopwatch stopwatchMain = new Stopwatch();
+			stopwatchMain.Start();
 			Initialize();
 
 			Grid grid = new Grid();
@@ -28,13 +32,18 @@ namespace TabNoc.Ooui.Interfaces.AbstractObjects
 
 			grid.AddRow().AppendCollum(CreateNavigationBar());
 
+			Stopwatch stopwatchCreatePage = new Stopwatch();
+
 			Task.Run((Func<Element>)CreatePage).ContinueWith(task =>
 			{
 				grid.AddRow().AppendCollum(task.Result);
-				Console.WriteLine(grid.OuterHtml.Length);
+				stopwatchCreatePage.Stop();
+				Console.WriteLine($"\t\tSended Website Content: {grid.OuterHtml.Length}Byte\r\n\t\tElapsedTime from CreatePage: {stopwatchCreatePage.ElapsedMilliseconds}ms");
 				grid.RemoveChild(loading);
 			});
-			Console.WriteLine(grid.OuterHtml.Length);
+			stopwatchMain.Stop();
+			Console.WriteLine($"\tSended Website Content: {grid.OuterHtml.Length}Byte\r\n\tElapsedTime in PopulateAppElement: {stopwatchMain.ElapsedMilliseconds}ms");
+			stopwatchCreatePage.Start();
 			return grid;
 		}
 
@@ -42,14 +51,14 @@ namespace TabNoc.Ooui.Interfaces.AbstractObjects
 		{
 			NavigationBar navBar = new NavigationBar("WateringWeb", "/home");
 
-			string address = "/settings";
-			navBar.AddElement(_publishPath == address, "Settings", address);
-
-			address = "/home";
+			string address = "/home";
 			navBar.AddElement(_publishPath == address, "Home", address);
 
 			address = "/overview";
 			navBar.AddElement(_publishPath == address, "Overview", address);
+
+			address = "/settings";
+			navBar.AddElement(_publishPath == address, "Settings", address);
 
 			address = "/test";
 			navBar.AddElement(_publishPath == address, "test", address);

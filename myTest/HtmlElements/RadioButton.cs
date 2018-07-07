@@ -1,13 +1,13 @@
-﻿using System;
-using TabNoc.Ooui.Interfaces.AbstractObjects;
+﻿using TabNoc.Ooui.Interfaces.AbstractObjects;
 using TabNoc.Ooui.Interfaces.Enums;
 using TabNoc.Ooui.Storage;
-using TabNoc.Ooui.UiComponents.FormControl;
 
 namespace TabNoc.Ooui.HtmlElements
 {
-	internal class RadioButton : StylableElement, IDisposable
+	internal class RadioButton : StylableElement
 	{
+		private bool _disposed;
+
 		private readonly string _radioButtonGroupName;
 
 		public RadioButton(string radioButtonGroupName, bool isChecked) : base("button")
@@ -16,12 +16,8 @@ namespace TabNoc.Ooui.HtmlElements
 			Style.Height = 18;
 			Style.Width = 18;
 			_radioButtonGroupName = radioButtonGroupName;
-			RadioButtonStorage.RegisterRadioButton(_radioButtonGroupName, this);
+			RadioButtonStorage.RegisterRadioButton(_radioButtonGroupName, this, isChecked);
 
-			if (isChecked)
-			{
-				RadioButtonStorage.AssertPositiveStartValueOfRadioButtonGroupIsFree(radioButtonGroupName);
-			}
 			SetAttribute("type", "radio");
 			SetAttribute("name", radioButtonGroupName);
 			Click += RadioButton_Click;
@@ -40,9 +36,19 @@ namespace TabNoc.Ooui.HtmlElements
 			set => RadioButtonStorage.SetRadioButtonState(_radioButtonGroupName, this, value);
 		}
 
-		public void Dispose()
+		protected override void Dispose(bool disposing)
 		{
-			RadioButtonStorage.UnRegisterRadioButton(_radioButtonGroupName, this);
+			if (!_disposed)
+			{
+				if (disposing)
+				{
+					RadioButtonStorage.UnRegisterRadioButton(_radioButtonGroupName, this);
+				}
+
+				_disposed = true;
+			}
+
+			base.Dispose(disposing);
 		}
 
 		~RadioButton()

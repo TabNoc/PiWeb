@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Ooui
 {
-    public abstract class Node : EventTarget
+    public abstract class Node : EventTarget, IDisposable
     {
         readonly List<Node> children = new List<Node> ();
 
@@ -210,9 +210,41 @@ namespace Ooui
         public abstract void WriteOuterHtml (System.Xml.XmlWriter w);
 
 #endif
-    }
+		#region Dispose Pattern
 
-    class ReadOnlyList<T> : IReadOnlyList<T>
+		bool _disposed;
+
+	    public void Dispose()
+	    {
+		    Dispose(true);
+		    GC.SuppressFinalize(this);
+	    }
+
+	    ~Node()
+	    {
+		    Dispose(false);
+	    }
+
+	    protected virtual void Dispose(bool disposing)
+	    {
+		    if (_disposed)
+			    return;
+
+		    if (disposing)
+		    {
+			    foreach (Node child in Children)
+			    {
+				    child.Dispose(true);
+			    }
+		    }
+
+		    _disposed = true;
+	    }
+
+		#endregion Dispose Pattern
+	}
+
+	class ReadOnlyList<T> : IReadOnlyList<T>
     {
         readonly List<T> list;
 

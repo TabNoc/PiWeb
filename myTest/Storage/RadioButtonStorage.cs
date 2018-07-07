@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Ooui;
+using System;
 using System.Collections.Generic;
-using Ooui;
 using TabNoc.Ooui.HtmlElements;
 
 namespace TabNoc.Ooui.Storage
@@ -8,25 +8,7 @@ namespace TabNoc.Ooui.Storage
 	internal static class RadioButtonStorage
 	{
 		private static readonly Dictionary<string, bool> RadioButtonGroupStorage = new Dictionary<string, bool>();
-
-		public static void AssertPositiveStartValueOfRadioButtonGroupIsFree(string radioButtonGroupName)
-		{
-			if (RadioButtonGroupStorage.ContainsKey(radioButtonGroupName) == false)
-			{
-				RadioButtonGroupStorage.Add(radioButtonGroupName, true);
-			}
-			else
-			{
-				if (RadioButtonGroupStorage[radioButtonGroupName] == true)
-				{
-					throw new InvalidOperationException($"Die radioButton Gruppe \"{radioButtonGroupName}\" hat bereits ein aktiviertes Element!");
-				}
-				else
-				{
-					RadioButtonGroupStorage[radioButtonGroupName] = true;
-				}
-			}
-		}
+		private static readonly Dictionary<string, List<RadioButton>> RadioButtonDictionary = new Dictionary<string, List<RadioButton>>();
 
 		public static void ChangeRadioButtonState(string radioButtonGroupName, RadioButton sender, TargetEventArgs targetEventArgs)
 		{
@@ -64,17 +46,43 @@ namespace TabNoc.Ooui.Storage
 				throw new InvalidOperationException("Es kann kein RadioButton entfernt werden, welcher zuvor nicht hinzugefügt wurde");
 			}
 			RadioButtonDictionary[radioButtonGroupName].Remove(radioButton);
+			if (RadioButtonDictionary[radioButtonGroupName].Count == 0)
+			{
+				RadioButtonDictionary.Remove(radioButtonGroupName);
+				RadioButtonGroupStorage.Remove(radioButtonGroupName);
+			}
 		}
 
-		private static readonly Dictionary<string, List<RadioButton>> RadioButtonDictionary = new Dictionary<string, List<RadioButton>>();
-
-		public static void RegisterRadioButton(string radioButtonGroupName, RadioButton radioButton)
+		public static void RegisterRadioButton(string radioButtonGroupName, RadioButton radioButton, bool startValue)
 		{
 			if (RadioButtonDictionary.ContainsKey(radioButtonGroupName) == false)
 			{
 				RadioButtonDictionary.Add(radioButtonGroupName, new List<RadioButton>());
 			}
 			RadioButtonDictionary[radioButtonGroupName].Add(radioButton);
+
+			#region checkStartValue
+
+			if (startValue)
+			{
+				if (RadioButtonGroupStorage.ContainsKey(radioButtonGroupName) == false)
+				{
+					RadioButtonGroupStorage.Add(radioButtonGroupName, true);
+				}
+				else
+				{
+					if (RadioButtonGroupStorage[radioButtonGroupName] == true)
+					{
+						throw new InvalidOperationException($"Die radioButton Gruppe \"{radioButtonGroupName}\" hat bereits ein aktiviertes Element!");
+					}
+					else
+					{
+						RadioButtonGroupStorage[radioButtonGroupName] = true;
+					}
+				}
+			}
+
+			#endregion checkStartValue
 		}
 	}
 }
