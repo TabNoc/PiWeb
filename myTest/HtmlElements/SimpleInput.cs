@@ -10,5 +10,5 @@ namespace TabNoc.Ooui.HtmlElements
 	    public SimpleInput () : base ("Input")
 	    {
 	    }
-    }
+	}
 }

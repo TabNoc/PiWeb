@@ -1,6 +1,5 @@
-﻿using System;
-using Ooui;
-using TabNoc.Ooui.Interfaces;
+﻿using Ooui;
+using System;
 using TabNoc.Ooui.Interfaces.AbstractObjects;
 using TabNoc.Ooui.Interfaces.Enums;
 using TabNoc.Ooui.UiComponents.FormControl;
@@ -24,7 +23,7 @@ namespace TabNoc.Ooui.TestPanels
 			buttonGroup.AddButton("789");
 
 			div.AppendChild(buttonGroup);
-			
+
 			ToggleButtonGroup toggleButtonGroup = new ToggleButtonGroup(StylingColor.Primary, StylingColor.Secondary);
 			toggleButtonGroup.AddToggleButton("123", true);
 			toggleButtonGroup.AddToggleButton("456", false);
@@ -51,7 +50,7 @@ namespace TabNoc.Ooui.TestPanels
 			{
 				Console.WriteLine(inputGroup.TextInput.Value);
 			};
-			
+
 			div.AppendChild(inputToolbar);
 			return div;
 		}

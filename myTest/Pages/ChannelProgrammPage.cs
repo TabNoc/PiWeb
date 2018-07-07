@@ -216,7 +216,8 @@ namespace TabNoc.Ooui.Pages
 				try
 				{
 					_channelProgram.Duration = new TimeSpan(int.Parse(durationStrings[0]), int.Parse(durationStrings[1]), int.Parse(durationStrings[2]));
-					_durationInputGroup.SetValidation(false, false);
+					_durationInputGroup.TextInput.SetValidation(false, false);
+					_durationInputGroup.TextInput.Value = _channelProgram.Duration.ToString();
 				}
 				catch (Exception e)
 				{
@@ -239,6 +240,7 @@ namespace TabNoc.Ooui.Pages
 				{
 					_channelProgram.StartTime = new TimeSpan(int.Parse(startTimeStrings[0]), int.Parse(startTimeStrings[1]), int.Parse(startTimeStrings[2]));
 					_startTimeInputGroup.TextInput.SetValidation(false, false);
+					_startTimeInputGroup.TextInput.Value = _channelProgram.StartTime.ToString();
 				}
 				catch (Exception e)
 				{

@@ -81,6 +81,7 @@ namespace TabNoc.Ooui.Pages
 				ChannelProgrammPage channelProgrammPage = new ChannelProgrammPage(channelProgramData, this, isMasterChannel);
 				_channelProgrammPages.Add(channelProgrammPage);
 				_tabDictionary.Add(channelProgramData, _tabNavigation.AddTab(channelProgramData.Id.ToString(), channelProgrammPage, channelProgramData.Id == 1));
+				ApplyName(channelProgramData);
 			}
 
 			#endregion add ChannelProgrammPages

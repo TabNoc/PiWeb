@@ -41,6 +41,7 @@ namespace TabNoc.Ooui.Pages
 			foreach (ChannelData channel in settingsData.SettingsData.Channels)
 			{
 				AddChannel(channel.Name, channel, false);
+				ApplyName(channel);
 			}
 
 			AppendChild(_pillNavigation);
