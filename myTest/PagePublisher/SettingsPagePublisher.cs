@@ -10,9 +10,9 @@ using TabNoc.Ooui.UiComponents;
 
 namespace TabNoc.Ooui
 {
-	internal class SettingsPublisher : Publishable
+	internal class SettingsPagePublisher : Publishable
 	{
-		public SettingsPublisher(string publishPath) : base(publishPath)
+		public SettingsPagePublisher(string publishPath) : base(publishPath)
 		{
 		}
 
