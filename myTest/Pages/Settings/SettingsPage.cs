@@ -1,5 +1,5 @@
-﻿using Ooui;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Ooui;
 using TabNoc.Ooui.Interfaces.AbstractObjects;
 using TabNoc.Ooui.Interfaces.Enums;
 using TabNoc.Ooui.Storage;
@@ -7,14 +7,14 @@ using TabNoc.Ooui.UiComponents;
 using TabNoc.Ooui.UiComponents.FormControl.InputGroups;
 using Button = TabNoc.Ooui.HtmlElements.Button;
 
-namespace TabNoc.Ooui.Pages
+namespace TabNoc.Ooui.Pages.Settings
 {
 	internal class SettingsPage : StylableElement
 	{
-		private readonly Settings _settingsData;
+		private readonly Storage.Settings _settingsData;
 		private readonly VerticalPillNavigation _pillNavigation = new VerticalPillNavigation("col-3", "col-9", true);
 
-		public SettingsPage(Settings settingsData) : base("div")
+		public SettingsPage(Storage.Settings settingsData) : base("div")
 		{
 			_settingsData = settingsData;
 			TwoStateButtonGroup enabledButtonGroup = new TwoStateButtonGroup("Aktiv", "Inaktiv", settingsData.SettingsData.Enabled, !settingsData.SettingsData.Enabled);

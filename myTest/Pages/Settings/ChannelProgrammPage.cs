@@ -1,5 +1,5 @@
-﻿using Ooui;
-using System;
+﻿using System;
+using Ooui;
 using TabNoc.Ooui.Interfaces.AbstractObjects;
 using TabNoc.Ooui.Interfaces.Enums;
 using TabNoc.Ooui.Storage;
@@ -7,7 +7,7 @@ using TabNoc.Ooui.UiComponents;
 using TabNoc.Ooui.UiComponents.FormControl;
 using TabNoc.Ooui.UiComponents.FormControl.InputGroups;
 
-namespace TabNoc.Ooui.Pages
+namespace TabNoc.Ooui.Pages.Settings
 {
 	internal class ChannelProgrammPage : StylableElement
 	{

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using TabNoc.Ooui.Interfaces.AbstractObjects;
 using TabNoc.Ooui.Interfaces.Enums;
 using TabNoc.Ooui.Pages;
+using TabNoc.Ooui.Pages.Settings;
 using TabNoc.Ooui.UiComponents;
 
 namespace TabNoc.Ooui
