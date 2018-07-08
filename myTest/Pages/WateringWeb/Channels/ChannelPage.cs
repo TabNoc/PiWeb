@@ -1,32 +1,36 @@
-﻿using System;
+﻿using Ooui;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Ooui;
 using TabNoc.Ooui.Interfaces.AbstractObjects;
 using TabNoc.Ooui.Interfaces.Enums;
-using TabNoc.Ooui.Storage;
+using TabNoc.Ooui.Storage.Channels;
+using TabNoc.Ooui.Storage.Settings;
 using TabNoc.Ooui.UiComponents;
+using TabNoc.Ooui.UiComponents.FormControl;
 using TabNoc.Ooui.UiComponents.FormControl.InputGroups;
 using Button = TabNoc.Ooui.HtmlElements.Button;
 
-namespace TabNoc.Ooui.Pages.Settings
+namespace TabNoc.Ooui.Pages.WateringWeb.Channels
 {
 	internal class ChannelPage : StylableElement
 	{
 		private readonly ChannelData _channel;
-		private readonly SettingsPage _parentSettingsPage;
+		private readonly ChannelsPage _parentChannelsPage;
 		private readonly bool _isMasterChannel;
 		private readonly TabNavigation _tabNavigation;
 		private readonly TextInputGroup _channelNameInputGroup;
 		private readonly HtmlElements.Button _deleteChannelButton;
+		private TwoStateButtonGroup _humiditySensorEnabledTwoStateButtonGroup;
+		private Dropdown _humiditySensorDropdown;
 
 		private readonly List<ChannelProgrammPage> _channelProgrammPages = new List<ChannelProgrammPage>();
 		private readonly Dictionary<ChannelProgramData, Anchor> _tabDictionary = new Dictionary<ChannelProgramData, Anchor>();
 
-		public ChannelPage(ChannelData channel, SettingsPage parentSettingsPage, bool isMasterChannel) : base("div")
+		public ChannelPage(ChannelData channel, ChannelsPage parentChannelsPage, bool isMasterChannel) : base("div")
 		{
 			_channel = channel;
-			_parentSettingsPage = parentSettingsPage;
+			_parentChannelsPage = parentChannelsPage;
 			_isMasterChannel = isMasterChannel;
 			SetBorder(BorderKind.Rounded, StylingColor.Secondary);
 
@@ -86,6 +90,15 @@ namespace TabNoc.Ooui.Pages.Settings
 
 			#endregion add ChannelProgrammPages
 
+			#region AddHumiditySensor
+
+			AddHumiditySensor(channel, grid);
+
+			_humiditySensorDropdown.Button.IsDisabled = _isMasterChannel;
+			_humiditySensorEnabledTwoStateButtonGroup.IsDisabled = _isMasterChannel;
+
+			#endregion AddHumiditySensor
+
 			#region SaveChannel Button
 
 			Button saveButton = new Button(StylingColor.Success, true, Button.ButtonSize.Normal, false, "Speichern");
@@ -102,13 +115,83 @@ namespace TabNoc.Ooui.Pages.Settings
 			AppendChild(grid);
 		}
 
+		private void AddHumiditySensor(ChannelData channel, Grid grid)
+		{
+			List<StylableAnchor> humiditySensorEntries = new List<StylableAnchor>();
+
+			MultiInputGroup humiditySensorMultiInputGroup = new MultiInputGroup();
+			humiditySensorMultiInputGroup.AddStyling(StylingOption.MarginTop, 4);
+			humiditySensorMultiInputGroup.AppendLabel("Feuchtigkeitssensor");
+			_humiditySensorEnabledTwoStateButtonGroup = new TwoStateButtonGroup("Aktiv", "Inaktiv", channel.HumiditySensorEnabled, !channel.HumiditySensorEnabled);
+			humiditySensorMultiInputGroup.AppendCustomElement(_humiditySensorEnabledTwoStateButtonGroup, false);
+
+			_humiditySensorDropdown = new Dropdown(new Button(StylingColor.Secondary, true, text: "N/A"));
+			_humiditySensorDropdown.Button.SetAttribute("data-realName", channel.HumiditySensor);
+			Anchor humiditySensorNone = _humiditySensorDropdown.AddEntry("Ohne", _humiditySensorDropdown.Button.GetAttribute("data-realName").ToString() == "");
+			humiditySensorNone.Click += (sender, args) =>
+			{
+				_humiditySensorDropdown.Button.SetAttribute("data-realName", "");
+				UpdateHumiditySensorDropDown(humiditySensorEntries, humiditySensorNone);
+			};
+			_humiditySensorDropdown.AddDivider();
+			foreach ((string realSensorName, string customSensorName) in PageStorage<SettingsData>.Instance.StorageData.HumiditySensors)
+			{
+				StylableAnchor humiditySensorEntry = _humiditySensorDropdown.AddEntry(customSensorName, _humiditySensorDropdown.Button.GetAttribute("data-realName").ToString() == realSensorName);
+				humiditySensorEntry.SetToolTip(ToolTipLocation.Right, realSensorName);
+				humiditySensorEntry.Click += (sender, args) =>
+				{
+					_humiditySensorDropdown.Button.SetAttribute("data-realName", realSensorName);
+					UpdateHumiditySensorDropDown(humiditySensorEntries, humiditySensorNone);
+				};
+				humiditySensorEntry.SetAttribute("data-realName", realSensorName);
+
+				humiditySensorEntries.Add(humiditySensorEntry);
+			}
+			UpdateHumiditySensorDropDown(humiditySensorEntries, humiditySensorNone);
+			humiditySensorMultiInputGroup.AppendCustomElement(_humiditySensorDropdown, false);
+
+			grid.AddRow().AppendCollum(humiditySensorMultiInputGroup, autoSize: true);
+		}
+
+		private void UpdateHumiditySensorDropDown(List<StylableAnchor> humiditySensorEntries, Anchor humiditySensorNone)
+		{
+			if (PageStorage<SettingsData>.Instance.StorageData.HumiditySensors.ContainsKey(_humiditySensorDropdown.Button.GetAttribute("data-realName").ToString()) == false)
+			{
+				_humiditySensorDropdown.Button.SetAttribute("data-realName", "");
+			}
+
+			_humiditySensorDropdown.Button.Text = _humiditySensorDropdown.Button.GetAttribute("data-realName").ToString() == "" ? "Keiner Gewählt" : PageStorage<SettingsData>.Instance.StorageData.HumiditySensors[_humiditySensorDropdown.Button.GetAttribute("data-realName").ToString()];
+			if (_humiditySensorDropdown.Button.GetAttribute("data-realName").ToString() == "")
+			{
+				humiditySensorNone.ClassName = humiditySensorNone.ClassName.Replace(" active", "") + " active";
+			}
+			else
+			{
+				humiditySensorNone.ClassName = humiditySensorNone.ClassName.Replace(" active", "");
+			}
+
+			foreach (StylableAnchor sensorEntry in humiditySensorEntries)
+			{
+				if (_humiditySensorDropdown.Button.GetAttribute("data-realName").ToString() == sensorEntry.GetAttribute("data-realName").ToString())
+				{
+					sensorEntry.ClassName = sensorEntry.ClassName.Replace(" active", "") + " active";
+				}
+				else
+				{
+					sensorEntry.ClassName = sensorEntry.ClassName.Replace(" active", "");
+				}
+			}
+		}
+
 		private void SaveButton_Click(object sender, global::Ooui.TargetEventArgs e)
 		{
 			_channelProgrammPages.ForEach(page => page.Save());
 			if (!_isMasterChannel)
 			{
 				_channel.Name = _channelNameInputGroup.TextInput.Value;
-				_parentSettingsPage.ApplyName(_channel);
+				_parentChannelsPage.ApplyName(_channel);
+				_channel.HumiditySensorEnabled = _humiditySensorEnabledTwoStateButtonGroup.FirstButtonActive;
+				_channel.HumiditySensor = _humiditySensorDropdown.Button.GetAttribute("data-realName").ToString();
 			}
 		}
 
@@ -134,7 +217,7 @@ namespace TabNoc.Ooui.Pages.Settings
 			}
 			else
 			{
-				_parentSettingsPage.RemoveChannel(this, _channel);
+				_parentChannelsPage.RemoveChannel(this, _channel);
 			}
 		}
 	}

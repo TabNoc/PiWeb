@@ -1,6 +1,10 @@
 ﻿using Ooui;
 using System;
-using TabNoc.Ooui.TestPanels;
+using TabNoc.Ooui.Interfaces.AbstractObjects;
+using TabNoc.Ooui.PagePublisher;
+using TabNoc.Ooui.PagePublisher.WateringWeb;
+using TabNoc.Ooui.Storage.Channels;
+using TabNoc.Ooui.Storage.Settings;
 
 namespace TabNoc.Ooui
 {
@@ -13,16 +17,25 @@ namespace TabNoc.Ooui
 			UI.HeadHtml += "<script src=\"https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js\" integrity=\"sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T\" crossorigin=\"anonymous\"></script>";
 			UI.HeadHtml += "<link rel=\"stylesheet\" href=\"https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css\" integrity=\"sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB\" crossorigin=\"anonymous\">";
 
-			new ButtonClickTest("/test").Publish();
-			new TabTest("/tabTest").Publish();
-			new ButtonTest("/buttonTest").Publish();
-			new SettingsPagePublisher("/settings").Publish();
-			new HomePagePublisher("/home").Publish();
+			#region WateringWeb
+
+			new ChannelsPagePublisher("/channels").Publish();
 			new OverviewPagePublisher("/overview").Publish();
-			//UI.Present("/test");
+			new ManualPagePublisher("/manual").Publish();
+			new SettingsPagePublisher("/settings").Publish();
+			new HistoryPagePublisher("/history").Publish();
+
+			#endregion WateringWeb
+
+			#region PiWeb
+
+			new PiWebPublisher("/").Publish();
+
+			#endregion PiWeb
 
 			Console.ReadLine();
-			TabNoc.Ooui.Storage.Settings.Instance.Dispose();
+			PageStorage<ChannelsData>.Instance.Dispose();
+			PageStorage<SettingsData>.Instance.Dispose();
 		}
 	}
 }

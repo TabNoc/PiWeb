@@ -1,9 +1,8 @@
 ﻿using Ooui;
-using TabNoc.Ooui.Interfaces.AbstractObjects;
 using TabNoc.Ooui.Interfaces.Enums;
-using TabNoc.Ooui.Pages;
+using TabNoc.Ooui.Pages.WateringWeb.Overview;
 
-namespace TabNoc.Ooui
+namespace TabNoc.Ooui.PagePublisher.WateringWeb
 {
 	internal class OverviewPagePublisher : WateringPublisher
 	{
@@ -19,6 +18,7 @@ namespace TabNoc.Ooui
 		{
 			OverviewPage overviewPage = new OverviewPage();
 			overviewPage.AddStyling(StylingOption.MarginRight, 5);
+			overviewPage.AddStyling(StylingOption.MarginLeft, 1);
 			overviewPage.ClassName += " col-xl-10";
 			return overviewPage;
 		}

@@ -5,7 +5,7 @@ using TabNoc.Ooui.Interfaces.AbstractObjects;
 
 namespace TabNoc.Ooui.UiComponents.FormControl.InputGroups
 {
-	internal class RadioButtonLabeledInputGroup : InputGroupControl
+	internal class RadioButtonInputGroup : InputGroupControl
 	{
 		private readonly RadioButton _radioButton;
 
@@ -17,7 +17,7 @@ namespace TabNoc.Ooui.UiComponents.FormControl.InputGroups
 
 		public readonly string RadioButtonGroupName;
 
-		public RadioButtonLabeledInputGroup(bool @checked, string labelText, string radioButtonGroupName = "")
+		public RadioButtonInputGroup(bool @checked, StylableElement content, string radioButtonGroupName = "")
 		{
 			if (string.IsNullOrWhiteSpace(radioButtonGroupName))
 			{
@@ -45,17 +45,13 @@ namespace TabNoc.Ooui.UiComponents.FormControl.InputGroups
 
 			// end checkbox
 
-			Div labelDiv1 = new Div
+			Div contentDivWrapper = new Div()
 			{
-				ClassName = "input-group-append"
+				ClassName = "input-group-append form-control"
 			};
-			AppendChild(labelDiv1);
+			contentDivWrapper.AppendChild(content);
 
-			Span labelSpan = new Span(labelText)
-			{
-				ClassName = "input-group-text"
-			};
-			labelDiv1.AppendChild(labelSpan);
+			AppendChild(contentDivWrapper);
 
 			Checked = @checked;
 		}

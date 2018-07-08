@@ -1,13 +1,13 @@
-﻿using System;
-using Ooui;
+﻿using Ooui;
+using System;
 using TabNoc.Ooui.Interfaces.AbstractObjects;
 using TabNoc.Ooui.Interfaces.Enums;
-using TabNoc.Ooui.Storage;
+using TabNoc.Ooui.Storage.Channels;
 using TabNoc.Ooui.UiComponents;
 using TabNoc.Ooui.UiComponents.FormControl;
 using TabNoc.Ooui.UiComponents.FormControl.InputGroups;
 
-namespace TabNoc.Ooui.Pages.Settings
+namespace TabNoc.Ooui.Pages.WateringWeb.Channels
 {
 	internal class ChannelProgrammPage : StylableElement
 	{

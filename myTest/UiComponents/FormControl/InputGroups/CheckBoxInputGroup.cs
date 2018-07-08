@@ -1,11 +1,10 @@
 ﻿using System;
 using Ooui;
 using TabNoc.Ooui.Interfaces.AbstractObjects;
-using TabNoc.Ooui.Interfaces.Enums;
 
 namespace TabNoc.Ooui.UiComponents.FormControl.InputGroups
 {
-	internal class CheckBoxLabeledInputGroup : InputGroupControl
+	internal class CheckBoxInputGroup : InputGroupControl
 	{
 		private readonly Input _checkBox;
 
@@ -15,7 +14,7 @@ namespace TabNoc.Ooui.UiComponents.FormControl.InputGroups
 			set => _checkBox.IsChecked = value;
 		}
 
-		public CheckBoxLabeledInputGroup(bool @checked, string labelText)
+		public CheckBoxInputGroup(bool @checked, StylableElement content)
 		{
 			ClassName = "input-group";
 
@@ -38,17 +37,13 @@ namespace TabNoc.Ooui.UiComponents.FormControl.InputGroups
 
 			// end checkbox
 
-			Div labelDiv1 = new Div
+			Div contentDivWrapper = new Div()
 			{
-				ClassName = "input-group-append"
+				ClassName = "input-group-append form-control"
 			};
-			AppendChild(labelDiv1);
+			contentDivWrapper.AppendChild(content);
 
-			Span labelSpan = new Span(labelText)
-			{
-				ClassName = "input-group-text"
-			};
-			labelDiv1.AppendChild(labelSpan);
+			AppendChild(contentDivWrapper);
 
 			Checked = @checked;
 		}

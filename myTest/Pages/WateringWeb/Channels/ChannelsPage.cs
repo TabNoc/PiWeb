@@ -1,44 +1,39 @@
-﻿using System.Collections.Generic;
-using Ooui;
+﻿using Ooui;
+using System.Collections.Generic;
+using System.Linq;
 using TabNoc.Ooui.Interfaces.AbstractObjects;
 using TabNoc.Ooui.Interfaces.Enums;
-using TabNoc.Ooui.Storage;
+using TabNoc.Ooui.Storage.Channels;
 using TabNoc.Ooui.UiComponents;
-using TabNoc.Ooui.UiComponents.FormControl.InputGroups;
 using Button = TabNoc.Ooui.HtmlElements.Button;
 
-namespace TabNoc.Ooui.Pages.Settings
+namespace TabNoc.Ooui.Pages.WateringWeb.Channels
 {
-	internal class SettingsPage : StylableElement
+	internal class ChannelsPage : StylableElement
 	{
-		private readonly Storage.Settings _settingsData;
+		private readonly PageStorage<ChannelsData> _channelsData;
 		private readonly VerticalPillNavigation _pillNavigation = new VerticalPillNavigation("col-3", "col-9", true);
 
-		public SettingsPage(Storage.Settings settingsData) : base("div")
+		public ChannelsPage(PageStorage<ChannelsData> channelsData) : base("div")
 		{
-			_settingsData = settingsData;
-			TwoStateButtonGroup enabledButtonGroup = new TwoStateButtonGroup("Aktiv", "Inaktiv", settingsData.SettingsData.Enabled, !settingsData.SettingsData.Enabled);
-			enabledButtonGroup.FirstButtonStateChange += (sender, args) => settingsData.SettingsData.Enabled = args.NewButtonState;
-			InputGroup inputGroup = new InputGroup("Automatik", enabledButtonGroup);
-			inputGroup.AddStyling(StylingOption.MarginBottom, 2);
-			inputGroup.AddStyling(StylingOption.MarginTop, 2);
+			_channelsData = channelsData;
+
 			Row row = new Row();
-			row.AppendCollum(inputGroup, autoSize: true);
 			AppendChild(row);
 
 			HtmlElements.Button addChannel = new HtmlElements.Button(asOutline: true, size: Button.ButtonSize.Small);
 			addChannel.Click += (sender, args) =>
 			{
-				ChannelData channelData = ChannelData.CreateNew();
-				settingsData.SettingsData.Channels.Add(channelData);
+				ChannelData channelData = ChannelData.CreateNew((channelsData.StorageData.Channels.Count > 0 ? channelsData.StorageData.Channels.Max(data => data.ChannelId):0) + 1);
+				channelsData.StorageData.Channels.Add(channelData);
 				AddChannel(channelData.Name, channelData, false);
 			};
 			addChannel.Text = "Neuen Kanal hinzufügen";
 			addChannel.AddStyling(StylingOption.MarginTop, 2);
 
-			AddChannel("Master", settingsData.SettingsData.MasterChannel, true);
+			AddChannel("Master", channelsData.StorageData.MasterChannel, true);
 
-			foreach (ChannelData channel in settingsData.SettingsData.Channels)
+			foreach (ChannelData channel in channelsData.StorageData.Channels)
 			{
 				AddChannel(channel.Name, channel, false);
 				ApplyName(channel);
@@ -66,8 +61,14 @@ namespace TabNoc.Ooui.Pages.Settings
 
 		public void RemoveChannel(ChannelPage channelPage, ChannelData channel)
 		{
-			_settingsData.SettingsData.Channels.Remove(channel);
+			_channelsData.StorageData.Channels.Remove(channel);
 			_pillNavigation.RemovePill(channel.Name, channelPage);
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			_channelsData.Save();
+			base.Dispose(disposing);
 		}
 	}
 }

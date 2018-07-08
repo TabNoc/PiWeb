@@ -120,18 +120,4 @@ namespace TabNoc.Ooui.UiComponents.FormControl.InputGroups
 
 		public event ButtonChangeEventHandler SecondButtonStateChange;
 	}
-
-	internal delegate void ButtonChangeEventHandler(object sender, ButtonChangeEventHandlerArgs args);
-
-	internal class ButtonChangeEventHandlerArgs
-	{
-		public readonly bool OldButtonState;
-		public readonly bool NewButtonState;
-
-		public ButtonChangeEventHandlerArgs(bool oldButtonState, bool newButtonState)
-		{
-			OldButtonState = oldButtonState;
-			NewButtonState = newButtonState;
-		}
-	}
 }

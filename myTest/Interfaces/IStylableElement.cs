@@ -18,5 +18,7 @@ namespace TabNoc.Ooui.Interfaces
 		void SetBorder(BorderKind borderKind, StylingColor borderColor);
 
 		void SetValidation(bool isValid, bool isInvalid);
+
+		void SetToolTip(ToolTipLocation location, string tooltipText);
 	}
 }

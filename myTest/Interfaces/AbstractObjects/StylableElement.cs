@@ -104,9 +104,11 @@ namespace TabNoc.Ooui.Interfaces.AbstractObjects
 					case StylingOption.Height:
 						returnval += " h";
 						break;
+
 					case StylingOption.Widith:
 						returnval += " w";
 						break;
+
 					default:
 						throw new ArgumentOutOfRangeException();
 				}
@@ -181,6 +183,17 @@ namespace TabNoc.Ooui.Interfaces.AbstractObjects
 			CalculateClassName();
 		}
 
+		public void SetToolTip(ToolTipLocation location, string tooltipText)
+		{
+			if (GetAttribute("data-toggle") != null)
+			{
+				throw new InvalidOperationException("Der Element hat bereits ein \"data-toggle\" Attribut, daher kann kein Tooltip hinzugefügt werden!");
+			}
+			SetAttribute("data-toggle", "tooltip");
+			SetAttribute("data-placement", Enum.GetName(typeof(ToolTipLocation), location).ToLower());
+			SetAttribute("title", Text);
+		}
+
 		//public void SetBreakPoint(BreakPoint breakPoint, int value = 0)
 		//{
 		//	if (value > 5 || value < 0)
@@ -190,29 +203,5 @@ namespace TabNoc.Ooui.Interfaces.AbstractObjects
 		//	_stylingDictionary.Add(styling, value);
 		//	CalculateClassName();
 		//}
-	}
-
-	internal enum BreakPoint
-	{
-		None,
-		ExtraSmall,
-		Small,
-		Medium,
-		Large,
-		ExtraLarge
-	}
-
-	internal class Style
-	{
-		internal readonly StylingOption StylingOption;
-		internal readonly int Amount;
-		internal readonly BreakPoint StylingBreakpoint;
-
-		public Style(StylingOption stylingOption, int amount, BreakPoint stylingBreakpoint)
-		{
-			StylingOption = stylingOption;
-			Amount = amount;
-			StylingBreakpoint = stylingBreakpoint;
-		}
 	}
 }

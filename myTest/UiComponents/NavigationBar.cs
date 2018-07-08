@@ -1,8 +1,9 @@
 ﻿using Ooui;
+using TabNoc.Ooui.Interfaces.AbstractObjects;
 
 namespace TabNoc.Ooui.UiComponents
 {
-	internal class NavigationBar : Element
+	internal class NavigationBar : StylableElement
 	{
 		/*
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -18,9 +19,9 @@ namespace TabNoc.Ooui.UiComponents
 </nav>
 		 */
 
-		private readonly Div _navigationDiv;
+		private readonly List _navigationList;
 
-		public NavigationBar(string brandName, string brandAddress) : base("nav")
+		public NavigationBar(string brandName, string brandAddress, Anchor lastAnchor) : base("nav")
 		{
 			ClassName = "navbar navbar-expand-sm navbar-light";
 			Style.BackgroundColor = "#e3f2fd";
@@ -31,15 +32,23 @@ namespace TabNoc.Ooui.UiComponents
 			};
 			AppendChild(brandAnchor);
 
-			_navigationDiv = new Div() { ClassName = "navbar-nav" };
-			AppendChild(_navigationDiv);
+			Div navigationDiv = new Div() { ClassName = "collapse navbar-collapse" };
+			_navigationList = new List(false)
+			{
+				ClassName = "navbar-nav mr-auto"
+			};
+			AppendChild(navigationDiv);
+			navigationDiv.AppendChild(_navigationList);
+
+			lastAnchor.ClassName = "navbar-brand";
+			navigationDiv.AppendChild(lastAnchor);
 		}
 
 		public void AddElement(bool active, string text, string address)
 		{
 			Anchor anchor = new Anchor(address, text) { ClassName = "nav-item nav-link" + (active == true ? " active" : "") };
 
-			_navigationDiv.AppendChild(anchor);
+			_navigationList.AppendChild(anchor);
 		}
 	}
 }

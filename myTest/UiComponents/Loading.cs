@@ -1,6 +1,9 @@
 ﻿using Ooui;
-using TabNoc.Ooui.HtmlElements;
+using System;
 using TabNoc.Ooui.Interfaces.AbstractObjects;
+using TabNoc.Ooui.Interfaces.Enums;
+using TabNoc.Ooui.UiComponents.FormControl.InputGroups;
+using Button = TabNoc.Ooui.HtmlElements.Button;
 
 namespace TabNoc.Ooui.UiComponents
 {
@@ -22,6 +25,10 @@ namespace TabNoc.Ooui.UiComponents
   </div>
 </div>
 		 */
+		private readonly Heading _loadingText;
+		private Div bodyWrapper;
+		private readonly Div _progressBarDiv;
+		private Div contentWrapper;
 
 		public Loading(string text = "Please Wait, Loading...") : base("div")
 		{
@@ -35,19 +42,19 @@ namespace TabNoc.Ooui.UiComponents
 			dialogWrapper.SetAttribute("role", "document");
 			AppendChild(dialogWrapper);
 
-			Div contentWrapper = new Div() { ClassName = "modal-content" };
+			contentWrapper = new Div() { ClassName = "modal-content" };
 			dialogWrapper.AppendChild(contentWrapper);
 
 			Div headerWrapper = new Div() { ClassName = "modal-header" };
 			contentWrapper.AppendChild(headerWrapper);
 
-			Heading loadingText = new Heading(5,text)
+			_loadingText = new Heading(5, text)
 			{
 				ClassName = "modal-title"
 			};
-			headerWrapper.AppendChild(loadingText);
+			headerWrapper.AppendChild(_loadingText);
 
-			Div bodyWrapper = new Div()
+			bodyWrapper = new Div()
 			{
 				ClassName = "modal-body"
 			};
@@ -59,14 +66,56 @@ namespace TabNoc.Ooui.UiComponents
 			};
 			bodyWrapper.AppendChild(progressDiv);
 
-			Div progressBarDiv = new Div()
+			_progressBarDiv = new Div()
 			{
 				ClassName = "progress-bar progress-bar-striped progress-bar-animated w-100"
 			};
-			progressBarDiv.SetAttribute("role", "progressbar");
-			progressDiv.AppendChild(progressBarDiv);
+			_progressBarDiv.SetAttribute("role", "progressbar");
+			progressDiv.AppendChild(_progressBarDiv);
 
-			SetAttribute("aria-labelledby", loadingText.Id.ToString());
+			SetAttribute("aria-labelledby", _loadingText.Id.ToString());
+		}
+
+		public void ShowError(Exception exception, string msg)
+		{
+			_progressBarDiv.ClassName += " bg-danger";
+			_loadingText.Text = msg;
+
+			Div footer = new Div
+			{
+				ClassName = "modal-footer"
+			};
+			contentWrapper.AppendChild(footer);
+
+			TextInputGroup inputGroup = new TextInputGroup("", "Passwort", inValidFeedback: "Falsches Passwort", centeredText: true)
+			{
+				IsHidden = true
+			};
+			Button button = new Button(StylingColor.Info, true, text:"Infos anzeigen");
+			button.Click += (sender, args) =>
+			{
+				if (inputGroup.IsHidden == true)
+				{
+					inputGroup.IsHidden = false;
+				}
+				else
+				{
+					if (inputGroup.TextInput.Value == "huhu")
+					{
+						Span span = new Span(exception.ToString());
+						footer.AppendChild(span);
+						footer.RemoveChild(inputGroup);
+						footer.RemoveChild(button);
+					}
+					else
+					{
+						inputGroup.TextInput.SetValidation(false, true);
+					}
+				}
+			};
+
+			footer.AppendChild(inputGroup);
+			footer.AppendChild(button);
 		}
 	}
 }

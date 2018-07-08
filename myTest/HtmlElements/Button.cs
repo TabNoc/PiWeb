@@ -6,7 +6,7 @@ namespace TabNoc.Ooui.HtmlElements
 {
 	internal class Button : StylableElement
 	{
-		public Button(StylingColor buttonType = StylingColor.Primary, bool asOutline = false, ButtonSize size = ButtonSize.Normal, bool asBlock = false, string text = "") : base("button")
+		public Button(StylingColor buttonType = StylingColor.Primary, bool asOutline = false, ButtonSize size = ButtonSize.Normal, bool asBlock = false, string text = "", int widthInPx = -1) : base("button")
 		{
 			SetAttribute("type", "button");
 			ClassName = $"btn btn-{(asOutline == true ? "outline-" : "")}{Enum.GetName(typeof(StylingColor), buttonType).ToLower()}";
@@ -15,6 +15,11 @@ namespace TabNoc.Ooui.HtmlElements
 			if (string.IsNullOrWhiteSpace(text) == false)
 			{
 				Text = text;
+			}
+
+			if (widthInPx > 0)
+			{
+				Style.Width = widthInPx;
 			}
 		}
 

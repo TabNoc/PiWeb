@@ -2,25 +2,35 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TabNoc.Ooui.HtmlElements;
 using TabNoc.Ooui.Interfaces.Enums;
 
 namespace TabNoc.Ooui.Interfaces.AbstractObjects
 {
-	internal class StylableTextInput : TextInput, IStylableElement
+	internal class StylableAnchor : Anchor, IStylableElement
 	{
 		private string _className = "";
-		private BorderKind _borderKind;
-		private StylingColor _borderStylingColor;
+		private BorderKind _borderKind = BorderKind.Rounded_0;
+		private StylingColor _borderStylingColor = StylingColor.Info;
 		private bool _isValid = false;
 		private bool _isInvalid = false;
 
-		public StylableTextInput() : base()
+		private readonly List<Style> _styles = new List<Style>();
+
+		public StylableAnchor()
+			: base()
 		{
-			_borderKind = BorderKind.Rounded_0;
-			_borderStylingColor = StylingColor.Info;
 		}
 
-		private readonly List<Style> _styles = new List<Style>();
+		public StylableAnchor(string href)
+			: base(href)
+		{
+		}
+
+		public StylableAnchor(string href, string text)
+			: base(href, text)
+		{
+		}
 
 		public new string ClassName
 		{
@@ -30,6 +40,11 @@ namespace TabNoc.Ooui.Interfaces.AbstractObjects
 				_className = value;
 				CalculateClassName();
 			}
+		}
+
+		public bool IsDisabled
+		{
+			get; set;
 		}
 
 		public void AddStyling(StylingOption styling, int value = 0, BreakPoint breakPoint = BreakPoint.None)
@@ -170,7 +185,9 @@ namespace TabNoc.Ooui.Interfaces.AbstractObjects
 			}
 			SetAttribute("data-toggle", "tooltip");
 			SetAttribute("data-placement", Enum.GetName(typeof(ToolTipLocation), location).ToLower());
-			SetAttribute("title", Text);
+			SetAttribute("title", tooltipText);
+
+			AppendChild(new Script("$('#" + Id + "').tooltip()"));
 		}
 	}
 }
