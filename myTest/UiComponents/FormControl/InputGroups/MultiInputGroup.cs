@@ -10,7 +10,7 @@ namespace TabNoc.Ooui.UiComponents.FormControl.InputGroups
 			ClassName = "input-group";
 		}
 
-		public void AppendCustomElement(Element content, bool asExternalFormControl = true)
+		public T AppendCustomElement<T>(T content, bool asExternalFormControl = true) where T : Element
 		{
 			Div contentDivWrapper = new Div()
 			{
@@ -19,6 +19,8 @@ namespace TabNoc.Ooui.UiComponents.FormControl.InputGroups
 			contentDivWrapper.AppendChild(content);
 
 			AppendChild(contentDivWrapper);
+
+			return content;
 		}
 
 		public void AppendLabel(string labelText, int labelSizeInPx = -1)
