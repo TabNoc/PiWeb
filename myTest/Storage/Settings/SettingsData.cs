@@ -8,17 +8,18 @@ namespace TabNoc.Ooui.Storage.Settings
 		public bool Enabled;
 		public bool WeatherEnabled;
 		public string Location;
+		public string LocationName;
 		public string OverrideValue;
 		public Dictionary<string, string> HumiditySensors;
 
 		public new static SettingsData CreateNew() => new SettingsData
 		{
 			Enabled = true,
-			Location = "Biesdorf",
+			LocationName = "Biesdorf",
 			OverrideValue = "100%",
 			WeatherEnabled = false,
 			Valid = true,
-			HumiditySensors = new Dictionary<string, string>() { { "test", "Banane" }, { "1", "2" }, { "Baum", "Baum" }, { "reeller Name", "custom Name" } }
+			HumiditySensors = new Dictionary<string, string>() { }
 		};
 	}
 }

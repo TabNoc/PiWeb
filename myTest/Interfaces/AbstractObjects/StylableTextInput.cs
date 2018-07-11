@@ -2,17 +2,19 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TabNoc.Ooui.HtmlElements;
 using TabNoc.Ooui.Interfaces.Enums;
 
 namespace TabNoc.Ooui.Interfaces.AbstractObjects
 {
-	internal class StylableTextInput : TextInput, IStylableElement
+	internal class StylableTextInput : TextInput, IStylableElement, IAutoComplete
 	{
 		private string _className = "";
 		private BorderKind _borderKind;
 		private StylingColor _borderStylingColor;
 		private bool _isValid = false;
 		private bool _isInvalid = false;
+		private readonly List<Style> _styles = new List<Style>();
 
 		public StylableTextInput() : base()
 		{
@@ -20,7 +22,41 @@ namespace TabNoc.Ooui.Interfaces.AbstractObjects
 			_borderStylingColor = StylingColor.Info;
 		}
 
-		private readonly List<Style> _styles = new List<Style>();
+		public void ActivateAutocomplete(string src, Dictionary<string, TextInput> resulTextInputs)
+		{
+			string resultOutputData = "({";
+			foreach ((string key, TextInput textInput) in resulTextInputs)
+			{
+				if (resultOutputData.Length > 2)
+				{
+					resultOutputData += ",";
+				}
+				resultOutputData += $"{key}: \"{textInput.Id}\"";
+			}
+			resultOutputData += "})";
+
+			Script script = new Script($@"
+$.get(""{src}"", function(data) {{
+	$(""#{Id}"").typeahead({{ source:data, afterSelect:function(selectedElement) {{
+		try {{
+			let resultOutputData = {resultOutputData};
+			let element = $(""#{Id}"");
+			for (let index in selectedElement) {{
+				send(JSON.stringify({{
+		            m: ""event"",
+		            id: resultOutputData[index],
+		            k: ""change"",
+					v: selectedElement[index]
+		        }}));
+			}}
+		}}
+		catch (exc) {{
+			console.error(exc);
+		}}
+	}}}});
+}},'json');");
+			AppendChild(script);
+		}
 
 		public new string ClassName
 		{

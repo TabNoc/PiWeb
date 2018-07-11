@@ -1,5 +1,6 @@
 ﻿using Ooui;
 using System;
+using TabNoc.Ooui.Interfaces;
 using TabNoc.Ooui.Interfaces.AbstractObjects;
 using Button = TabNoc.Ooui.HtmlElements.Button;
 
@@ -82,13 +83,5 @@ namespace TabNoc.Ooui.UiComponents.FormControl
 		{
 			_dropDownMenu.AppendChild(new Div() { ClassName = "dropdown-divider" });
 		}
-	}
-
-	internal enum DropdownDirection
-	{
-		DropDown,
-		DropUp,
-		DropRight,
-		DropLeft
 	}
 }

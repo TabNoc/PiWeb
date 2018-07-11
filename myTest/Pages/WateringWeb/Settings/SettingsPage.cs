@@ -58,13 +58,51 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Settings
 
 			Row locationRow = grid.AddRow();
 			locationRow.AddStyling(StylingOption.MarginBottom, 2);
-			TextInputGroup locationInputGroup = new TextInputGroup("Standort", "", labelSize);
-			locationInputGroup.TextInput.Value = settingsData.StorageData.Location;
-			locationRow.AppendCollum(locationInputGroup, autoSize: true);
+			MultiInputGroup weatherLocationMultiInputGroup = new MultiInputGroup();
+			weatherLocationMultiInputGroup.AppendLabel("Standort", labelSize);
+
+			StylableTextInput weatherLocationTextInput = weatherLocationMultiInputGroup.AppendTextInput("Bitte Eintragen...", false);
+			weatherLocationTextInput.Value = settingsData.StorageData.LocationName;
+
+			#region Hidden TextInputs
+
+			TextInput weatherLocationChangeTextInput = new TextInput { IsHidden = true };
+			
+			locationRow.AppendChild(weatherLocationChangeTextInput);
+			TextInput weatherLocationNameChangeTextInput = new TextInput { IsHidden = true };
+			
+			locationRow.AppendChild(weatherLocationNameChangeTextInput);
+
+			#endregion Hidden TextInputs
+
+			Button weatherLocationActivateAutocompleteButton = weatherLocationMultiInputGroup.AppendCustomElement(new Button(StylingColor.Secondary, true, Button.ButtonSize.Small, false, "v"), false);
+			weatherLocationActivateAutocompleteButton.Click += (sender, args) =>
+			{
+				weatherLocationActivateAutocompleteButton.IsHidden = true;
+				ActivateAutoComplete(weatherLocationTextInput, weatherLocationChangeTextInput, weatherLocationNameChangeTextInput);
+			};
+			locationRow.AppendCollum(weatherLocationMultiInputGroup, autoSize: true);
+
+			#region Save Button
 
 			Button saveLocationButton = new Button(StylingColor.Success, true, text: "Übernehmen");
-			saveLocationButton.Click += (sender, args) => settingsData.StorageData.Location = locationInputGroup.TextInput.Value;
+			saveLocationButton.Click += (sender, args) =>
+			{
+				if (weatherLocationChangeTextInput.Value == "")
+				{
+					weatherLocationTextInput.SetValidation(false, true);
+				}
+				else
+				{
+					weatherLocationTextInput.SetValidation(false, false);
+					settingsData.StorageData.Location = weatherLocationChangeTextInput.Value;
+					settingsData.StorageData.LocationName = weatherLocationNameChangeTextInput.Value;
+					weatherLocationTextInput.Value = settingsData.StorageData.LocationName;
+				}
+			};
 			locationRow.AppendCollum(saveLocationButton, autoSize: true);
+
+			#endregion Save Button
 
 			#endregion Location
 
@@ -173,6 +211,15 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Settings
 			}
 
 			#endregion Rename HumiditySensors
+		}
+
+		private void ActivateAutoComplete(StylableTextInput weatherLocationTextInput, TextInput locationChangeTextInput, TextInput nameChangeTextInput)
+		{
+			weatherLocationTextInput.ActivateAutocomplete("/settings/WeatherLocations.json", new Dictionary<string, TextInput>()
+			{
+				{"location", locationChangeTextInput },
+				{"name", nameChangeTextInput }
+			});
 		}
 
 		public void SelectHumiditySensor(string humiditySensor)

@@ -466,9 +466,17 @@ namespace Ooui
 
             public static byte[] GetData (object obj)
             {
-                var r = Ooui.JsonConvert.SerializeObject (obj);
-                var e = new UTF8Encoding (false);
-                return e.GetBytes (r);
+	            string result;
+	            if (obj is string s)
+	            {
+		            result = s;
+	            }
+	            else
+	            {
+		            result = Ooui.JsonConvert.SerializeObject (obj);
+				}
+				UTF8Encoding encoding = new UTF8Encoding (false);
+                return encoding.GetBytes (result);
             }
 
             public override void Respond (HttpListenerContext listenerContext, CancellationToken token)

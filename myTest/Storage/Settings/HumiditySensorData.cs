@@ -10,7 +10,6 @@ namespace TabNoc.Ooui.Storage.Settings
 		public new static HumiditySensorData CreateNew() => new HumiditySensorData()
 		{
 			Valid = true,
-			//HumiditySensors = new List<string>() { "test", "1", "Baum",  "reeller Name"}
 			HumiditySensors = new List<string>()
 		};
 	}
