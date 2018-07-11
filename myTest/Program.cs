@@ -6,8 +6,8 @@ using System.Text;
 using TabNoc.Ooui.Interfaces.AbstractObjects;
 using TabNoc.Ooui.PagePublisher;
 using TabNoc.Ooui.PagePublisher.WateringWeb;
-using TabNoc.Ooui.Storage.Channels;
-using TabNoc.Ooui.Storage.Settings;
+using TabNoc.Ooui.Storage.WateringWeb.Channels;
+using TabNoc.Ooui.Storage.WateringWeb.Settings;
 
 namespace TabNoc.Ooui
 {
@@ -34,7 +34,7 @@ namespace TabNoc.Ooui
 			{
 				Assembly assembly = Assembly.GetExecutingAssembly();
 				//Assembly.GetExecutingAssembly().GetManifestResourceNames();
-				string resourceName = "TabNoc.Ooui.Storage.Settings.external_WeatherLocations.WeatherLocations.json";
+				string resourceName = "TabNoc.Ooui.Storage.WateringWeb.Settings.external_WeatherLocations.WeatherLocations.json";
 
 				using (Stream stream = assembly.GetManifestResourceStream(resourceName))
 				using (StreamReader reader = new StreamReader(stream, Encoding.Default))

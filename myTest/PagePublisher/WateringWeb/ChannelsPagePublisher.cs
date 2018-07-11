@@ -3,7 +3,7 @@ using System.IO;
 using TabNoc.Ooui.Interfaces.AbstractObjects;
 using TabNoc.Ooui.Interfaces.Enums;
 using TabNoc.Ooui.Pages.WateringWeb.Channels;
-using TabNoc.Ooui.Storage.Channels;
+using TabNoc.Ooui.Storage.WateringWeb.Channels;
 
 namespace TabNoc.Ooui.PagePublisher.WateringWeb
 {

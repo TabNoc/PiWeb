@@ -23,16 +23,20 @@
   
   <ItemGroup>
     <None Remove="Storage\lib\bootstrap3-typeahead.min.js" />
-    <None Remove="Storage\Settings\external_WeatherLocations\WeatherLocations.json" />
+    <None Remove="Storage\WateringWeb\Settings\external_WeatherLocations\WeatherLocations.json" />
   </ItemGroup>
   
   <ItemGroup>
     <EmbeddedResource Include="Storage\lib\bootstrap3-typeahead.min.js" />
-    <EmbeddedResource Include="Storage\Settings\external_WeatherLocations\WeatherLocations.json" />
+    <EmbeddedResource Include="Storage\WateringWeb\Settings\external_WeatherLocations\WeatherLocations.json" />
   </ItemGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\Ooui\Ooui.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="Storage\WateringWeb\Overview\" />
   </ItemGroup>
 
 </Project>

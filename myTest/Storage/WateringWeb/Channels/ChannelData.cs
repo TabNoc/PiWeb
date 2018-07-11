@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace TabNoc.Ooui.Storage.Channels
+namespace TabNoc.Ooui.Storage.WateringWeb.Channels
 {
 	public class ChannelData
 	{
