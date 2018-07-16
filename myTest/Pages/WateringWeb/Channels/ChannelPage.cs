@@ -16,16 +16,15 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Channels
 	internal class ChannelPage : StylableElement
 	{
 		private readonly ChannelData _channel;
-		private readonly ChannelsPage _parentChannelsPage;
-		private readonly bool _isMasterChannel;
-		private readonly TabNavigation _tabNavigation;
 		private readonly TextInputGroup _channelNameInputGroup;
-		private readonly HtmlElements.Button _deleteChannelButton;
-		private TwoStateButtonGroup _humiditySensorEnabledTwoStateButtonGroup;
-		private Dropdown _humiditySensorDropdown;
-
 		private readonly List<ChannelProgrammPage> _channelProgrammPages = new List<ChannelProgrammPage>();
+		private readonly HtmlElements.Button _deleteChannelButton;
+		private readonly bool _isMasterChannel;
+		private readonly ChannelsPage _parentChannelsPage;
 		private readonly Dictionary<ChannelProgramData, Anchor> _tabDictionary = new Dictionary<ChannelProgramData, Anchor>();
+		private readonly TabNavigation _tabNavigation;
+		private Dropdown _humiditySensorDropdown;
+		private TwoStateButtonGroup _humiditySensorEnabledTwoStateButtonGroup;
 
 		public ChannelPage(ChannelData channel, ChannelsPage parentChannelsPage, bool isMasterChannel) : base("div")
 		{
@@ -36,7 +35,7 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Channels
 
 			#region Initialize Grid
 
-			Grid grid = new Grid();
+			Grid grid = new Grid(this);
 			grid.AddStyling(StylingOption.MarginRight, 2);
 			grid.AddStyling(StylingOption.MarginLeft, 2);
 			grid.AddStyling(StylingOption.MarginTop, 4);
@@ -51,7 +50,7 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Channels
 			_channelNameInputGroup.TextInput.Value = channel.Name;
 			if (!isMasterChannel)
 			{
-				_deleteChannelButton = new HtmlElements.Button(StylingColor.Danger, asOutline: true, text: "Kanal Löschen");
+				_deleteChannelButton = new HtmlElements.Button(StylingColor.Danger, asOutline: true, text: "Kanal Löschen", fontAwesomeIcon: "trash");
 				_deleteChannelButton.Click += DeleteChannelButtonOnClick;
 				_channelNameInputGroup.AddFormElement(_deleteChannelButton);
 			}
@@ -101,7 +100,7 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Channels
 
 			#region SaveChannel Button
 
-			Button saveButton = new Button(StylingColor.Success, true, Button.ButtonSize.Normal, false, "Speichern");
+			Button saveButton = new Button(StylingColor.Success, true, Button.ButtonSize.Normal, false, "Speichern", fontAwesomeIcon: "save");
 			saveButton.AddStyling(StylingOption.MarginTop, 4);
 			saveButton.AddStyling(StylingOption.MarginLeft, 4);
 			saveButton.AddStyling(StylingOption.MarginBottom, 1);
@@ -111,8 +110,18 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Channels
 			grid.AddRow().AppendCollum(saveButton);
 
 			#endregion SaveChannel Button
+		}
 
-			AppendChild(grid);
+		public void ApplyName(ChannelProgramData channelProgram)
+		{
+			_tabDictionary[channelProgram].Text = channelProgram.Name.Substring(0, Math.Min(channelProgram.Name.Length, 3));
+		}
+
+		public void RemoveProgramm(ChannelProgrammPage channelProgrammPage, ChannelProgramData channelProgram)
+		{
+			_channelProgrammPages.Remove(channelProgrammPage);
+			_channel.ProgramList.Remove(channelProgram);
+			_tabNavigation.RemoveTab(channelProgram.Id.ToString(), channelProgrammPage);
 		}
 
 		private void AddHumiditySensor(ChannelData channel, Grid grid)
@@ -153,6 +162,32 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Channels
 			grid.AddRow().AppendCollum(humiditySensorMultiInputGroup, autoSize: true);
 		}
 
+		private void DeleteChannelButtonOnClick(object sender, TargetEventArgs e)
+		{
+			const string confirmMessage = "Wirklich Löschen";
+			if (_deleteChannelButton.Text != confirmMessage)
+			{
+				_deleteChannelButton.Text = confirmMessage;
+				return;
+			}
+			else
+			{
+				_parentChannelsPage.RemoveChannel(this, _channel);
+			}
+		}
+
+		private void SaveButton_Click(object sender, global::Ooui.TargetEventArgs e)
+		{
+			_channelProgrammPages.ForEach(page => page.Save());
+			if (!_isMasterChannel)
+			{
+				_channel.Name = _channelNameInputGroup.TextInput.Value;
+				_parentChannelsPage.ApplyName(_channel);
+				_channel.HumiditySensorEnabled = _humiditySensorEnabledTwoStateButtonGroup.FirstButtonActive;
+				_channel.HumiditySensor = _humiditySensorDropdown.Button.GetAttribute("data-realName").ToString();
+			}
+		}
+
 		private void UpdateHumiditySensorDropDown(List<StylableAnchor> humiditySensorEntries, Anchor humiditySensorNone)
 		{
 			if (PageStorage<SettingsData>.Instance.StorageData.HumiditySensors.ContainsKey(_humiditySensorDropdown.Button.GetAttribute("data-realName").ToString()) == false)
@@ -180,44 +215,6 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Channels
 				{
 					sensorEntry.ClassName = sensorEntry.ClassName.Replace(" active", "");
 				}
-			}
-		}
-
-		private void SaveButton_Click(object sender, global::Ooui.TargetEventArgs e)
-		{
-			_channelProgrammPages.ForEach(page => page.Save());
-			if (!_isMasterChannel)
-			{
-				_channel.Name = _channelNameInputGroup.TextInput.Value;
-				_parentChannelsPage.ApplyName(_channel);
-				_channel.HumiditySensorEnabled = _humiditySensorEnabledTwoStateButtonGroup.FirstButtonActive;
-				_channel.HumiditySensor = _humiditySensorDropdown.Button.GetAttribute("data-realName").ToString();
-			}
-		}
-
-		public void RemoveProgramm(ChannelProgrammPage channelProgrammPage, ChannelProgramData channelProgram)
-		{
-			_channelProgrammPages.Remove(channelProgrammPage);
-			_channel.ProgramList.Remove(channelProgram);
-			_tabNavigation.RemoveTab(channelProgram.Id.ToString(), channelProgrammPage);
-		}
-
-		public void ApplyName(ChannelProgramData channelProgram)
-		{
-			_tabDictionary[channelProgram].Text = channelProgram.Name.Substring(0, Math.Min(channelProgram.Name.Length, 3));
-		}
-
-		private void DeleteChannelButtonOnClick(object sender, TargetEventArgs e)
-		{
-			const string confirmMessage = "Wirklich Löschen";
-			if (_deleteChannelButton.Text != confirmMessage)
-			{
-				_deleteChannelButton.Text = confirmMessage;
-				return;
-			}
-			else
-			{
-				_parentChannelsPage.RemoveChannel(this, _channel);
 			}
 		}
 	}

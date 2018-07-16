@@ -16,20 +16,19 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Channels
 
 		#region FormElements
 
-		private readonly TextInputGroup _programmNameInputGroup;
+		private readonly TwoStateButtonGroup _activateMasterChannel;
 		private readonly HtmlElements.Button _deleteProgrammButton;
-		private readonly TwoStateButtonGroup _programmEnabled;
-		private readonly TextInputGroup _startTimeInputGroup;
+		private readonly TextAreaInputGroup _descriptionInputGroup;
 		private readonly TextInputGroup _durationInputGroup;
-		private readonly RadioButtonLabeledInputGroup _weekdaysMoMiFrRadioButtonLabeledInputGroup;
-		private readonly RadioButtonLabeledInputGroup _weekdaysDiDoRadioButtonLabeledInputGroup;
-		private readonly RadioButtonLabeledInputGroup _weekdaysSaSoRadioButtonLabeledInputGroup;
+		private readonly TwoStateButtonGroup _programmEnabled;
+		private readonly TextInputGroup _programmNameInputGroup;
+		private readonly TextInputGroup _startTimeInputGroup;
+		private readonly TwoStateButtonGroup _weatherInfo;
 		private readonly RadioButtonInputGroup _weekDaysChoosenRadioButtonInputGroup;
 		private readonly ToggleButtonGroup _weekdaysChoosenToggleButtonGroup;
-		private readonly TwoStateButtonGroup _weatherInfo;
-		private readonly TwoStateButtonGroup _activateMasterChannel;
-		private readonly TextAreaInputGroup _descriptionInputGroup;
-
+		private readonly RadioButtonLabeledInputGroup _weekdaysDiDoRadioButtonLabeledInputGroup;
+		private readonly RadioButtonLabeledInputGroup _weekdaysMoMiFrRadioButtonLabeledInputGroup;
+		private readonly RadioButtonLabeledInputGroup _weekdaysSaSoRadioButtonLabeledInputGroup;
 		#endregion FormElements
 
 		public ChannelProgrammPage(ChannelProgramData channelProgram, ChannelPage parentChannelPage, bool isMasterChannel) : base("div")
@@ -40,7 +39,7 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Channels
 
 			#region Initialize Grid
 
-			Grid grid = new Grid();
+			Grid grid = new Grid(this);
 			grid.AddStyling(StylingOption.MarginRight, 2);
 			grid.AddStyling(StylingOption.MarginLeft, 2);
 			grid.AddStyling(StylingOption.MarginTop, 2);
@@ -53,7 +52,7 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Channels
 			_programmNameInputGroup = new TextInputGroup("ProgrammName", "N/A", labelSize, centeredText: true);
 			_programmNameInputGroup.AddStyling(StylingOption.MarginBottom, 2);
 			_programmNameInputGroup.TextInput.Value = channelProgram.Name;
-			_deleteProgrammButton = new HtmlElements.Button(StylingColor.Danger, asOutline: true, text: "Programm Löschen");
+			_deleteProgrammButton = new HtmlElements.Button(StylingColor.Danger, asOutline: true, text: "Programm Löschen", fontAwesomeIcon: "trash");
 			_deleteProgrammButton.Click += DeleteProgrammButtonOnClick;
 			_programmNameInputGroup.AddFormElement(_deleteProgrammButton);
 			grid.AddRow().AppendCollum(_programmNameInputGroup);
@@ -165,40 +164,6 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Channels
 			{
 				_activateMasterChannel.IsDisabled = true;
 			}
-
-			AppendChild(grid);
-		}
-
-		private void DeleteProgrammButtonOnClick(object sender, TargetEventArgs e)
-		{
-			const string confirmMessage = "Wirklich Löschen";
-			if (_deleteProgrammButton.Text != confirmMessage)
-			{
-				_deleteProgrammButton.Text = confirmMessage;
-				return;
-			}
-			else
-			{
-				_parentChannelPage.RemoveProgramm(this, _channelProgram);
-			}
-		}
-
-		private int GetCheckedWeekdays(ChannelProgramData.Weekdays channelProgramChoosenWeekdays)
-		{
-			switch (channelProgramChoosenWeekdays)
-			{
-				case ChannelProgramData.Weekdays.Montag | ChannelProgramData.Weekdays.Mittwoch | ChannelProgramData.Weekdays.Freitag:
-					return 1;
-
-				case ChannelProgramData.Weekdays.Dienstag | ChannelProgramData.Weekdays.Donnerstag:
-					return 2;
-
-				case ChannelProgramData.Weekdays.Samstag | ChannelProgramData.Weekdays.Sonntag:
-					return 3;
-
-				default:
-					return 4;
-			}
 		}
 
 		public void Save()
@@ -255,6 +220,66 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Channels
 			_parentChannelPage.ApplyName(_channelProgram);
 		}
 
+		private void DeleteProgrammButtonOnClick(object sender, TargetEventArgs e)
+		{
+			const string confirmMessage = "Wirklich Löschen";
+			if (_deleteProgrammButton.Text != confirmMessage)
+			{
+				_deleteProgrammButton.Text = confirmMessage;
+				return;
+			}
+			else
+			{
+				_parentChannelPage.RemoveProgramm(this, _channelProgram);
+			}
+		}
+
+		private int GetCheckedWeekdays(ChannelProgramData.Weekdays channelProgramChoosenWeekdays)
+		{
+			switch (channelProgramChoosenWeekdays)
+			{
+				case ChannelProgramData.Weekdays.Montag | ChannelProgramData.Weekdays.Mittwoch | ChannelProgramData.Weekdays.Freitag:
+					return 1;
+
+				case ChannelProgramData.Weekdays.Dienstag | ChannelProgramData.Weekdays.Donnerstag:
+					return 2;
+
+				case ChannelProgramData.Weekdays.Samstag | ChannelProgramData.Weekdays.Sonntag:
+					return 3;
+
+				default:
+					return 4;
+			}
+		}
+		private ChannelProgramData.Weekdays GetWeekday(string shortWeekday)
+		{
+			switch (shortWeekday)
+			{
+				case "Mo":
+					return ChannelProgramData.Weekdays.Montag;
+
+				case "Di":
+					return ChannelProgramData.Weekdays.Dienstag;
+
+				case "Mi":
+					return ChannelProgramData.Weekdays.Mittwoch;
+
+				case "Do":
+					return ChannelProgramData.Weekdays.Donnerstag;
+
+				case "Fr":
+					return ChannelProgramData.Weekdays.Freitag;
+
+				case "Sa":
+					return ChannelProgramData.Weekdays.Samstag;
+
+				case "So":
+					return ChannelProgramData.Weekdays.Sonntag;
+			}
+
+			throw new IndexOutOfRangeException("Der angegebene String ist kein Wochentag");
+		}
+
 		private ChannelProgramData.Weekdays GetWeekdays()
 		{
 			if (_weekdaysDiDoRadioButtonLabeledInputGroup.Checked == true)
@@ -284,35 +309,6 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Channels
 			{
 				throw new IndexOutOfRangeException("Es wurde kein RadioButton aktiviert!");
 			}
-		}
-
-		private ChannelProgramData.Weekdays GetWeekday(string shortWeekday)
-		{
-			switch (shortWeekday)
-			{
-				case "Mo":
-					return ChannelProgramData.Weekdays.Montag;
-
-				case "Di":
-					return ChannelProgramData.Weekdays.Dienstag;
-
-				case "Mi":
-					return ChannelProgramData.Weekdays.Mittwoch;
-
-				case "Do":
-					return ChannelProgramData.Weekdays.Donnerstag;
-
-				case "Fr":
-					return ChannelProgramData.Weekdays.Freitag;
-
-				case "Sa":
-					return ChannelProgramData.Weekdays.Samstag;
-
-				case "So":
-					return ChannelProgramData.Weekdays.Sonntag;
-			}
-
-			throw new IndexOutOfRangeException("Der angegebene String ist kein Wochentag");
 		}
 	}
 }

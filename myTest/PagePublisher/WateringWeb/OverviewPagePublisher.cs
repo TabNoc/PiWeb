@@ -10,24 +10,11 @@ namespace TabNoc.Ooui.PagePublisher.WateringWeb
 {
 	internal class OverviewPagePublisher : WateringPublisher
 	{
-		public OverviewPagePublisher(string publishPath) : base(publishPath)
-		{
-			Initialize();
-		}
+		public OverviewPagePublisher(string publishPath) : base(publishPath) => Initialize();
 
-		protected override void Initialize()
-		{
-			PageStorage<OverviewData>.Instance.Initialize(LoadDataCallback, SaveDataCallback);
-		}
+		protected override void Initialize() => PageStorage<OverviewData>.Instance.Initialize(LoadDataCallback, SaveDataCallback);
 
-		protected override Element CreatePage()
-		{
-			OverviewPage overviewPage = new OverviewPage();
-			overviewPage.AddStyling(StylingOption.MarginRight, 5);
-			overviewPage.AddStyling(StylingOption.MarginLeft, 1);
-			overviewPage.ClassName += " col-xl-10";
-			return overviewPage;
-		}
+		protected override Element CreatePage() => new OverviewPage();
 
 		private void SaveDataCallback(string data)
 		{

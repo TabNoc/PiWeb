@@ -18,7 +18,7 @@ namespace TabNoc.Ooui.UiComponents
 			});
 		}
 
-		public void AppendCollum(Element content, int sizing = 0, bool autoSize = false)
+		public T AppendCollum<T>(T content, int sizing = 0, bool autoSize = false) where T : Element
 		{
 			Div newChild = new Div()
 			{
@@ -26,6 +26,7 @@ namespace TabNoc.Ooui.UiComponents
 			};
 			newChild.AppendChild(content);
 			AppendChild(newChild);
+			return content;
 		}
 	}
 }

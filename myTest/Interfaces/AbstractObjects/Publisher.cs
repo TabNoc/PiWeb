@@ -25,17 +25,19 @@ namespace TabNoc.Ooui.Interfaces.AbstractObjects
 		{
 			Stopwatch stopwatchMain = new Stopwatch();
 			stopwatchMain.Start();
-
-			Grid grid = new Grid();
+			Div testDiv = new Div();
+			//Grid grid = new Grid();
 
 			Loading loading = new Loading();
-			grid.AppendChild(loading);
+			//grid.AppendChild(loading);
+			testDiv.AppendChild(loading);
 
 			NavigationBar navigationBar = CreateNavigationBar();
 			if (navigationBar != null)
 			{
 				navigationBar.AddStyling(StylingOption.MarginBottom, 3);
-				grid.AddRow().AppendCollum(navigationBar);
+				//grid.AddRow().AppendCollum(navigationBar);
+				testDiv.AppendChild(navigationBar);
 			}
 
 			Stopwatch stopwatchCreatePage = new Stopwatch();
@@ -64,16 +66,16 @@ namespace TabNoc.Ooui.Interfaces.AbstractObjects
 
 			Task.Run((Func<Element>)WaitForInitAndCreatePage).ContinueWith(task =>
 			{
-				grid.AddRow().AppendCollum(task.Result);
+				testDiv.AppendChild(task.Result);
 				stopwatchCreatePage.Stop();
-				Console.WriteLine($"\t\tSended Website Content: {grid.OuterHtml.Length}Byte\r\n\t\tElapsedTime from CreatePage: {stopwatchCreatePage.ElapsedMilliseconds}ms");
-				grid.RemoveChild(loading);
+				Console.WriteLine($"\t\tSended Website Content: {testDiv.OuterHtml.Length}Byte\r\n\t\tElapsedTime from CreatePage: {stopwatchCreatePage.ElapsedMilliseconds}ms");
+				testDiv.RemoveChild(loading);
 			});
 
 			stopwatchMain.Stop();
-			Console.WriteLine($"\tSended Website Content: {grid.OuterHtml.Length}Byte\r\n\tElapsedTime in PopulateAppElement: {stopwatchMain.ElapsedMilliseconds}ms");
+			Console.WriteLine($"\tSended Website Content: {testDiv.OuterHtml.Length}Byte\r\n\tElapsedTime in PopulateAppElement: {stopwatchMain.ElapsedMilliseconds}ms");
 			stopwatchCreatePage.Start();
-			return grid;
+			return testDiv;
 		}
 
 		private void Error(Exception exception, string msg, Loading loading)

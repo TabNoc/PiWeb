@@ -12,7 +12,10 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Channels
 	internal class ChannelsPage : StylableElement
 	{
 		private readonly PageStorage<ChannelsData> _channelsData;
+		private readonly Dictionary<ChannelData, Anchor> _pillDictionary = new Dictionary<ChannelData, Anchor>();
 		private readonly VerticalPillNavigation _pillNavigation = new VerticalPillNavigation("col-3", "col-9", true);
+
+		private bool _hasActivePill = false;
 
 		public ChannelsPage(PageStorage<ChannelsData> channelsData) : base("div")
 		{
@@ -24,7 +27,7 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Channels
 			HtmlElements.Button addChannel = new HtmlElements.Button(asOutline: true, size: Button.ButtonSize.Small);
 			addChannel.Click += (sender, args) =>
 			{
-				ChannelData channelData = ChannelData.CreateNew((channelsData.StorageData.Channels.Count > 0 ? channelsData.StorageData.Channels.Max(data => data.ChannelId):0) + 1);
+				ChannelData channelData = ChannelData.CreateNew((channelsData.StorageData.Channels.Count > 0 ? channelsData.StorageData.Channels.Max(data => data.ChannelId) : 0) + 1);
 				channelsData.StorageData.Channels.Add(channelData);
 				AddChannel(channelData.Name, channelData, false);
 			};
@@ -43,17 +46,6 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Channels
 			AppendChild(addChannel);
 		}
 
-		private bool _hasActivePill = false;
-
-		private readonly Dictionary<ChannelData, Anchor> _pillDictionary = new Dictionary<ChannelData, Anchor>();
-
-		private void AddChannel(string channelName, ChannelData channel, bool isMasterChannel)
-		{
-			Anchor pill = _pillNavigation.AddPill(channelName, new ChannelPage(channel, this, isMasterChannel), _hasActivePill == false);
-			_pillDictionary.Add(channel, pill);
-			_hasActivePill = true;
-		}
-
 		public void ApplyName(ChannelData channel)
 		{
 			_pillDictionary[channel].Text = channel.Name;
@@ -69,6 +61,13 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Channels
 		{
 			_channelsData.Save();
 			base.Dispose(disposing);
+		}
+
+		private void AddChannel(string channelName, ChannelData channel, bool isMasterChannel)
+		{
+			Anchor pill = _pillNavigation.AddPill(channelName, new ChannelPage(channel, this, isMasterChannel), _hasActivePill == false);
+			_pillDictionary.Add(channel, pill);
+			_hasActivePill = true;
 		}
 	}
 }

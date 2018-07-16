@@ -6,17 +6,17 @@ namespace TabNoc.Ooui.Storage.WateringWeb.Settings
 	internal class SettingsData : PageData
 	{
 		public bool Enabled;
-		public bool WeatherEnabled;
+		public Dictionary<string, string> HumiditySensors;
 		public string Location;
 		public string LocationName;
-		public string OverrideValue;
-		public Dictionary<string, string> HumiditySensors;
+		public int OverrideValue;
+		public bool WeatherEnabled;
 
 		public new static SettingsData CreateNew() => new SettingsData
 		{
 			Enabled = true,
 			LocationName = "Biesdorf",
-			OverrideValue = "100%",
+			OverrideValue = 100,
 			WeatherEnabled = false,
 			Valid = true,
 			HumiditySensors = new Dictionary<string, string>() { }

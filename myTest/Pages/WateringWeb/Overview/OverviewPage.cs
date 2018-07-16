@@ -13,17 +13,17 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Overview
 	{
 		public OverviewPage() : base("div")
 		{
-			Container c = new Container();
-			AppendChild(c);
+			Container wrappingContainer = new Container();
+			Grid grid = new Grid(wrappingContainer);
+
 			Table table = new Table(CreateAutomaticTableHeading(), CreateAutomaticTableBody());
-			c.AppendChild(table);
+			grid.AddRow().AppendCollum(table);
 
-			AppendChild(new Container(new Heading(1, "Manuelle Aufträge"){ClassName = "text-center" }));
+			grid.AddRow().AppendCollum(new Heading(2, "Manuelle Aufträge"){ClassName = "text-center" });
 
-			Container c2 = new Container();
-			AppendChild(c2);
 			Table table2 = new Table(CreateManualTableHeading(), CreateManualTableBody());
-			c2.AppendChild(table2);
+			grid.AddRow().AppendCollum(table2);
+			AppendChild(wrappingContainer);
 		}
 
 		private List<string> CreateManualTableHeading()

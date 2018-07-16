@@ -29,10 +29,10 @@ namespace TabNoc.Ooui.Storage.WateringWeb.Overview
 
 		public static AutomaticOverviewEntry CreateNew() => new AutomaticOverviewEntry
 		{
-			ChannelName = "N/A",
-			EndTime = TimeSpan.Zero,
+			ChannelName = "N/A" + new Random().Next(),
+			EndTime = new TimeSpan(0,0,0, new Random().Next()),
 			MasterEnabled = false,
-			StartTime = TimeSpan.Zero,
+			StartTime = new TimeSpan(0, 0, 0, new Random().Next()),
 			WeatherEnabled = false,
 			ActiveWeekdays = ChannelProgramData.Weekdays.None,
 			ChannelEnabled = false

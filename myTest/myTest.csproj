@@ -7,7 +7,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
-    <RuntimeIdentifiers>win10-x64;osx.10.11-x64</RuntimeIdentifiers>
+    <RuntimeIdentifiers>win10-x64;win7-x64</RuntimeIdentifiers>
     <RootNamespace>TabNoc.Ooui</RootNamespace>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
   </PropertyGroup>
@@ -33,10 +33,6 @@
   
   <ItemGroup>
     <ProjectReference Include="..\Ooui\Ooui.csproj" />
-  </ItemGroup>
-  
-  <ItemGroup>
-    <Folder Include="Storage\WateringWeb\Manual\" />
   </ItemGroup>
 
 </Project>

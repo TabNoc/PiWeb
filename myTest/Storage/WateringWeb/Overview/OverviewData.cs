@@ -12,7 +12,7 @@ namespace TabNoc.Ooui.Storage.WateringWeb.Overview
 		{
 			Valid = true,
 			ManualOverviewEntries = new List<ManualOverviewEntry>(){ManualOverviewEntry.CreateNew()},
-			AutomaticOverviewEntries = new List<AutomaticOverviewEntry>() { AutomaticOverviewEntry.CreateNew(), AutomaticOverviewEntry.CreateNew() }
+			AutomaticOverviewEntries = new List<AutomaticOverviewEntry>() { AutomaticOverviewEntry.CreateNew(), AutomaticOverviewEntry.CreateNew(), AutomaticOverviewEntry.CreateNew(), AutomaticOverviewEntry.CreateNew(), AutomaticOverviewEntry.CreateNew() }
 		};
 	}
 }
