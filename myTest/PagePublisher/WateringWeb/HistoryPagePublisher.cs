@@ -1,4 +1,7 @@
 ﻿using Ooui;
+using TabNoc.Ooui.Interfaces.AbstractObjects;
+using TabNoc.Ooui.Pages.WateringWeb.Overview;
+using TabNoc.Ooui.Storage.WateringWeb.History;
 
 namespace TabNoc.Ooui.PagePublisher.WateringWeb
 {
@@ -6,6 +9,14 @@ namespace TabNoc.Ooui.PagePublisher.WateringWeb
 	{
 		public HistoryPagePublisher (string publishPath) : base (publishPath)
 		{
+			PageStorage<HistoryData>.Instance.ReadOnly = true;
+			PageStorage<HistoryData>.Instance.Initialize(LoadDataCallback, null);
+		}
+
+		private string LoadDataCallback()
+		{
+			//TODO: Implement 
+			return "";
 		}
 
 		protected override void Initialize()
@@ -15,7 +26,7 @@ namespace TabNoc.Ooui.PagePublisher.WateringWeb
 
 		protected override Element CreatePage()
 		{
-			throw new System.NotImplementedException();
+			return new HistoryPage();
 		}
 	}
 }

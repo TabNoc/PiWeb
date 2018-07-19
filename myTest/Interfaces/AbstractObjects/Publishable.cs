@@ -11,11 +11,11 @@ namespace TabNoc.Ooui.Interfaces.AbstractObjects
 			_publishPath = publishPath;
 		}
 
-		protected abstract Element PopulateAppElement();
-
 		public void Publish()
 		{
 			UI.Publish(_publishPath, PopulateAppElement, true);
 		}
+
+		protected abstract Element PopulateAppElement();
 	}
 }

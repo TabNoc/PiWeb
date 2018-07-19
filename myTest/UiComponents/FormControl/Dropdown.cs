@@ -83,5 +83,13 @@ namespace TabNoc.Ooui.UiComponents.FormControl
 		{
 			_dropDownMenu.AppendChild(new Div() { ClassName = "dropdown-divider" });
 		}
+
+		public void Clear()
+		{
+			while (_dropDownMenu.FirstChild != null)
+			{
+				_dropDownMenu.RemoveChild(_dropDownMenu.FirstChild);
+			}
+		}
 	}
 }

@@ -24,8 +24,8 @@ namespace TabNoc.Ooui.UiComponents
 			</div>
 			 */
 		public readonly Button AddButton;
-		private readonly Div _navigationDiv;
 		private readonly Div _contentDiv;
+		private readonly Div _navigationDiv;
 		private bool _hasActiveTab = false;
 
 		public TabNavigation(bool asCardStyle = false, bool includeAddButton = false) : base("div")
@@ -99,7 +99,14 @@ namespace TabNoc.Ooui.UiComponents
 		public void RemoveTab(string tabName, Element content)
 		{
 			_contentDiv.RemoveChild(_contentDiv.Children.First(node => node.Children.Contains(content)));
-			_navigationDiv.RemoveChild(_navigationDiv.Children.First(node => node is Anchor anchor && anchor.Text == tabName));
+			Node removeChild = _navigationDiv.RemoveChild(_navigationDiv.Children.First(node => node is Anchor anchor && anchor.Text == tabName));
+			if (removeChild is Anchor removedAnchor)
+			{
+				if (removedAnchor.ClassName.Contains("active"))
+				{
+					_hasActiveTab = false;
+				}
+			}
 		}
 	}
 }

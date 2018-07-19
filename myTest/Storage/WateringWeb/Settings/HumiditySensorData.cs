@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using TabNoc.Ooui.Interfaces.AbstractObjects;
 
-namespace TabNoc.Ooui.Storage.Settings
+namespace TabNoc.Ooui.Storage.WateringWeb.Settings
 {
 	internal class HumiditySensorData : PageData
 	{

@@ -1,6 +1,10 @@
 ﻿using Ooui;
+using System.IO;
+using TabNoc.Ooui.Interfaces.AbstractObjects;
 using TabNoc.Ooui.Interfaces.Enums;
 using TabNoc.Ooui.Pages.WateringWeb.Overview;
+using TabNoc.Ooui.Storage.WateringWeb.Overview;
+using TabNoc.Ooui.Storage.WateringWeb.Settings;
 
 namespace TabNoc.Ooui.PagePublisher.WateringWeb
 {
@@ -8,19 +12,32 @@ namespace TabNoc.Ooui.PagePublisher.WateringWeb
 	{
 		public OverviewPagePublisher(string publishPath) : base(publishPath)
 		{
+			PageStorage<OverviewData>.Instance.ReadOnly = true;
+			PageStorage<OverviewData>.Instance.Initialize(LoadDataCallback, null);
 		}
 
 		protected override void Initialize()
 		{
-		}
+	}
 
-		protected override Element CreatePage()
+		protected override Element CreatePage() => new OverviewPage();
+
+		
+
+		private string LoadDataCallback()
 		{
-			OverviewPage overviewPage = new OverviewPage();
-			overviewPage.AddStyling(StylingOption.MarginRight, 5);
-			overviewPage.AddStyling(StylingOption.MarginLeft, 1);
-			overviewPage.ClassName += " col-xl-10";
-			return overviewPage;
+			if (File.Exists("demo_Overview.json"))
+			{
+				FileInfo fileInfo = new FileInfo("demo_Overview.json");
+				using (StreamReader streamReader = fileInfo.OpenText())
+				{
+					return streamReader.ReadToEnd();
+				}
+			}
+			else
+			{
+				return "";
+			}
 		}
 	}
 }

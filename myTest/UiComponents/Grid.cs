@@ -5,8 +5,9 @@ namespace TabNoc.Ooui.UiComponents
 {
 	internal class Grid : StylableElement
 	{
-		public Grid() : base("div")
+		public Grid(Element parent) : base("div")
 		{
+			parent.AppendChild(this);
 		}
 
 		public Row AddRow()

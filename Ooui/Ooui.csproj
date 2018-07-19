@@ -8,7 +8,7 @@
     <PackageProjectUrl>https://github.com/praeclarum/Ooui</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/praeclarum/Ooui/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryUrl>https://github.com/praeclarum/Ooui.git</RepositoryUrl>
-    <TargetFrameworks>netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>netcoreapp2.1</TargetFrameworks>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">

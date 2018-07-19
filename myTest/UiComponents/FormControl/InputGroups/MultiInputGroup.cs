@@ -43,21 +43,22 @@ namespace TabNoc.Ooui.UiComponents.FormControl.InputGroups
 			div1.AppendChild(div2);
 		}
 
-		public void AppendValidation(string validFeedback = "", string inValidFeedback = "", bool feedbackAsTooltip = false)
-		{
-			ValidationFeedback.AppendValidationFeedbackElements(this, validFeedback, inValidFeedback, feedbackAsTooltip);
-		}
-
-		public StylableTextInput AppendTextInput(string textInputGhostMessage, bool centeredText = false)
+		public StylableTextInput AppendTextInput(string textInputGhostMessage, bool centeredText = false, string startText = "")
 		{
 			StylableTextInput textInput = new StylableTextInput();
 			textInput.SetAttribute("type", "text");
 			textInput.ClassName = "form-control" + (centeredText ? " text-center" : "");
 			textInput.SetAttribute("placeholder", textInputGhostMessage);
 			textInput.SetAttribute("aria-label", textInputGhostMessage);
+			textInput.Value = startText;
 
 			AppendChild(textInput);
 			return textInput;
+		}
+
+		public void AppendValidation(string validFeedback = "", string inValidFeedback = "", bool feedbackAsTooltip = false)
+		{
+			ValidationFeedback.AppendValidationFeedbackElements(this, validFeedback, inValidFeedback, feedbackAsTooltip);
 		}
 
 		private string GetClassType()

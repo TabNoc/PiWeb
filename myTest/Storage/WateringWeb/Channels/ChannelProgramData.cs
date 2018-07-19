@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TabNoc.Ooui.Storage.Channels
+namespace TabNoc.Ooui.Storage.WateringWeb.Channels
 {
 	public class ChannelProgramData
 	{

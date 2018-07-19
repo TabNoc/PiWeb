@@ -1,10 +1,11 @@
 ﻿using Ooui;
 using System;
 using System.Linq;
+using TabNoc.Ooui.Interfaces.AbstractObjects;
 
 namespace TabNoc.Ooui.UiComponents
 {
-	public class VerticalPillNavigation : Element
+	internal class VerticalPillNavigation : StylableElement
 	{
 		/*
 		<div class="row">
@@ -30,14 +31,22 @@ namespace TabNoc.Ooui.UiComponents
 		private readonly Div _contentDiv;
 		private bool _hasActivePill = false;
 
+		public VerticalPillNavigation(int navigationSize, int contentSize, bool asCardStyle = false) : this("col-" + navigationSize, "col-" + contentSize, asCardStyle)
+		{
+			if (navigationSize + contentSize > 12)
+			{
+				throw new ArgumentException("The Sum of " + nameof(navigationSize) + " and " + nameof(contentSize) + " must be smaller then 12!");
+			}
+		}
+
 		//("col-3", "col-9")
 		public VerticalPillNavigation(string navigationDivWrapperClassName, string contentDivWrapperClassName, bool asCardStyle = false) : base("div")
 		{
-			ClassName = "row";
+			ClassName = "row" + (asCardStyle ? " ml-0" : "");
 
 			Div navigationDivWrapper = new Div
 			{
-				ClassName = navigationDivWrapperClassName + (asCardStyle ? " card text-center card-header rounded":"")
+				ClassName = navigationDivWrapperClassName + (asCardStyle ? " card text-center card-header rounded" : "")
 			};
 			AppendChild(navigationDivWrapper);
 
@@ -100,6 +109,20 @@ namespace TabNoc.Ooui.UiComponents
 		{
 			_contentDiv.RemoveChild(_contentDiv.Children.First(node => node.Children.Contains(content)));
 			_navigationDiv.RemoveChild(_navigationDiv.Children.First(node => node is Anchor anchor && anchor.Text == pillName));
+		}
+
+		public void Clear()
+		{
+			while (_contentDiv.FirstChild != null)
+			{
+				_contentDiv.RemoveChild(_contentDiv.FirstChild);
+			}
+			while (_navigationDiv.FirstChild != null)
+			{
+				_navigationDiv.RemoveChild(_navigationDiv.FirstChild);
+			}
+
+			_hasActivePill = false;
 		}
 	}
 }

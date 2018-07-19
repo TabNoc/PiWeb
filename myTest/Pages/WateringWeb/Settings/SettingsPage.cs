@@ -3,19 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using TabNoc.Ooui.Interfaces.AbstractObjects;
 using TabNoc.Ooui.Interfaces.Enums;
-using TabNoc.Ooui.Storage.Settings;
+using TabNoc.Ooui.Storage.WateringWeb.Settings;
 using TabNoc.Ooui.UiComponents;
 using TabNoc.Ooui.UiComponents.FormControl;
 using TabNoc.Ooui.UiComponents.FormControl.InputGroups;
+using TabNoc.Ooui.UiComponents.FormControl.InputGroups.Components;
 using Button = TabNoc.Ooui.HtmlElements.Button;
 
 namespace TabNoc.Ooui.Pages.WateringWeb.Settings
 {
 	internal class SettingsPage : StylableElement
 	{
-		private readonly PageStorage<SettingsData> _settingsData;
 		private readonly Dropdown _humidityDropdown;
 		private readonly TextInputGroup _humiditySensorTextInputGroup;
+		private readonly OverrideInputGroup _overrideInputGroup;
+		private readonly PageStorage<SettingsData> _settingsData;
 
 		public SettingsPage(PageStorage<SettingsData> settingsData) : base("div")
 		{
@@ -25,12 +27,11 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Settings
 
 			#region Initialize Grid
 
-			Grid grid = new Grid();
+			Grid grid = new Grid(this);
 			grid.AddStyling(StylingOption.MarginRight, 2);
 			grid.AddStyling(StylingOption.MarginLeft, 2);
 			grid.AddStyling(StylingOption.MarginTop, 4);
 			grid.AddStyling(StylingOption.MarginBottom, 2);
-			AppendChild(grid);
 
 			#endregion Initialize Grid
 
@@ -67,10 +68,10 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Settings
 			#region Hidden TextInputs
 
 			TextInput weatherLocationChangeTextInput = new TextInput { IsHidden = true };
-			
+
 			locationRow.AppendChild(weatherLocationChangeTextInput);
 			TextInput weatherLocationNameChangeTextInput = new TextInput { IsHidden = true };
-			
+
 			locationRow.AppendChild(weatherLocationNameChangeTextInput);
 
 			#endregion Hidden TextInputs
@@ -108,42 +109,8 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Settings
 
 			#region Override
 
-			MultiInputGroup multiInputGroup = new MultiInputGroup();
-			multiInputGroup.AppendLabel("Relativ", labelSize);
-			StylableTextInput overrideTextInput = multiInputGroup.AppendTextInput("100%");
-			overrideTextInput.Value = settingsData.StorageData.OverrideValue;
-
-			Button incrementOverrideButton = new Button(StylingColor.Secondary, true, text: "+", widthInPx: 35);
-			incrementOverrideButton.Click += (sender, args) =>
-			{
-				if (int.TryParse(overrideTextInput.Value.Replace("%", ""), out int number))
-				{
-					overrideTextInput.Value = number + 5 + "%";
-				}
-				else
-				{
-					overrideTextInput.SetValidation(false, true);
-				}
-			};
-			multiInputGroup.AppendCustomElement(incrementOverrideButton, false);
-
-			Button decrementOverrideButton = new Button(StylingColor.Secondary, true, text: "-", widthInPx: 35);
-			decrementOverrideButton.Click += (sender, args) =>
-			{
-				if (int.TryParse(overrideTextInput.Value.Replace("%", ""), out int number))
-				{
-					overrideTextInput.Value = number - 5 + "%";
-				}
-				else
-				{
-					overrideTextInput.SetValidation(false, true);
-				}
-			};
-			multiInputGroup.AppendCustomElement(decrementOverrideButton, false);
-			multiInputGroup.AppendValidation("", "Bitte nur ganze zahlen mit optionalem % Zeichen angeben!", true);
-
-			multiInputGroup.AddStyling(StylingOption.MarginBottom, 5);
-			grid.AddRow().AppendCollum(multiInputGroup, autoSize: true);
+			_overrideInputGroup = new OverrideInputGroup(_settingsData.StorageData.OverrideValue);
+			grid.AddRow().AppendCollum(_overrideInputGroup, autoSize: true);
 
 			#endregion Override
 
@@ -213,15 +180,6 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Settings
 			#endregion Rename HumiditySensors
 		}
 
-		private void ActivateAutoComplete(StylableTextInput weatherLocationTextInput, TextInput locationChangeTextInput, TextInput nameChangeTextInput)
-		{
-			weatherLocationTextInput.ActivateAutocomplete("/settings/WeatherLocations.json", new Dictionary<string, TextInput>()
-			{
-				{"location", locationChangeTextInput },
-				{"name", nameChangeTextInput }
-			});
-		}
-
 		public void SelectHumiditySensor(string humiditySensor)
 		{
 			_humidityDropdown.Button.Text = humiditySensor;
@@ -230,8 +188,18 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Settings
 
 		protected override void Dispose(bool disposing)
 		{
+			_settingsData.StorageData.OverrideValue = _overrideInputGroup.Value;
 			_settingsData.Save();
 			base.Dispose(disposing);
+		}
+
+		private void ActivateAutoComplete(StylableTextInput weatherLocationTextInput, TextInput locationChangeTextInput, TextInput nameChangeTextInput)
+		{
+			weatherLocationTextInput.ActivateAutocomplete("/settings/WeatherLocations.json", new Dictionary<string, TextInput>()
+			{
+				{"location", locationChangeTextInput },
+				{"name", nameChangeTextInput }
+			});
 		}
 	}
 }
