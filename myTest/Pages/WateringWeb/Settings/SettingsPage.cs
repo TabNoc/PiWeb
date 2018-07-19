@@ -178,6 +178,37 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Settings
 			}
 
 			#endregion Rename HumiditySensors
+
+			#region Backend Server Path
+
+			Row backendServerRow = grid.AddRow();
+			backendServerRow.AppendChild(new Heading(3, "Backend Server Schnittstelle einstellen"));
+			backendServerRow.AddNewLine();
+
+			MultiInputGroup historyPageBackendMultiInputGroup = new MultiInputGroup();
+			historyPageBackendMultiInputGroup.AppendLabel("Verlauf");
+			TwoStateButtonGroup historyPageBackendEnabled = historyPageBackendMultiInputGroup.AppendCustomElement(new TwoStateButtonGroup("Vom Server", "Als Debug", settingsData.StorageData.Backend_HistoryEnabled, !settingsData.StorageData.Backend_HistoryEnabled), false);
+			StylableTextInput historyPageBackendPath = historyPageBackendMultiInputGroup.AppendTextInput("Pfad zur WebAPI", startText: settingsData.StorageData.Backend_HistoryPath);
+			historyPageBackendMultiInputGroup.AppendValidation("Einstellungen OK", "Einstellungen sind nicht OK", false);
+			Button historyPageBackendSaveSettings = historyPageBackendMultiInputGroup.AppendCustomElement(new Button(StylingColor.Success, true, text: "Speichern", fontAwesomeIcon: "save"), false);
+			
+			historyPageBackendSaveSettings.Click += (sender, args) =>
+			{
+				historyPageBackendPath.SetValidation(false, false);
+				if (historyPageBackendEnabled.FirstButtonActive && historyPageBackendPath.Value != "")
+				{
+					historyPageBackendPath.SetValidation(true, false);
+					settingsData.StorageData.Backend_HistoryEnabled = historyPageBackendEnabled.FirstButtonActive;
+					settingsData.StorageData.Backend_HistoryPath = historyPageBackendPath.Value;
+				}
+				else
+				{
+					historyPageBackendPath.SetValidation(false, true);
+				}
+			};
+			backendServerRow.AppendCollum(historyPageBackendMultiInputGroup, autoSize: true);
+
+			#endregion Backend Server Path
 		}
 
 		public void SelectHumiditySensor(string humiditySensor)
