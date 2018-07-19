@@ -259,9 +259,14 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Manual
 			_removeFromJobButton.IsHidden = true;
 			_removeFromJobButton.Click += (sender, args) =>
 			{
-				if (PageStorage<ManualData>.Instance.StorageData.JobEntries.Any(entry => entry.Name == jobNameTextInput.Value))
+				if (PageStorage<ManualData>.Instance.StorageData.JobEntries.Any(entry => entry.Name == _jobSelectDropdown.Button.Text))
 				{
-					PageStorage<ManualData>.Instance.StorageData.JobEntries.First(entry => entry.Name == _jobSelectDropdown.Button.Text).BatchEntries.RemoveAll(entry => entry.Name == _batch.Name);
+					JobEntry jobEntry = PageStorage<ManualData>.Instance.StorageData.JobEntries.First(entry => entry.Name == _jobSelectDropdown.Button.Text);
+					jobEntry.BatchEntries.RemoveAll(entry => entry.Name == _batch.Name);
+					if (jobEntry.BatchEntries.Count == 0)
+					{
+						PageStorage<ManualData>.Instance.StorageData.JobEntries.Remove(jobEntry);
+					}
 				}
 				_removeFromJobButton.IsHidden = true;
 				_appendToJobButton.IsHidden = false;

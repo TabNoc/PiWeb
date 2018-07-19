@@ -9,6 +9,9 @@ namespace TabNoc.Ooui.Storage.WateringWeb.Manual
 	internal class ManualActionExecutionData : PageData
 	{
 		public List<ManualActionExecution> ExecutionList;
+#pragma warning disable 169
+		public string EventSource = "Manual";
+#pragma warning restore 169
 
 		private ManualActionExecutionData()
 		{

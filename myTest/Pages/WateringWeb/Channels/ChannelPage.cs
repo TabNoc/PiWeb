@@ -67,7 +67,7 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Channels
 			_tabNavigation = new TabNavigation(true, true);
 			_tabNavigation.AddButton.Click += (sender, args) =>
 			{
-				ChannelProgramData channelProgramData = ChannelProgramData.CreateNew(channel.ProgramList.Max(data => int.TryParse(data.Name, out int parsedInt) ? parsedInt : 1) + 1);
+				ChannelProgramData channelProgramData = ChannelProgramData.CreateNew(channel.ProgramList.Count > 0 ? channel.ProgramList.Max(data => int.TryParse(data.Name, out int parsedInt) ? parsedInt : 1) + 1 : 1);
 				channel.ProgramList.Add(channelProgramData);
 				ChannelProgrammPage channelProgrammPage = new ChannelProgrammPage(channelProgramData, this, isMasterChannel);
 				_channelProgrammPages.Add(channelProgrammPage);
@@ -83,7 +83,7 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Channels
 			{
 				ChannelProgrammPage channelProgrammPage = new ChannelProgrammPage(channelProgramData, this, isMasterChannel);
 				_channelProgrammPages.Add(channelProgrammPage);
-				_tabDictionary.Add(channelProgramData, _tabNavigation.AddTab(channelProgramData.Id.ToString(), channelProgrammPage, channelProgramData.Id == 1));
+				_tabDictionary.Add(channelProgramData, _tabNavigation.AddTab(channelProgramData.Id.ToString(), channelProgrammPage, channelProgramData.Id == channel.ProgramList.First().Id));
 				ApplyName(channelProgramData);
 			}
 

@@ -6,6 +6,8 @@ namespace TabNoc.Ooui.Interfaces.AbstractObjects
 {
 	internal class PageStorage<T> : IDisposable where T : PageData
 	{
+		public bool ReadOnly = false;
+		public bool WriteOnly = false;
 		private static PageStorage<T> _instance;
 		private bool _initialized = false;
 		private bool _isDisposed = false;
@@ -35,7 +37,10 @@ namespace TabNoc.Ooui.Interfaces.AbstractObjects
 			{
 				throw new ObjectDisposedException(typeof(T).Name);
 			}
-			Save();
+			if (!ReadOnly)
+			{
+				Save();
+			}
 			_instance = null;
 			_storageData = null;
 			_isDisposed = true;
@@ -55,9 +60,29 @@ namespace TabNoc.Ooui.Interfaces.AbstractObjects
 
 			if (_initialized == false)
 			{
-				_loadDataCallback = loadDataCallback ?? throw new ArgumentNullException(nameof(loadDataCallback));
+				if (WriteOnly == true)
+				{
+					if (loadDataCallback != null)
+					{
+						throw new ArgumentException("You Cannot apply a " + nameof(loadDataCallback) + " to a writeonly PageStorage (" + typeof(T).Name + ")", nameof(loadDataCallback));
+					}
+				}
+				else
+				{
+					_loadDataCallback = loadDataCallback ?? throw new ArgumentNullException(nameof(loadDataCallback));
+				}
 
-				_saveDataCallback = saveDataCallback ?? throw new ArgumentNullException(nameof(saveDataCallback));
+				if (ReadOnly == true)
+				{
+					if (saveDataCallback != null)
+					{
+						throw new ArgumentException("You Cannot apply a " + nameof(saveDataCallback) + " to a readonly PageStorage (" + typeof(T).Name + ")", nameof(saveDataCallback));
+					}
+				}
+				else
+				{
+					_saveDataCallback = saveDataCallback ?? throw new ArgumentNullException(nameof(saveDataCallback));
+				}
 			}
 
 			_initialized = true;
@@ -65,6 +90,10 @@ namespace TabNoc.Ooui.Interfaces.AbstractObjects
 
 		public void Save()
 		{
+			if (ReadOnly == true)
+			{
+				throw new InvalidOperationException(" this PageStorage is ReadOnly -> You can't save it.");
+			}
 			if (_isDisposed)
 			{
 				throw new ObjectDisposedException(typeof(T).Name);
@@ -87,12 +116,12 @@ namespace TabNoc.Ooui.Interfaces.AbstractObjects
 			{
 				throw new ObjectDisposedException(typeof(T).Name);
 			}
-			if (_loadDataCallback == null)
+			if (_loadDataCallback == null && !WriteOnly)
 			{
 				throw new NullReferenceException(nameof(Initialize) + " has to be called before Loading the the " + typeof(T).Name);
 			}
 
-			_loadedData = _loadDataCallback();
+			_loadedData = WriteOnly ? "" : _loadDataCallback();
 			_storageData = ReadData(_loadedData) ?? (T)typeof(T).GetMethod("CreateNew").Invoke(null, null);
 
 			if (_storageData.Valid == false && typeof(T) != typeof(ManualActionExecutionData))

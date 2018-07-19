@@ -108,6 +108,10 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Overview
 
 		private void FillChannelTabPage()
 		{
+			ManualChannelPage masterChannelPage = new ManualChannelPage(PageStorage<ChannelsData>.Instance.StorageData.MasterChannel, this);
+			Anchor masterPill = _channelTabPage.AddPill(PageStorage<ChannelsData>.Instance.StorageData.MasterChannel.Name, masterChannelPage, false);
+			_channelPills.Add((masterPill, masterChannelPage));
+
 			foreach (ChannelData channel in PageStorage<ChannelsData>.Instance.StorageData.Channels)
 			{
 				ManualChannelPage manualChannelPage = new ManualChannelPage(channel, this);

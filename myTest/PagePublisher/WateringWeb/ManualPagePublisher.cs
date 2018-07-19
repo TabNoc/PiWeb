@@ -10,8 +10,9 @@ namespace TabNoc.Ooui.PagePublisher.WateringWeb
 	{
 		public ManualPagePublisher(string publishPath) : base(publishPath)
 		{
-			Initialize();
-			PageStorage<ManualActionExecutionData>.Instance.Initialize(() => "", SaveManualActionExecutionDataCallback);
+			PageStorage<ManualActionExecutionData>.Instance.WriteOnly = true;
+			PageStorage<ManualActionExecutionData>.Instance.Initialize(null, SaveManualActionExecutionDataCallback);
+			PageStorage<ManualData>.Instance.Initialize(LoadDataCallback, SaveDataCallback);
 		}
 
 		protected override Element CreatePage()
@@ -21,7 +22,6 @@ namespace TabNoc.Ooui.PagePublisher.WateringWeb
 
 		protected override void Initialize()
 		{
-			PageStorage<ManualData>.Instance.Initialize(LoadDataCallback, SaveDataCallback);
 		}
 
 		private string LoadDataCallback()

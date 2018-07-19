@@ -10,23 +10,19 @@ namespace TabNoc.Ooui.PagePublisher.WateringWeb
 {
 	internal class OverviewPagePublisher : WateringPublisher
 	{
-		public OverviewPagePublisher(string publishPath) : base(publishPath) => Initialize();
+		public OverviewPagePublisher(string publishPath) : base(publishPath)
+		{
+			PageStorage<OverviewData>.Instance.ReadOnly = true;
+			PageStorage<OverviewData>.Instance.Initialize(LoadDataCallback, null);
+		}
 
-		protected override void Initialize() => PageStorage<OverviewData>.Instance.Initialize(LoadDataCallback, SaveDataCallback);
+		protected override void Initialize()
+		{
+	}
 
 		protected override Element CreatePage() => new OverviewPage();
 
-		private void SaveDataCallback(string data)
-		{
-			FileInfo fileInfo = new FileInfo("demo_Overview.json");
-			using (StreamWriter streamWriter = fileInfo.CreateText())
-			{
-				streamWriter.Write(data);
-				streamWriter.Flush();
-				streamWriter.Close();
-				streamWriter.Dispose();
-			}
-		}
+		
 
 		private string LoadDataCallback()
 		{
