@@ -1,15 +1,15 @@
 ﻿using Ooui;
 using System;
 using System.Linq;
-using TabNoc.Ooui.Interfaces.AbstractObjects;
-using TabNoc.Ooui.Interfaces.Enums;
-using TabNoc.Ooui.Storage.WateringWeb.Channels;
-using TabNoc.Ooui.Storage.WateringWeb.Manual;
-using TabNoc.Ooui.UiComponents;
-using TabNoc.Ooui.UiComponents.FormControl.InputGroups;
-using Button = TabNoc.Ooui.HtmlElements.Button;
+using TabNoc.MyOoui.Interfaces.AbstractObjects;
+using TabNoc.MyOoui.Interfaces.Enums;
+using TabNoc.MyOoui.UiComponents;
+using TabNoc.MyOoui.UiComponents.FormControl.InputGroups;
+using TabNoc.PiWeb.Storage.WateringWeb.Channels;
+using TabNoc.PiWeb.Storage.WateringWeb.Manual;
+using Button = TabNoc.MyOoui.HtmlElements.Button;
 
-namespace TabNoc.Ooui.Pages.WateringWeb.Overview
+namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
 {
 	internal class ManualChannelPage : StylableElement
 	{

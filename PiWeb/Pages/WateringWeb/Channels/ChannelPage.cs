@@ -2,23 +2,23 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TabNoc.Ooui.Interfaces.AbstractObjects;
-using TabNoc.Ooui.Interfaces.Enums;
-using TabNoc.Ooui.Storage.WateringWeb.Channels;
-using TabNoc.Ooui.Storage.WateringWeb.Settings;
-using TabNoc.Ooui.UiComponents;
-using TabNoc.Ooui.UiComponents.FormControl;
-using TabNoc.Ooui.UiComponents.FormControl.InputGroups;
-using Button = TabNoc.Ooui.HtmlElements.Button;
+using TabNoc.MyOoui.Interfaces.AbstractObjects;
+using TabNoc.MyOoui.Interfaces.Enums;
+using TabNoc.MyOoui.UiComponents;
+using TabNoc.MyOoui.UiComponents.FormControl;
+using TabNoc.MyOoui.UiComponents.FormControl.InputGroups;
+using TabNoc.PiWeb.Storage.WateringWeb.Channels;
+using TabNoc.PiWeb.Storage.WateringWeb.Settings;
+using Button = TabNoc.MyOoui.HtmlElements.Button;
 
-namespace TabNoc.Ooui.Pages.WateringWeb.Channels
+namespace TabNoc.PiWeb.Pages.WateringWeb.Channels
 {
 	internal class ChannelPage : StylableElement
 	{
 		private readonly ChannelData _channel;
 		private readonly TextInputGroup _channelNameInputGroup;
 		private readonly List<ChannelProgrammPage> _channelProgrammPages = new List<ChannelProgrammPage>();
-		private readonly HtmlElements.Button _deleteChannelButton;
+		private readonly Button _deleteChannelButton;
 		private readonly bool _isMasterChannel;
 		private readonly ChannelsPage _parentChannelsPage;
 		private readonly Dictionary<ChannelProgramData, Anchor> _tabDictionary = new Dictionary<ChannelProgramData, Anchor>();
@@ -50,7 +50,7 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Channels
 			_channelNameInputGroup.TextInput.Value = channel.Name;
 			if (!isMasterChannel)
 			{
-				_deleteChannelButton = new HtmlElements.Button(StylingColor.Danger, asOutline: true, text: "Kanal Löschen", fontAwesomeIcon: "trash");
+				_deleteChannelButton = new Button(StylingColor.Danger, asOutline: true, text: "Kanal Löschen", fontAwesomeIcon: "trash");
 				_deleteChannelButton.Click += DeleteChannelButtonOnClick;
 				_channelNameInputGroup.AddFormElement(_deleteChannelButton);
 			}

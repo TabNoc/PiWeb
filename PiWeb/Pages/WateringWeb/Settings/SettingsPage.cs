@@ -1,16 +1,16 @@
 ﻿using Ooui;
 using System.Collections.Generic;
 using System.Linq;
-using TabNoc.Ooui.Interfaces.AbstractObjects;
-using TabNoc.Ooui.Interfaces.Enums;
-using TabNoc.Ooui.Storage.WateringWeb.Settings;
-using TabNoc.Ooui.UiComponents;
-using TabNoc.Ooui.UiComponents.FormControl;
-using TabNoc.Ooui.UiComponents.FormControl.InputGroups;
-using TabNoc.Ooui.UiComponents.FormControl.InputGroups.Components;
-using Button = TabNoc.Ooui.HtmlElements.Button;
+using TabNoc.MyOoui.Interfaces.AbstractObjects;
+using TabNoc.MyOoui.Interfaces.Enums;
+using TabNoc.MyOoui.UiComponents;
+using TabNoc.MyOoui.UiComponents.FormControl;
+using TabNoc.MyOoui.UiComponents.FormControl.InputGroups;
+using TabNoc.MyOoui.UiComponents.FormControl.InputGroups.Components;
+using TabNoc.PiWeb.Storage.WateringWeb.Settings;
+using Button = TabNoc.MyOoui.HtmlElements.Button;
 
-namespace TabNoc.Ooui.Pages.WateringWeb.Settings
+namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 {
 	internal class SettingsPage : StylableElement
 	{

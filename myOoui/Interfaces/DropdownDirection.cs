@@ -1,4 +1,4 @@
-﻿namespace TabNoc.Ooui.Interfaces
+﻿namespace TabNoc.MyOoui.Interfaces
 {
 	public enum DropdownDirection
 	{

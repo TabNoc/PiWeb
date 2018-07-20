@@ -1,4 +1,4 @@
-﻿namespace TabNoc.Ooui.Interfaces.Enums
+﻿namespace TabNoc.MyOoui.Interfaces.Enums
 {
 	public enum BorderKind
 	{

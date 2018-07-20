@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TabNoc.Ooui.Storage.WateringWeb.Manual
+namespace TabNoc.PiWeb.Storage.WateringWeb.Manual
 {
 	public class BatchEntry
 	{

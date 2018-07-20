@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using TabNoc.Ooui.Interfaces.AbstractObjects;
+using TabNoc.MyOoui.Interfaces.AbstractObjects;
 
-namespace TabNoc.Ooui.Storage.WateringWeb.Overview
+namespace TabNoc.PiWeb.Storage.WateringWeb.Overview
 {
 	internal class OverviewData : PageData
 	{
@@ -11,7 +11,7 @@ namespace TabNoc.Ooui.Storage.WateringWeb.Overview
 		public new static OverviewData CreateNew() => new OverviewData
 		{
 			Valid = true,
-			ManualOverviewEntries = new List<ManualOverviewEntry>(){ManualOverviewEntry.CreateNew()},
+			ManualOverviewEntries = new List<ManualOverviewEntry>() { ManualOverviewEntry.CreateNew() },
 			AutomaticOverviewEntries = new List<AutomaticOverviewEntry>() { AutomaticOverviewEntry.CreateNew(), AutomaticOverviewEntry.CreateNew(), AutomaticOverviewEntry.CreateNew(), AutomaticOverviewEntry.CreateNew(), AutomaticOverviewEntry.CreateNew() }
 		};
 	}

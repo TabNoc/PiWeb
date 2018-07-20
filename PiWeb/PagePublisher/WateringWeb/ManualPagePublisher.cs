@@ -1,10 +1,10 @@
 ﻿using Ooui;
 using System.IO;
-using TabNoc.Ooui.Interfaces.AbstractObjects;
-using TabNoc.Ooui.Pages.WateringWeb.Overview;
-using TabNoc.Ooui.Storage.WateringWeb.Manual;
+using TabNoc.MyOoui.Interfaces.AbstractObjects;
+using TabNoc.PiWeb.Pages.WateringWeb.Manual;
+using TabNoc.PiWeb.Storage.WateringWeb.Manual;
 
-namespace TabNoc.Ooui.PagePublisher.WateringWeb
+namespace TabNoc.PiWeb.PagePublisher.WateringWeb
 {
 	internal class ManualPagePublisher : WateringPublisher
 	{

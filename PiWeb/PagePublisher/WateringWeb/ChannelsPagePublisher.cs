@@ -1,11 +1,11 @@
 ﻿using Ooui;
 using System.IO;
-using TabNoc.Ooui.Interfaces.AbstractObjects;
-using TabNoc.Ooui.Interfaces.Enums;
-using TabNoc.Ooui.Pages.WateringWeb.Channels;
-using TabNoc.Ooui.Storage.WateringWeb.Channels;
+using TabNoc.MyOoui.Interfaces.AbstractObjects;
+using TabNoc.MyOoui.Interfaces.Enums;
+using TabNoc.PiWeb.Pages.WateringWeb.Channels;
+using TabNoc.PiWeb.Storage.WateringWeb.Channels;
 
-namespace TabNoc.Ooui.PagePublisher.WateringWeb
+namespace TabNoc.PiWeb.PagePublisher.WateringWeb
 {
 	internal class ChannelsPagePublisher : WateringPublisher
 	{

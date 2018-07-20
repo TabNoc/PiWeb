@@ -1,8 +1,7 @@
-﻿using System;
-using Ooui;
-using TabNoc.Ooui.Interfaces.AbstractObjects;
+﻿using Ooui;
+using TabNoc.MyOoui.Interfaces.AbstractObjects;
 
-namespace TabNoc.Ooui.UiComponents
+namespace TabNoc.MyOoui.UiComponents
 {
 	public class Container : StylableElement
 	{

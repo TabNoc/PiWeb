@@ -1,7 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 
-namespace TabNoc.Ooui.Interfaces.AbstractObjects
+namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 {
 	public class PageStorage<T> : IDisposable where T : PageData
 	{

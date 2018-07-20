@@ -2,10 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TabNoc.Ooui.HtmlElements;
-using TabNoc.Ooui.Interfaces.Enums;
+using TabNoc.MyOoui.HtmlElements;
+using TabNoc.MyOoui.Interfaces.Enums;
 
-namespace TabNoc.Ooui.Interfaces.AbstractObjects
+namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 {
 	public class StylableAnchor : Anchor, IStylableElement
 	{

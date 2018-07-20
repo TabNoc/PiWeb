@@ -1,14 +1,13 @@
 ﻿using Ooui;
 using System.Collections.Generic;
 using System.Linq;
-using TabNoc.Ooui.Interfaces.AbstractObjects;
-using TabNoc.Ooui.Interfaces.Enums;
-using TabNoc.Ooui.Pages.WateringWeb.Manual;
-using TabNoc.Ooui.Storage.WateringWeb.Channels;
-using TabNoc.Ooui.Storage.WateringWeb.Manual;
-using TabNoc.Ooui.UiComponents;
+using TabNoc.MyOoui.Interfaces.AbstractObjects;
+using TabNoc.MyOoui.Interfaces.Enums;
+using TabNoc.MyOoui.UiComponents;
+using TabNoc.PiWeb.Storage.WateringWeb.Channels;
+using TabNoc.PiWeb.Storage.WateringWeb.Manual;
 
-namespace TabNoc.Ooui.Pages.WateringWeb.Overview
+namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
 {
 	internal class ManualPage : StylableElement
 	{

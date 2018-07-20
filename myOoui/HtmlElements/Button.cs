@@ -1,8 +1,8 @@
 ﻿using System;
-using TabNoc.Ooui.Interfaces.AbstractObjects;
-using TabNoc.Ooui.Interfaces.Enums;
+using TabNoc.MyOoui.Interfaces.AbstractObjects;
+using TabNoc.MyOoui.Interfaces.Enums;
 
-namespace TabNoc.Ooui.HtmlElements
+namespace TabNoc.MyOoui.HtmlElements
 {
 	public class Button : StylableElement
 	{

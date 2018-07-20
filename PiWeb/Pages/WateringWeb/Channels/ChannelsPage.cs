@@ -1,13 +1,13 @@
 ﻿using Ooui;
 using System.Collections.Generic;
 using System.Linq;
-using TabNoc.Ooui.Interfaces.AbstractObjects;
-using TabNoc.Ooui.Interfaces.Enums;
-using TabNoc.Ooui.Storage.WateringWeb.Channels;
-using TabNoc.Ooui.UiComponents;
-using Button = TabNoc.Ooui.HtmlElements.Button;
+using TabNoc.MyOoui.Interfaces.AbstractObjects;
+using TabNoc.MyOoui.Interfaces.Enums;
+using TabNoc.MyOoui.UiComponents;
+using TabNoc.PiWeb.Storage.WateringWeb.Channels;
+using Button = TabNoc.MyOoui.HtmlElements.Button;
 
-namespace TabNoc.Ooui.Pages.WateringWeb.Channels
+namespace TabNoc.PiWeb.Pages.WateringWeb.Channels
 {
 	internal class ChannelsPage : StylableElement
 	{
@@ -24,7 +24,7 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Channels
 			Row row = new Row();
 			AppendChild(row);
 
-			HtmlElements.Button addChannel = new HtmlElements.Button(asOutline: true, size: Button.ButtonSize.Small);
+			Button addChannel = new Button(asOutline: true, size: Button.ButtonSize.Small);
 			addChannel.Click += (sender, args) =>
 			{
 				ChannelData channelData = ChannelData.CreateNew((channelsData.StorageData.Channels.Count > 0 ? channelsData.StorageData.Channels.Max(data => data.ChannelId) : 0) + 1);

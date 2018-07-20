@@ -1,9 +1,8 @@
-﻿using System;
-using Ooui;
-using TabNoc.Ooui.Interfaces.AbstractObjects;
-using TabNoc.Ooui.Interfaces.Enums;
+﻿using Ooui;
+using System;
+using TabNoc.MyOoui.Interfaces.AbstractObjects;
 
-namespace TabNoc.Ooui.UiComponents.FormControl.InputGroups
+namespace TabNoc.MyOoui.UiComponents.FormControl.InputGroups
 {
 	internal class CheckBoxLabeledInputGroup : InputGroupControl
 	{

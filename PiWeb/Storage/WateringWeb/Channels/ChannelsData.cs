@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using TabNoc.Ooui.Interfaces.AbstractObjects;
+using TabNoc.MyOoui.Interfaces.AbstractObjects;
 
-namespace TabNoc.Ooui.Storage.WateringWeb.Channels
+namespace TabNoc.PiWeb.Storage.WateringWeb.Channels
 {
 	public class ChannelsData : PageData
 	{

@@ -1,11 +1,11 @@
 ﻿using Ooui;
 using System;
 using System.Linq;
-using TabNoc.Ooui.HtmlElements;
-using TabNoc.Ooui.Interfaces.Enums;
-using Button = TabNoc.Ooui.HtmlElements.Button;
+using TabNoc.MyOoui.HtmlElements;
+using TabNoc.MyOoui.Interfaces.Enums;
+using Button = TabNoc.MyOoui.HtmlElements.Button;
 
-namespace TabNoc.Ooui.UiComponents
+namespace TabNoc.MyOoui.UiComponents
 {
 	public class TabNavigation : Element
 	{

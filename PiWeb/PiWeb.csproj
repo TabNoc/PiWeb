@@ -10,7 +10,7 @@
     <RuntimeIdentifiers>win10-x64;win7-x64</RuntimeIdentifiers>
     <RootNamespace>TabNoc.PiWeb</RootNamespace>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <StartupObject>TabNoc.Ooui.Program</StartupObject>
+    <StartupObject>TabNoc.PiWeb.Program</StartupObject>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

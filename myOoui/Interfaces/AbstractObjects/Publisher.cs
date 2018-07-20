@@ -2,10 +2,10 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using TabNoc.Ooui.Interfaces.Enums;
-using TabNoc.Ooui.UiComponents;
+using TabNoc.MyOoui.Interfaces.Enums;
+using TabNoc.MyOoui.UiComponents;
 
-namespace TabNoc.Ooui.Interfaces.AbstractObjects
+namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 {
 	public abstract class Publisher : Publishable
 	{

@@ -1,6 +1,6 @@
-﻿using TabNoc.Ooui.Interfaces.AbstractObjects;
+﻿using TabNoc.MyOoui.Interfaces.AbstractObjects;
 
-namespace TabNoc.Ooui.UiComponents.FormControl
+namespace TabNoc.MyOoui.UiComponents.FormControl
 {
 	internal class InputToolbar : global::Ooui.FormControl
 	{

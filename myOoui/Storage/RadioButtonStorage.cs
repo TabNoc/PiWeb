@@ -1,9 +1,9 @@
 ﻿using Ooui;
 using System;
 using System.Collections.Generic;
-using TabNoc.Ooui.HtmlElements;
+using TabNoc.MyOoui.HtmlElements;
 
-namespace TabNoc.Ooui.Storage
+namespace TabNoc.MyOoui.Storage
 {
 	internal static class RadioButtonStorage
 	{

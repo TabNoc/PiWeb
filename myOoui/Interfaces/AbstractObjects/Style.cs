@@ -1,6 +1,6 @@
-﻿using TabNoc.Ooui.Interfaces.Enums;
+﻿using TabNoc.MyOoui.Interfaces.Enums;
 
-namespace TabNoc.Ooui.Interfaces.AbstractObjects
+namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 {
 	internal class Style
 	{

@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using Ooui;
+﻿using Ooui;
+using System.Collections.Generic;
 
-namespace TabNoc.Ooui.Interfaces
+namespace TabNoc.MyOoui.Interfaces
 {
 	internal interface IAutoComplete
 	{

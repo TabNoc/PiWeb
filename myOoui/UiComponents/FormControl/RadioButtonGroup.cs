@@ -1,9 +1,9 @@
-﻿using System;
-using Ooui;
-using TabNoc.Ooui.HtmlElements;
-using TabNoc.Ooui.Interfaces.AbstractObjects;
+﻿using Ooui;
+using System;
+using TabNoc.MyOoui.HtmlElements;
+using TabNoc.MyOoui.Interfaces.AbstractObjects;
 
-namespace TabNoc.Ooui.UiComponents.FormControl
+namespace TabNoc.MyOoui.UiComponents.FormControl
 {
 	internal class RadioButtonGroup : InputGroupControl
 	{

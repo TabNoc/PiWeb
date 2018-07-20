@@ -1,8 +1,8 @@
-﻿using TabNoc.Ooui.Interfaces.AbstractObjects;
-using TabNoc.Ooui.Interfaces.Enums;
-using TabNoc.Ooui.Storage;
+﻿using TabNoc.MyOoui.Interfaces.AbstractObjects;
+using TabNoc.MyOoui.Interfaces.Enums;
+using TabNoc.MyOoui.Storage;
 
-namespace TabNoc.Ooui.HtmlElements
+namespace TabNoc.MyOoui.HtmlElements
 {
 	internal class RadioButton : StylableElement
 	{

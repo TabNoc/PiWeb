@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using TabNoc.Ooui.Interfaces.AbstractObjects;
+using TabNoc.MyOoui.Interfaces.AbstractObjects;
 
-namespace TabNoc.Ooui.Storage.WateringWeb.History
+namespace TabNoc.PiWeb.Storage.WateringWeb.History
 {
 	internal class HistoryData : PageData
 	{
@@ -35,24 +35,5 @@ namespace TabNoc.Ooui.Storage.WateringWeb.History
 				new ManualHistoryElement(){TimeStamp = DateTime.Now, Message = "Manual Test", Status = "Fehler"}
 			}
 		};
-	}
-
-	internal class SystemHistoryElement : HistoryElement
-	{
-	}
-
-	internal class AutomaticHistoryElement : HistoryElement
-	{
-	}
-
-	internal class ManualHistoryElement : HistoryElement
-	{
-	}
-
-	internal abstract class HistoryElement
-	{
-		public DateTime TimeStamp;
-		public string Status;
-		public string Message;
 	}
 }

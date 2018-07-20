@@ -1,8 +1,8 @@
 ﻿using System;
-using TabNoc.Ooui.Storage.WateringWeb.Channels;
-using TabNoc.Ooui.UiComponents;
+using TabNoc.MyOoui.UiComponents;
+using TabNoc.PiWeb.Storage.WateringWeb.Channels;
 
-namespace TabNoc.Ooui.Storage.WateringWeb.Overview
+namespace TabNoc.PiWeb.Storage.WateringWeb.Overview
 {
 	internal class AutomaticOverviewEntry
 	{
@@ -30,7 +30,7 @@ namespace TabNoc.Ooui.Storage.WateringWeb.Overview
 		public static AutomaticOverviewEntry CreateNew() => new AutomaticOverviewEntry
 		{
 			ChannelName = "N/A" + new Random().Next(),
-			EndTime = new TimeSpan(0,0,0, new Random().Next()),
+			EndTime = new TimeSpan(0, 0, 0, new Random().Next()),
 			MasterEnabled = false,
 			StartTime = new TimeSpan(0, 0, 0, new Random().Next()),
 			WeatherEnabled = false,

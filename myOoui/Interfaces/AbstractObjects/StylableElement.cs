@@ -2,9 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TabNoc.Ooui.Interfaces.Enums;
+using TabNoc.MyOoui.Interfaces.Enums;
 
-namespace TabNoc.Ooui.Interfaces.AbstractObjects
+namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 {
 	public abstract class StylableElement : Element, IStylableElement
 	{

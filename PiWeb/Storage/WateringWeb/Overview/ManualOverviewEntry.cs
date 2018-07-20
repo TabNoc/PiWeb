@@ -1,7 +1,7 @@
 ﻿using System;
-using TabNoc.Ooui.UiComponents;
+using TabNoc.MyOoui.UiComponents;
 
-namespace TabNoc.Ooui.Storage.WateringWeb.Overview
+namespace TabNoc.PiWeb.Storage.WateringWeb.Overview
 {
 	internal class ManualOverviewEntry
 	{

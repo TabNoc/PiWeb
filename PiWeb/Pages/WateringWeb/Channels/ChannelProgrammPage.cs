@@ -1,13 +1,13 @@
 ﻿using Ooui;
 using System;
-using TabNoc.Ooui.Interfaces.AbstractObjects;
-using TabNoc.Ooui.Interfaces.Enums;
-using TabNoc.Ooui.Storage.WateringWeb.Channels;
-using TabNoc.Ooui.UiComponents;
-using TabNoc.Ooui.UiComponents.FormControl;
-using TabNoc.Ooui.UiComponents.FormControl.InputGroups;
+using TabNoc.MyOoui.Interfaces.AbstractObjects;
+using TabNoc.MyOoui.Interfaces.Enums;
+using TabNoc.MyOoui.UiComponents;
+using TabNoc.MyOoui.UiComponents.FormControl;
+using TabNoc.MyOoui.UiComponents.FormControl.InputGroups;
+using TabNoc.PiWeb.Storage.WateringWeb.Channels;
 
-namespace TabNoc.Ooui.Pages.WateringWeb.Channels
+namespace TabNoc.PiWeb.Pages.WateringWeb.Channels
 {
 	internal class ChannelProgrammPage : StylableElement
 	{
@@ -17,7 +17,7 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Channels
 		#region FormElements
 
 		private readonly TwoStateButtonGroup _activateMasterChannel;
-		private readonly HtmlElements.Button _deleteProgrammButton;
+		private readonly MyOoui.HtmlElements.Button _deleteProgrammButton;
 		private readonly TextAreaInputGroup _descriptionInputGroup;
 		private readonly TextInputGroup _durationInputGroup;
 		private readonly TwoStateButtonGroup _programmEnabled;
@@ -29,6 +29,7 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Channels
 		private readonly RadioButtonLabeledInputGroup _weekdaysDiDoRadioButtonLabeledInputGroup;
 		private readonly RadioButtonLabeledInputGroup _weekdaysMoMiFrRadioButtonLabeledInputGroup;
 		private readonly RadioButtonLabeledInputGroup _weekdaysSaSoRadioButtonLabeledInputGroup;
+
 		#endregion FormElements
 
 		public ChannelProgrammPage(ChannelProgramData channelProgram, ChannelPage parentChannelPage, bool isMasterChannel) : base("div")
@@ -52,7 +53,7 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Channels
 			_programmNameInputGroup = new TextInputGroup("ProgrammName", "N/A", labelSize, centeredText: true);
 			_programmNameInputGroup.AddStyling(StylingOption.MarginBottom, 2);
 			_programmNameInputGroup.TextInput.Value = channelProgram.Name;
-			_deleteProgrammButton = new HtmlElements.Button(StylingColor.Danger, asOutline: true, text: "Programm Löschen", fontAwesomeIcon: "trash");
+			_deleteProgrammButton = new MyOoui.HtmlElements.Button(StylingColor.Danger, asOutline: true, text: "Programm Löschen", fontAwesomeIcon: "trash");
 			_deleteProgrammButton.Click += DeleteProgrammButtonOnClick;
 			_programmNameInputGroup.AddFormElement(_deleteProgrammButton);
 			grid.AddRow().AppendCollum(_programmNameInputGroup);
@@ -251,6 +252,7 @@ namespace TabNoc.Ooui.Pages.WateringWeb.Channels
 					return 4;
 			}
 		}
+
 		private ChannelProgramData.Weekdays GetWeekday(string shortWeekday)
 		{
 			switch (shortWeekday)

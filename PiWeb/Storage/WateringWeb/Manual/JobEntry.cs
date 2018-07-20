@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using TabNoc.Ooui.Storage.WateringWeb.Manual;
 
-namespace TabNoc.Ooui.Pages.WateringWeb.Overview
+namespace TabNoc.PiWeb.Storage.WateringWeb.Manual
 {
 	internal class JobEntry
 	{

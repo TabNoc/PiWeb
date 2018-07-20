@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Ooui;
+﻿using Ooui;
 
-namespace TabNoc.Ooui.HtmlElements
+namespace TabNoc.MyOoui.HtmlElements
 {
-    class SimpleInput:Element
-    {
-	    public SimpleInput () : base ("Input")
-	    {
-	    }
+	internal class SimpleInput : Element
+	{
+		public SimpleInput() : base("Input")
+		{
+		}
 	}
 }

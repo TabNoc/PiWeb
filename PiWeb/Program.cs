@@ -3,13 +3,13 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Text;
-using TabNoc.Ooui.Interfaces.AbstractObjects;
-using TabNoc.Ooui.PagePublisher;
-using TabNoc.Ooui.PagePublisher.WateringWeb;
-using TabNoc.Ooui.Storage.WateringWeb.Channels;
-using TabNoc.Ooui.Storage.WateringWeb.Settings;
+using TabNoc.MyOoui.Interfaces.AbstractObjects;
+using TabNoc.PiWeb.PagePublisher;
+using TabNoc.PiWeb.PagePublisher.WateringWeb;
+using TabNoc.PiWeb.Storage.WateringWeb.Channels;
+using TabNoc.PiWeb.Storage.WateringWeb.Settings;
 
-namespace TabNoc.Ooui
+namespace TabNoc.PiWeb
 {
 	internal static class Program
 	{

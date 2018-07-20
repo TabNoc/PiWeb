@@ -1,11 +1,11 @@
 ﻿using Ooui;
 using System;
-using TabNoc.Ooui.Interfaces.AbstractObjects;
-using TabNoc.Ooui.Interfaces.Enums;
-using TabNoc.Ooui.UiComponents.FormControl.InputGroups;
-using Button = TabNoc.Ooui.HtmlElements.Button;
+using TabNoc.MyOoui.Interfaces.AbstractObjects;
+using TabNoc.MyOoui.Interfaces.Enums;
+using TabNoc.MyOoui.UiComponents.FormControl.InputGroups;
+using Button = TabNoc.MyOoui.HtmlElements.Button;
 
-namespace TabNoc.Ooui.UiComponents
+namespace TabNoc.MyOoui.UiComponents
 {
 	internal class Loading : StylableElement
 	{
@@ -91,7 +91,7 @@ namespace TabNoc.Ooui.UiComponents
 			{
 				IsHidden = true
 			};
-			Button button = new Button(StylingColor.Info, true, text:"Infos anzeigen");
+			Button button = new Button(StylingColor.Info, true, text: "Infos anzeigen");
 			button.Click += (sender, args) =>
 			{
 				if (inputGroup.IsHidden == true)

@@ -1,8 +1,8 @@
 ﻿using Ooui;
-using TabNoc.Ooui.Interfaces.AbstractObjects;
-using TabNoc.Ooui.UiComponents;
+using TabNoc.MyOoui.Interfaces.AbstractObjects;
+using TabNoc.MyOoui.UiComponents;
 
-namespace TabNoc.Ooui.PagePublisher.WateringWeb
+namespace TabNoc.PiWeb.PagePublisher.WateringWeb
 {
 	internal abstract class WateringPublisher : Publisher
 	{

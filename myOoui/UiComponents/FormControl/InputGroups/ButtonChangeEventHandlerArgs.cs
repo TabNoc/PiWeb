@@ -1,4 +1,4 @@
-﻿namespace TabNoc.Ooui.UiComponents.FormControl.InputGroups
+﻿namespace TabNoc.MyOoui.UiComponents.FormControl.InputGroups
 {
 	public class ButtonChangeEventHandlerArgs
 	{

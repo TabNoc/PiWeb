@@ -1,10 +1,10 @@
 ﻿using Ooui;
 using System;
-using TabNoc.Ooui.Interfaces;
-using TabNoc.Ooui.Interfaces.AbstractObjects;
-using Button = TabNoc.Ooui.HtmlElements.Button;
+using TabNoc.MyOoui.Interfaces;
+using TabNoc.MyOoui.Interfaces.AbstractObjects;
+using Button = TabNoc.MyOoui.HtmlElements.Button;
 
-namespace TabNoc.Ooui.UiComponents.FormControl
+namespace TabNoc.MyOoui.UiComponents.FormControl
 {
 	public class Dropdown : StylableElement
 	{

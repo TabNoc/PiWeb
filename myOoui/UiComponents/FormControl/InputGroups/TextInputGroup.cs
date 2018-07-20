@@ -1,7 +1,7 @@
 ﻿using Ooui;
-using TabNoc.Ooui.Interfaces.AbstractObjects;
+using TabNoc.MyOoui.Interfaces.AbstractObjects;
 
-namespace TabNoc.Ooui.UiComponents.FormControl.InputGroups
+namespace TabNoc.MyOoui.UiComponents.FormControl.InputGroups
 {
 	public class TextInputGroup : InputGroupControl
 	{
@@ -26,7 +26,7 @@ namespace TabNoc.Ooui.UiComponents.FormControl.InputGroups
 			div1.AppendChild(div2);
 			TextInput = new StylableTextInput();
 			TextInput.SetAttribute("type", "text");
-			TextInput.ClassName = "form-control" + (centeredText ? " text-center"  :"");
+			TextInput.ClassName = "form-control" + (centeredText ? " text-center" : "");
 			TextInput.SetAttribute("placeholder", textBoxDescriptionMessage);
 			TextInput.SetAttribute("aria-label", textBoxDescriptionMessage);
 			TextInput.SetAttribute("aria-describedby", div2.Id);

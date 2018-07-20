@@ -1,6 +1,6 @@
 ﻿using Ooui;
 
-namespace TabNoc.Ooui.HtmlElements
+namespace TabNoc.MyOoui.HtmlElements
 {
 	internal class Script : Element
 	{

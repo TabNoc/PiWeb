@@ -2,10 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TabNoc.Ooui.Interfaces.AbstractObjects;
-using TabNoc.Ooui.Interfaces.Enums;
+using TabNoc.MyOoui.Interfaces.AbstractObjects;
+using TabNoc.MyOoui.Interfaces.Enums;
 
-namespace TabNoc.Ooui.UiComponents.FormControl
+namespace TabNoc.MyOoui.UiComponents.FormControl
 {
 	public class ToggleButtonGroup : InputGroupControl
 	{

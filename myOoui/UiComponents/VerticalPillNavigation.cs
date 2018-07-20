@@ -1,9 +1,9 @@
 ﻿using Ooui;
 using System;
 using System.Linq;
-using TabNoc.Ooui.Interfaces.AbstractObjects;
+using TabNoc.MyOoui.Interfaces.AbstractObjects;
 
-namespace TabNoc.Ooui.UiComponents
+namespace TabNoc.MyOoui.UiComponents
 {
 	public class VerticalPillNavigation : StylableElement
 	{

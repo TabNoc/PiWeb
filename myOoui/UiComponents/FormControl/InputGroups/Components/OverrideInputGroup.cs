@@ -1,9 +1,9 @@
 ﻿using System;
-using TabNoc.Ooui.HtmlElements;
-using TabNoc.Ooui.Interfaces.AbstractObjects;
-using TabNoc.Ooui.Interfaces.Enums;
+using TabNoc.MyOoui.HtmlElements;
+using TabNoc.MyOoui.Interfaces.AbstractObjects;
+using TabNoc.MyOoui.Interfaces.Enums;
 
-namespace TabNoc.Ooui.UiComponents.FormControl.InputGroups.Components
+namespace TabNoc.MyOoui.UiComponents.FormControl.InputGroups.Components
 {
 	public class OverrideInputGroup : StylableElement
 	{

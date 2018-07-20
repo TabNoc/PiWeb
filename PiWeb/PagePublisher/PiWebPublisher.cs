@@ -1,9 +1,9 @@
 ﻿using Ooui;
-using TabNoc.Ooui.Interfaces.AbstractObjects;
-using TabNoc.Ooui.Pages;
-using TabNoc.Ooui.UiComponents;
+using TabNoc.MyOoui.Interfaces.AbstractObjects;
+using TabNoc.MyOoui.UiComponents;
+using TabNoc.PiWeb.Pages;
 
-namespace TabNoc.Ooui.PagePublisher
+namespace TabNoc.PiWeb.PagePublisher
 {
 	internal class PiWebPublisher : Publisher
 	{

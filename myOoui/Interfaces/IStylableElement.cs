@@ -1,7 +1,7 @@
-﻿using TabNoc.Ooui.Interfaces.AbstractObjects;
-using TabNoc.Ooui.Interfaces.Enums;
+﻿using TabNoc.MyOoui.Interfaces.AbstractObjects;
+using TabNoc.MyOoui.Interfaces.Enums;
 
-namespace TabNoc.Ooui.Interfaces
+namespace TabNoc.MyOoui.Interfaces
 {
 	internal interface IStylableElement
 	{

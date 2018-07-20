@@ -1,6 +1,6 @@
 ﻿using Ooui;
 
-namespace TabNoc.Ooui.Interfaces.AbstractObjects
+namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 {
 	public abstract class Publishable
 	{
