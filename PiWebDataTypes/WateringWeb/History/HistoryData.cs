@@ -4,7 +4,7 @@ using TabNoc.MyOoui.Interfaces.AbstractObjects;
 
 namespace TabNoc.PiWeb.Storage.WateringWeb.History
 {
-	internal class HistoryData : PageData
+	public class HistoryData : PageData
 	{
 		public List<ManualHistoryElement> ManualHistoryElements;
 		public List<AutomaticHistoryElement> AutomaticHistoryElements;

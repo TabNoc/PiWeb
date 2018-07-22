@@ -4,7 +4,7 @@ using TabNoc.PiWeb.Storage.WateringWeb.Channels;
 
 namespace TabNoc.PiWeb.Storage.WateringWeb.Overview
 {
-	internal class AutomaticOverviewEntry
+	public class AutomaticOverviewEntry
 	{
 		[Table.TableHeadingDefinition(0, "Kanal")]
 		public string ChannelName;

@@ -2,7 +2,7 @@
 
 namespace TabNoc.PiWeb.Storage.WateringWeb.History
 {
-	internal abstract class HistoryElement
+	public abstract class HistoryElement
 	{
 		public DateTime TimeStamp;
 		public string Status;

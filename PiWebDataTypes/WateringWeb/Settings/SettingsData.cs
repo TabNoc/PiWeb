@@ -3,7 +3,7 @@ using TabNoc.MyOoui.Interfaces.AbstractObjects;
 
 namespace TabNoc.PiWeb.Storage.WateringWeb.Settings
 {
-	internal class SettingsData : PageData
+	public class SettingsData : PageData
 	{
 		public bool Enabled;
 		public Dictionary<string, string> HumiditySensors;

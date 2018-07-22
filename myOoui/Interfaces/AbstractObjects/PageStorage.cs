@@ -141,7 +141,7 @@ namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 		{
 			if (ReadOnly == true)
 			{
-				throw new InvalidOperationException(" this PageStorage is ReadOnly -> You can't save it.");
+				throw new InvalidOperationException($"This PageStorage<{typeof(T).Name}> is ReadOnly -> You can't save it.");
 			}
 			if (_isDisposed)
 			{
@@ -149,7 +149,7 @@ namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 			}
 			if (_saveDataCallback == null)
 			{
-				throw new NullReferenceException(nameof(Initialize) + " has to be called before Saving the the " + typeof(T).Name);
+				throw new NullReferenceException($"{nameof(Initialize)} has to be called before Saving the PageStorage<{typeof(T).Name}>");
 			}
 
 			string writeData = GetWriteData(_storageData);
@@ -179,11 +179,14 @@ namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 			}
 			if (_loadDataCallback == null && !WriteOnly)
 			{
-				throw new NullReferenceException(nameof(Initialize) + " has to be called before Loading the the " + typeof(T).Name);
+				throw new NullReferenceException($"{nameof(Initialize)} has to be called before Loading the PageStorage<{typeof(T).Name}>");
 			}
 
 			_loadedData = WriteOnly ? "" : _loadDataCallback();
 			_storageData = FromReadData(_loadedData) ?? (T)typeof(T).GetMethod("CreateNew").Invoke(null, null);
+
+			// Get the Data from this Machine to compare it later
+			_loadedData = GetWriteData(_storageData);
 
 			_lastLoadDateTime = DateTime.Now;
 

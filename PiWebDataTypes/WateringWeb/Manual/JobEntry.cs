@@ -2,7 +2,7 @@
 
 namespace TabNoc.PiWeb.Storage.WateringWeb.Manual
 {
-	internal class JobEntry
+	public class JobEntry
 	{
 		public List<BatchEntry> BatchEntries;
 		public string Name;

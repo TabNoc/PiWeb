@@ -47,7 +47,7 @@ namespace TabNoc.PiWeb
 			{
 				Assembly assembly = Assembly.GetExecutingAssembly();
 				//Assembly.GetExecutingAssembly().GetManifestResourceNames();
-				string resourceName = "TabNoc.PiWeb.Storage.WateringWeb.Settings.external_WeatherLocations.WeatherLocations.json";
+				string resourceName = "TabNoc.PiWeb.Storage.external_WeatherLocations.WeatherLocations.json";
 
 				using (Stream stream = assembly.GetManifestResourceStream(resourceName))
 				using (StreamReader reader = new StreamReader(stream, Encoding.Default))

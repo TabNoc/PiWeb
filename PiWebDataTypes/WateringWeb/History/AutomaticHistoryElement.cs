@@ -1,6 +1,6 @@
 ﻿namespace TabNoc.PiWeb.Storage.WateringWeb.History
 {
-	internal class AutomaticHistoryElement : HistoryElement
+	public class AutomaticHistoryElement : HistoryElement
 	{
 	}
 }

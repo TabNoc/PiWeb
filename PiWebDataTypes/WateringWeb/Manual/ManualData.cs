@@ -3,7 +3,7 @@ using TabNoc.MyOoui.Interfaces.AbstractObjects;
 
 namespace TabNoc.PiWeb.Storage.WateringWeb.Manual
 {
-	internal class ManualData : PageData
+	public class ManualData : PageData
 	{
 		public List<BatchEntry> BatchEntries;
 		public List<JobEntry> JobEntries;

@@ -3,7 +3,7 @@ using TabNoc.MyOoui.UiComponents;
 
 namespace TabNoc.PiWeb.Storage.WateringWeb.Overview
 {
-	internal class ManualOverviewEntry
+	public class ManualOverviewEntry
 	{
 		[Table.TableHeadingDefinition(0, "Reihenfolge")]
 		public int ActivationPriority;

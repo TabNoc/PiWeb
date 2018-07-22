@@ -5,7 +5,7 @@ using TabNoc.PiWeb.Storage.WateringWeb.Channels;
 
 namespace TabNoc.PiWeb.Storage.WateringWeb.Manual
 {
-	internal class ManualActionExecutionData : PageData
+	public class ManualActionExecutionData : PageData
 	{
 		public List<ManualActionExecution> ExecutionList;
 #pragma warning disable 169
@@ -14,7 +14,7 @@ namespace TabNoc.PiWeb.Storage.WateringWeb.Manual
 
 		private ManualActionExecutionData()
 		{
-			Valid = false;
+			Valid = true;
 		}
 
 		public new static ManualActionExecutionData CreateNew() => new ManualActionExecutionData();

@@ -3,7 +3,7 @@ using TabNoc.MyOoui.Interfaces.AbstractObjects;
 
 namespace TabNoc.PiWeb.Storage.WateringWeb.Overview
 {
-	internal class OverviewData : PageData
+	public class OverviewData : PageData
 	{
 		public List<AutomaticOverviewEntry> AutomaticOverviewEntries;
 		public List<ManualOverviewEntry> ManualOverviewEntries;
