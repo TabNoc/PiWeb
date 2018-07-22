@@ -45,7 +45,7 @@ namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 			}
 			resultOutputData += "})";
 
-			Script script = new Script($@"
+			Script script = new Script().SetContent($@"
 $.get(""{src}"", function(data) {{
 	$(""#{Id}"").typeahead({{ source:data, afterSelect:function(selectedElement) {{
 		try {{

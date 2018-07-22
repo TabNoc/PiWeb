@@ -10,9 +10,9 @@ namespace TabNoc.MyOoui.UiComponents
 			ClassName = "container";
 		}
 
-		public Container(Element content) : this()
+		public Container(Element parent) : this()
 		{
-			AppendChild(content);
+			parent.AppendChild(this);
 		}
 	}
 }

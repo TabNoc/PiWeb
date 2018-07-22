@@ -187,7 +187,7 @@ namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 			SetAttribute("data-placement", Enum.GetName(typeof(ToolTipLocation), location).ToLower());
 			SetAttribute("title", tooltipText);
 
-			AppendChild(new Script("$('#" + Id + "').tooltip()"));
+			AppendChild(new Script().SetContent("$('#" + Id + "').tooltip()"));
 		}
 	}
 }

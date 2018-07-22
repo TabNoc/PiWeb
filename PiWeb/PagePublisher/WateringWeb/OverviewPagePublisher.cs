@@ -1,5 +1,5 @@
 ﻿using Ooui;
-using System.IO;
+using System;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
 using TabNoc.PiWeb.Pages.WateringWeb.Overview;
 using TabNoc.PiWeb.Storage.WateringWeb.Overview;
@@ -11,29 +11,13 @@ namespace TabNoc.PiWeb.PagePublisher.WateringWeb
 		public OverviewPagePublisher(string publishPath) : base(publishPath)
 		{
 			PageStorage<OverviewData>.Instance.ReadOnly = true;
-			PageStorage<OverviewData>.Instance.Initialize(LoadDataCallback, null);
-		}
-
-		protected override void Initialize()
-		{
+			PageStorage<OverviewData>.Instance.Initialize("Overview", new TimeSpan(0, 0, 5));
 		}
 
 		protected override Element CreatePage() => new OverviewPage();
 
-		private string LoadDataCallback()
+		protected override void Initialize()
 		{
-			if (File.Exists("demo_Overview.json"))
-			{
-				FileInfo fileInfo = new FileInfo("demo_Overview.json");
-				using (StreamReader streamReader = fileInfo.OpenText())
-				{
-					return streamReader.ReadToEnd();
-				}
-			}
-			else
-			{
-				return "";
-			}
 		}
 	}
 }

@@ -53,6 +53,12 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.History
 			AppendChild(wrappingContainer);
 		}
 
+		protected override void Dispose(bool disposing)
+		{
+			PageStorage<ManualData>.Instance.Save();
+			base.Dispose(disposing);
+		}
+
 		private List<(string, List<string>)> CreateHistoryTableContent()
 		{
 			List<(string, List<string>)> returnval = new List<(string, List<string>)>();
@@ -79,12 +85,6 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.History
 			}
 
 			return returnval;
-		}
-
-		protected override void Dispose(bool disposing)
-		{
-			PageStorage<ManualData>.Instance.Save();
-			base.Dispose(disposing);
 		}
 	}
 }

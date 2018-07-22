@@ -1,8 +1,10 @@
 ﻿using Ooui;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
 using TabNoc.MyOoui.Interfaces.Enums;
+using TabNoc.MyOoui.Storage;
 using TabNoc.MyOoui.UiComponents;
 using TabNoc.MyOoui.UiComponents.FormControl;
 using TabNoc.MyOoui.UiComponents.FormControl.InputGroups;
@@ -21,13 +23,16 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 
 		public SettingsPage(PageStorage<SettingsData> settingsData) : base("div")
 		{
-			const int labelSize = 100;
+			this.AddScriptDependency("/lib/bootstrap3-typeahead.min.js");
+			const int labelSize = 115;
 
 			_settingsData = settingsData;
 
 			#region Initialize Grid
 
-			Grid grid = new Grid(this);
+			Container wrappingContainer = new Container(this);
+			Grid grid = new Grid(wrappingContainer);
+
 			grid.AddStyling(StylingOption.MarginRight, 2);
 			grid.AddStyling(StylingOption.MarginLeft, 2);
 			grid.AddStyling(StylingOption.MarginTop, 4);
@@ -76,12 +81,16 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 
 			#endregion Hidden TextInputs
 
-			Button weatherLocationActivateAutocompleteButton = weatherLocationMultiInputGroup.AppendCustomElement(new Button(StylingColor.Secondary, true, Button.ButtonSize.Small, false, "v"), false);
-			weatherLocationActivateAutocompleteButton.Click += (sender, args) =>
+			#region Autocomplete
+
+			weatherLocationTextInput.ActivateAutocomplete("/settings/WeatherLocations.json", new Dictionary<string, TextInput>()
 			{
-				weatherLocationActivateAutocompleteButton.IsHidden = true;
-				ActivateAutoComplete(weatherLocationTextInput, weatherLocationChangeTextInput, weatherLocationNameChangeTextInput);
-			};
+				{"location", weatherLocationChangeTextInput },
+				{"name", weatherLocationNameChangeTextInput }
+			});
+
+			#endregion Autocomplete
+
 			locationRow.AppendCollum(weatherLocationMultiInputGroup, autoSize: true);
 
 			#region Save Button
@@ -109,7 +118,7 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 
 			#region Override
 
-			_overrideInputGroup = new OverrideInputGroup(_settingsData.StorageData.OverrideValue);
+			_overrideInputGroup = new OverrideInputGroup(_settingsData.StorageData.OverrideValue, labelSizeInPx: labelSize);
 			grid.AddRow().AppendCollum(_overrideInputGroup, autoSize: true);
 
 			#endregion Override
@@ -181,32 +190,15 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 
 			#region Backend Server Path
 
+			grid.AddRow().AppendCollum(new Heading(3, "Backend Server Schnittstelle einstellen") { ClassName = "text-center mb-4" });
 			Row backendServerRow = grid.AddRow();
-			backendServerRow.AppendChild(new Heading(3, "Backend Server Schnittstelle einstellen"));
 			backendServerRow.AddNewLine();
 
-			MultiInputGroup historyPageBackendMultiInputGroup = new MultiInputGroup();
-			historyPageBackendMultiInputGroup.AppendLabel("Verlauf");
-			TwoStateButtonGroup historyPageBackendEnabled = historyPageBackendMultiInputGroup.AppendCustomElement(new TwoStateButtonGroup("Vom Server", "Als Debug", settingsData.StorageData.Backend_HistoryEnabled, !settingsData.StorageData.Backend_HistoryEnabled), false);
-			StylableTextInput historyPageBackendPath = historyPageBackendMultiInputGroup.AppendTextInput("Pfad zur WebAPI", startText: settingsData.StorageData.Backend_HistoryPath);
-			historyPageBackendMultiInputGroup.AppendValidation("Einstellungen OK", "Einstellungen sind nicht OK", false);
-			Button historyPageBackendSaveSettings = historyPageBackendMultiInputGroup.AppendCustomElement(new Button(StylingColor.Success, true, text: "Speichern", fontAwesomeIcon: "save"), false);
-			
-			historyPageBackendSaveSettings.Click += (sender, args) =>
+			foreach ((string name, BackedProperties backedProperties) in PageStorage<BackendData>.Instance.StorageData.BackedPropertieses)
 			{
-				historyPageBackendPath.SetValidation(false, false);
-				if (historyPageBackendEnabled.FirstButtonActive && historyPageBackendPath.Value != "")
-				{
-					historyPageBackendPath.SetValidation(true, false);
-					settingsData.StorageData.Backend_HistoryEnabled = historyPageBackendEnabled.FirstButtonActive;
-					settingsData.StorageData.Backend_HistoryPath = historyPageBackendPath.Value;
-				}
-				else
-				{
-					historyPageBackendPath.SetValidation(false, true);
-				}
-			};
-			backendServerRow.AppendCollum(historyPageBackendMultiInputGroup, autoSize: true);
+				backendServerRow.AddNewLine();
+				backendServerRow.AppendCollum(CreateBackendCollum(name, backedProperties), autoSize: true);
+			}
 
 			#endregion Backend Server Path
 		}
@@ -221,16 +213,42 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 		{
 			_settingsData.StorageData.OverrideValue = _overrideInputGroup.Value;
 			_settingsData.Save();
+			PageStorage<BackendData>.Instance.Save();
 			base.Dispose(disposing);
 		}
 
-		private void ActivateAutoComplete(StylableTextInput weatherLocationTextInput, TextInput locationChangeTextInput, TextInput nameChangeTextInput)
+		private MultiInputGroup CreateBackendCollum(string name, BackedProperties backedProperties)
 		{
-			weatherLocationTextInput.ActivateAutocomplete("/settings/WeatherLocations.json", new Dictionary<string, TextInput>()
+			MultiInputGroup backendMultiInputGroup = new MultiInputGroup();
+			backendMultiInputGroup.AppendLabel(name, 115 + 80);
+			TwoStateButtonGroup backendEnabled = backendMultiInputGroup.AppendCustomElement(new TwoStateButtonGroup("Vom Server", "Als Debug", backedProperties.RequestDataFromBackend, !backedProperties.RequestDataFromBackend), false);
+			StylableTextInput backendPath = backendMultiInputGroup.AppendTextInput("Pfad zur WebAPI", startText: backedProperties.DataSourcePath);
+			backendMultiInputGroup.AppendValidation("Einstellungen OK", "Einstellungen sind nicht OK", false);
+			Button backendSaveSettings = backendMultiInputGroup.AppendCustomElement(new Button(StylingColor.Success, true, text: "Speichern", fontAwesomeIcon: "save"), false);
+
+			backendSaveSettings.Click += (sender, args) =>
 			{
-				{"location", locationChangeTextInput },
-				{"name", nameChangeTextInput }
-			});
+				backendPath.SetValidation(false, false);
+				if (backendEnabled.FirstButtonActive && Uri.IsWellFormedUriString(backendPath.Value, UriKind.Absolute))
+				{
+					backendPath.SetValidation(true, false);
+					backedProperties.RequestDataFromBackend = backendEnabled.FirstButtonActive;
+					backedProperties.SendDataToBackend = backendEnabled.FirstButtonActive;
+					backedProperties.DataSourcePath = backendPath.Value;
+				}
+				else if (backendEnabled.SecondButtonActive)
+				{
+					backendPath.SetValidation(true, false);
+					backedProperties.RequestDataFromBackend = backendEnabled.FirstButtonActive;
+					backedProperties.SendDataToBackend = backendEnabled.FirstButtonActive;
+				}
+				else
+				{
+					backendPath.SetValidation(false, true);
+				}
+			};
+			backendMultiInputGroup.AddStyling(StylingOption.MarginBottom, 2);
+			return backendMultiInputGroup;
 		}
 	}
 }

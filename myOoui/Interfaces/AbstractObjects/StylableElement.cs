@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TabNoc.MyOoui.HtmlElements;
 using TabNoc.MyOoui.Interfaces.Enums;
 
 namespace TabNoc.MyOoui.Interfaces.AbstractObjects
@@ -191,6 +192,11 @@ namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 			}
 
 			base.ClassName = returnval;
+		}
+
+		public void AddScriptDependency(string name)
+		{
+			AppendChild(new Script().SetSource(name));
 		}
 
 		//public void SetBreakPoint(BreakPoint breakPoint, int value = 0)

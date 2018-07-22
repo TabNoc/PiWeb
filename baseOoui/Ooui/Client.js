@@ -145,8 +145,7 @@ function getNode (id) {
         case "window": return window;
         case "document": return document;
         case "document.body":
-            const bodyNode = document.getElementById ("ooui-body");
-            return bodyNode || document.body;
+			return document.getElementById("ooui-body") || document.body;
         default: return nodes[id];
     }
 }
