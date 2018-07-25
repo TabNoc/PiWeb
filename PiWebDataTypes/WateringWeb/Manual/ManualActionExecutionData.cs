@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using TabNoc.MyOoui.Interfaces.AbstractObjects;
-using TabNoc.PiWeb.Storage.WateringWeb.Channels;
 
-namespace TabNoc.PiWeb.Storage.WateringWeb.Manual
+namespace TabNoc.PiWeb.DataTypes.WateringWeb.Manual
 {
 	public class ManualActionExecutionData : PageData
 	{

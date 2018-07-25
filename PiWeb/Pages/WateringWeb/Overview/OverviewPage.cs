@@ -5,7 +5,7 @@ using System.Reflection;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
 using TabNoc.MyOoui.UiComponents;
 using TabNoc.PiWeb.DataTypes;
-using TabNoc.PiWeb.Storage.WateringWeb.Overview;
+using TabNoc.PiWeb.DataTypes.WateringWeb.Overview;
 
 namespace TabNoc.PiWeb.Pages.WateringWeb.Overview
 {

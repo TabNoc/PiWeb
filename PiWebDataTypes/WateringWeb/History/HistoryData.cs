@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using TabNoc.MyOoui.Interfaces.AbstractObjects;
 
-namespace TabNoc.PiWeb.Storage.WateringWeb.History
+namespace TabNoc.PiWeb.DataTypes.WateringWeb.History
 {
 	public class HistoryData : PageData
 	{

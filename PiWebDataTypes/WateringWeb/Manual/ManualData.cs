@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using TabNoc.MyOoui.Interfaces.AbstractObjects;
 
-namespace TabNoc.PiWeb.Storage.WateringWeb.Manual
+namespace TabNoc.PiWeb.DataTypes.WateringWeb.Manual
 {
 	public class ManualData : PageData
 	{

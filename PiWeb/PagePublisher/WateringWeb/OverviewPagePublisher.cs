@@ -3,9 +3,9 @@ using System;
 using System.Net.Http;
 using System.Text;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
+using TabNoc.PiWeb.DataTypes.WateringWeb.History;
+using TabNoc.PiWeb.DataTypes.WateringWeb.Overview;
 using TabNoc.PiWeb.Pages.WateringWeb.Overview;
-using TabNoc.PiWeb.Storage.WateringWeb.History;
-using TabNoc.PiWeb.Storage.WateringWeb.Overview;
 
 namespace TabNoc.PiWeb.PagePublisher.WateringWeb
 {

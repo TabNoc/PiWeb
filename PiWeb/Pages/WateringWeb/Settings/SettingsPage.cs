@@ -9,7 +9,7 @@ using TabNoc.MyOoui.UiComponents;
 using TabNoc.MyOoui.UiComponents.FormControl;
 using TabNoc.MyOoui.UiComponents.FormControl.InputGroups;
 using TabNoc.MyOoui.UiComponents.FormControl.InputGroups.Components;
-using TabNoc.PiWeb.Storage.WateringWeb.Settings;
+using TabNoc.PiWeb.DataTypes.WateringWeb.Settings;
 using Button = TabNoc.MyOoui.HtmlElements.Button;
 
 namespace TabNoc.PiWeb.Pages.WateringWeb.Settings

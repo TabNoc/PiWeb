@@ -5,9 +5,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Npgsql;
-using TabNoc.PiWeb.WateringWebServer;
 
-namespace WateringWebServer
+namespace TabNoc.PiWeb.WateringWebServer
 {
 	public class Startup
 	{

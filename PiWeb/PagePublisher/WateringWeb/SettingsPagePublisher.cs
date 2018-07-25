@@ -4,9 +4,9 @@ using System.Net.Http;
 using System.Text;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
 using TabNoc.MyOoui.Interfaces.Enums;
+using TabNoc.PiWeb.DataTypes.WateringWeb.History;
+using TabNoc.PiWeb.DataTypes.WateringWeb.Settings;
 using TabNoc.PiWeb.Pages.WateringWeb.Settings;
-using TabNoc.PiWeb.Storage.WateringWeb.History;
-using TabNoc.PiWeb.Storage.WateringWeb.Settings;
 
 namespace TabNoc.PiWeb.PagePublisher.WateringWeb
 {

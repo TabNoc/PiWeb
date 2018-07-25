@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TabNoc.PiWeb.Storage.WateringWeb.Channels
+namespace TabNoc.PiWeb.DataTypes.WateringWeb.Channels
 {
 	public class ChannelProgramData
 	{

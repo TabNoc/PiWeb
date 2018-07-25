@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TabNoc.PiWeb.Storage.WateringWeb.History
+namespace TabNoc.PiWeb.DataTypes.WateringWeb.History
 {
 	public class HistoryElement
 	{

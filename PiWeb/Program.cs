@@ -6,10 +6,10 @@ using System.Reflection;
 using System.Text;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
 using TabNoc.MyOoui.Storage;
+using TabNoc.PiWeb.DataTypes.WateringWeb.Channels;
+using TabNoc.PiWeb.DataTypes.WateringWeb.Settings;
 using TabNoc.PiWeb.PagePublisher;
 using TabNoc.PiWeb.PagePublisher.WateringWeb;
-using TabNoc.PiWeb.Storage.WateringWeb.Channels;
-using TabNoc.PiWeb.Storage.WateringWeb.Settings;
 
 namespace TabNoc.PiWeb
 {

@@ -1,7 +1,6 @@
 ﻿using System;
-using TabNoc.PiWeb.DataTypes;
 
-namespace TabNoc.PiWeb.Storage.WateringWeb.Overview
+namespace TabNoc.PiWeb.DataTypes.WateringWeb.Overview
 {
 	public class ManualOverviewEntry
 	{

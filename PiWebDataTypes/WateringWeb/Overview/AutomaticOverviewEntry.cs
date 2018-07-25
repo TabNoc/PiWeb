@@ -1,8 +1,7 @@
 ﻿using System;
-using TabNoc.PiWeb.DataTypes;
-using TabNoc.PiWeb.Storage.WateringWeb.Channels;
+using TabNoc.PiWeb.DataTypes.WateringWeb.Channels;
 
-namespace TabNoc.PiWeb.Storage.WateringWeb.Overview
+namespace TabNoc.PiWeb.DataTypes.WateringWeb.Overview
 {
 	public class AutomaticOverviewEntry
 	{

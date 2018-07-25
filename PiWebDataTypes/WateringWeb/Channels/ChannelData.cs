@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace TabNoc.PiWeb.Storage.WateringWeb.Channels
+namespace TabNoc.PiWeb.DataTypes.WateringWeb.Channels
 {
 	public class ChannelData
 	{

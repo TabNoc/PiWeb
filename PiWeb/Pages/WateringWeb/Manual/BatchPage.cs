@@ -9,7 +9,7 @@ using TabNoc.MyOoui.UiComponents;
 using TabNoc.MyOoui.UiComponents.FormControl;
 using TabNoc.MyOoui.UiComponents.FormControl.InputGroups;
 using TabNoc.MyOoui.UiComponents.FormControl.InputGroups.Components;
-using TabNoc.PiWeb.Storage.WateringWeb.Manual;
+using TabNoc.PiWeb.DataTypes.WateringWeb.Manual;
 using Button = TabNoc.MyOoui.HtmlElements.Button;
 
 namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
@@ -23,7 +23,7 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
 		private readonly Dropdown _jobSelectDropdown;
 		private readonly Button _removeFromJobButton;
 
-		public BatchPage(Storage.WateringWeb.Manual.BatchEntry batch, ManualPage parent) : base("div")
+		public BatchPage(BatchEntry batch, ManualPage parent) : base("div")
 		{
 			_batch = batch;
 			SetBorder(BorderKind.Rounded, StylingColor.Secondary);

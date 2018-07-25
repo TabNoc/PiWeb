@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
 using Npgsql;
 
-namespace WateringWebServer.Controllers
+namespace TabNoc.PiWeb.WateringWebServer.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]

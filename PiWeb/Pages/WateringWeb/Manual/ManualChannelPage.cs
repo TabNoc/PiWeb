@@ -6,8 +6,8 @@ using TabNoc.MyOoui.Interfaces.AbstractObjects;
 using TabNoc.MyOoui.Interfaces.Enums;
 using TabNoc.MyOoui.UiComponents;
 using TabNoc.MyOoui.UiComponents.FormControl.InputGroups;
-using TabNoc.PiWeb.Storage.WateringWeb.Channels;
-using TabNoc.PiWeb.Storage.WateringWeb.Manual;
+using TabNoc.PiWeb.DataTypes.WateringWeb.Channels;
+using TabNoc.PiWeb.DataTypes.WateringWeb.Manual;
 using Button = TabNoc.MyOoui.HtmlElements.Button;
 
 namespace TabNoc.PiWeb.Pages.WateringWeb.Manual

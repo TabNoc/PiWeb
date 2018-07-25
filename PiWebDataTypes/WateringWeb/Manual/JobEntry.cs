@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace TabNoc.PiWeb.Storage.WateringWeb.Manual
+namespace TabNoc.PiWeb.DataTypes.WateringWeb.Manual
 {
 	public class JobEntry
 	{

@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
 using TabNoc.MyOoui.Interfaces.Enums;
 using TabNoc.MyOoui.UiComponents;
 using TabNoc.MyOoui.UiComponents.FormControl;
-using TabNoc.PiWeb.Storage.WateringWeb.History;
-using TabNoc.PiWeb.Storage.WateringWeb.Manual;
+using TabNoc.PiWeb.DataTypes.WateringWeb.History;
+using TabNoc.PiWeb.DataTypes.WateringWeb.Manual;
 using Button = TabNoc.MyOoui.HtmlElements.Button;
 
 namespace TabNoc.PiWeb.Pages.WateringWeb.History
@@ -60,46 +59,24 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.History
 			AppendChild(wrappingContainer);
 		}
 
-		private string PrimaryCellConverter(DateTime primaryKey)
+		protected override void Dispose(bool disposing)
 		{
-			return primaryKey.ToShortDateString() + " " + primaryKey.ToLongTimeString();
+			PageStorage<ManualData>.Instance.Save();
+			base.Dispose(disposing);
 		}
 
-		private Task<List<(DateTime, List<string>)>> FetchSearchEntries(string searchstring, int collumn, int amount)
+		private List<(string, List<string>)> CreateHistoryTableContent()
 		{
-			if (UseServerApiQuery)
+			throw new NotSupportedException();
+			List<(string, List<string>)> returnval = new List<(string, List<string>)>();
+			foreach (HistoryElement historyElement in PageStorage<HistoryData>.Instance.StorageData.HistoryElements)
 			{
-				throw new NotImplementedException();
+				returnval.Add((
+					historyElement.TimeStamp.ToShortDateString() + " " + historyElement.TimeStamp.ToLongTimeString(),
+					new List<string>() { historyElement.Status, historyElement.Source, historyElement.Message }));
 			}
-			else
-			{
-				return Task.Run(() => PageStorage<HistoryData>.Instance.StorageData.HistoryElements
-					.Where(element => GetElementCollumn(element, collumn).Contains(searchstring)).Take(amount).Select(historyElement =>
-						(historyElement.TimeStamp, new List<string>() { historyElement.Status, historyElement.Source, historyElement.Message }))
-					.ToList());
-				;
-			}
-		}
 
-		private string GetElementCollumn(HistoryElement element, int collumn)
-		{
-			switch (collumn)
-			{
-				case 0:
-					return PrimaryCellConverter(element.TimeStamp);
-
-				case 1:
-					return element.Status;
-
-				case 2:
-					return element.Source;
-
-				case 3:
-					return element.Message;
-
-				default:
-					throw new IndexOutOfRangeException();
-			}
+			return returnval;
 		}
 
 		private Task<int> FetchAmount()
@@ -150,24 +127,46 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.History
 			}
 		}
 
-		protected override void Dispose(bool disposing)
+		private Task<List<(DateTime, List<string>)>> FetchSearchEntries(string searchstring, int collumn, int amount)
 		{
-			PageStorage<ManualData>.Instance.Save();
-			base.Dispose(disposing);
+			if (UseServerApiQuery)
+			{
+				throw new NotImplementedException();
+			}
+			else
+			{
+				return Task.Run(() => PageStorage<HistoryData>.Instance.StorageData.HistoryElements
+					.Where(element => GetElementCollumn(element, collumn).Contains(searchstring)).Take(amount).Select(historyElement =>
+						(historyElement.TimeStamp, new List<string>() { historyElement.Status, historyElement.Source, historyElement.Message }))
+					.ToList());
+				;
+			}
 		}
 
-		private List<(string, List<string>)> CreateHistoryTableContent()
+		private string GetElementCollumn(HistoryElement element, int collumn)
 		{
-			throw new NotSupportedException();
-			List<(string, List<string>)> returnval = new List<(string, List<string>)>();
-			foreach (HistoryElement historyElement in PageStorage<HistoryData>.Instance.StorageData.HistoryElements)
+			switch (collumn)
 			{
-				returnval.Add((
-					historyElement.TimeStamp.ToShortDateString() + " " + historyElement.TimeStamp.ToLongTimeString(),
-					new List<string>() { historyElement.Status, historyElement.Source, historyElement.Message }));
-			}
+				case 0:
+					return PrimaryCellConverter(element.TimeStamp);
 
-			return returnval;
+				case 1:
+					return element.Status;
+
+				case 2:
+					return element.Source;
+
+				case 3:
+					return element.Message;
+
+				default:
+					throw new IndexOutOfRangeException();
+			}
+		}
+
+		private string PrimaryCellConverter(DateTime primaryKey)
+		{
+			return primaryKey.ToShortDateString() + " " + primaryKey.ToLongTimeString();
 		}
 	}
 }

@@ -5,16 +5,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using TabNoc.MyOoui.HtmlElements;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
+using TabNoc.MyOoui.Interfaces.delegates;
 using TabNoc.MyOoui.Interfaces.Enums;
 
 namespace TabNoc.MyOoui.UiComponents
 {
-	public delegate Task<List<(T, List<string>)>> FetchEntriesDelegate<T>(T fetchFromPrimaryKey, int takeAmount);
-
-	public delegate string PrimaryKeyConverterDelegate<in T>(T primaryKeyValue);
-
-	public delegate Task<List<(T, List<string>)>> SearchFetchEntriesDelegate<T>(string searchString, int collumn, int amount);
-
 	public class Table<T> : StylableElement
 	{
 		private readonly List<(T, List<string>)> _entries = new List<(T, List<string>)>();

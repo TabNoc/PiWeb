@@ -1,4 +1,4 @@
-﻿namespace TabNoc.MyOoui.Interfaces.AbstractObjects
+﻿namespace TabNoc.PiWeb.DataTypes
 {
 	public class PageData
 	{

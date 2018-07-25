@@ -5,7 +5,7 @@ using TabNoc.MyOoui.Interfaces.Enums;
 using TabNoc.MyOoui.UiComponents;
 using TabNoc.MyOoui.UiComponents.FormControl;
 using TabNoc.MyOoui.UiComponents.FormControl.InputGroups;
-using TabNoc.PiWeb.Storage.WateringWeb.Channels;
+using TabNoc.PiWeb.DataTypes.WateringWeb.Channels;
 
 namespace TabNoc.PiWeb.Pages.WateringWeb.Channels
 {

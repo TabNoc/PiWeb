@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TabNoc.MyOoui.HtmlElements;
+using TabNoc.MyOoui.Interfaces.@event;
 using TabNoc.MyOoui.Interfaces.Enums;
 
 namespace TabNoc.MyOoui.Interfaces.AbstractObjects

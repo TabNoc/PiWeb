@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using TabNoc.MyOoui.Storage;
+using TabNoc.PiWeb.DataTypes;
 
 namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 {
