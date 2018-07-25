@@ -1,5 +1,6 @@
 ﻿using Ooui;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
 using TabNoc.MyOoui.Interfaces.Enums;
@@ -114,8 +115,8 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
 				startButton.IsDisabled = true;
 				try
 				{
-					ManualActionExecutionData.CreateJobAction(job, overrideInputGroup.Value);
-					ManualActionExecutionData.ExecuteAction();
+					CreateJobAction(job, overrideInputGroup.Value);
+
 					startButton.Text = "Gestartet";
 				}
 				catch (Exception)
@@ -137,6 +138,19 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
 			{
 				batchEntries.AppendChild(new ListItem() { Text = jobBatchEntry.Name });
 			}
+		}
+
+		private static void CreateJobAction(JobEntry job, int durationOverride)
+		{
+			PageStorage<ManualActionExecutionData>.Instance.StorageData.ExecutionList = new List<ManualActionExecutionData.ManualActionExecution>();
+			foreach (BatchEntry jobBatchEntry in job.BatchEntries)
+			{
+				PageStorage<ManualActionExecutionData>.Instance.StorageData.ExecutionList.Add(
+					new ManualActionExecutionData.ManualActionExecution(jobBatchEntry.ChannelId, jobBatchEntry.Duration,
+						jobBatchEntry.ActivateMasterChannel, durationOverride));
+			}
+			PageStorage<ManualActionExecutionData>.Instance.Save();
+			PageStorage<ManualActionExecutionData>.Instance.StorageData.ExecutionList = null;
 		}
 	}
 }

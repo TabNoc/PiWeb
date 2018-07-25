@@ -1,4 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
 using TabNoc.MyOoui.Interfaces.Enums;
 using TabNoc.MyOoui.UiComponents;
@@ -11,6 +15,8 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.History
 {
 	internal class HistoryPage : StylableElement
 	{
+		private const bool UseServerApiQuery = false;
+
 		public HistoryPage() : base("div")
 		{
 			Container wrappingContainer = new Container();
@@ -20,7 +26,8 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.History
 			grid.AddRow().AppendCollum(messageKindDropdown, autoSize: true);
 			messageKindDropdown.AddStyling(StylingOption.MarginBottom, 4);
 
-			Table historyTable = new Table(new List<string>() { "Zeitpunkt", "Status", "Quelle", "Meldung" }, CreateHistoryTableContent(), true);
+			// Table historyTable = new Table(new List<string>() { "Zeitpunkt", "Status", "Quelle", "Meldung" }, CreateHistoryTableContent(), true);
+			Table<DateTime> historyTable = new Table<DateTime>(new List<string>() { "Zeitpunkt", "Status", "Quelle", "Meldung" }, FetchEntries, FetchSearchEntries, FetchAmount, PrimaryCellConverter, true, 14);
 			grid.AddRow().AppendCollum(historyTable);
 
 			messageKindDropdown.AddEntry("Alles").Click += (sender, args) =>
@@ -53,6 +60,96 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.History
 			AppendChild(wrappingContainer);
 		}
 
+		private string PrimaryCellConverter(DateTime primaryKey)
+		{
+			return primaryKey.ToShortDateString() + " " + primaryKey.ToLongTimeString();
+		}
+
+		private Task<List<(DateTime, List<string>)>> FetchSearchEntries(string searchstring, int collumn, int amount)
+		{
+			if (UseServerApiQuery)
+			{
+				throw new NotImplementedException();
+			}
+			else
+			{
+				return Task.Run(() => PageStorage<HistoryData>.Instance.StorageData.HistoryElements
+					.Where(element => GetElementCollumn(element, collumn).Contains(searchstring)).Take(amount).Select(historyElement =>
+						(historyElement.TimeStamp, new List<string>() { historyElement.Status, historyElement.Source, historyElement.Message }))
+					.ToList());
+				;
+			}
+		}
+
+		private string GetElementCollumn(HistoryElement element, int collumn)
+		{
+			switch (collumn)
+			{
+				case 0:
+					return PrimaryCellConverter(element.TimeStamp);
+
+				case 1:
+					return element.Status;
+
+				case 2:
+					return element.Source;
+
+				case 3:
+					return element.Message;
+
+				default:
+					throw new IndexOutOfRangeException();
+			}
+		}
+
+		private Task<int> FetchAmount()
+		{
+			if (UseServerApiQuery)
+			{
+				throw new NotImplementedException();
+			}
+			else
+			{
+				return Task.Run(() => PageStorage<HistoryData>.Instance.StorageData.HistoryElements.Count);
+			}
+		}
+
+		private Task<List<(DateTime, List<string>)>> FetchEntries(DateTime primaryKey, int takeAmount)
+		{
+			if (UseServerApiQuery)
+			{
+				throw new NotImplementedException();
+			}
+			else
+			{
+				if (primaryKey == default(DateTime))
+				{
+					return Task.Run(() =>
+						PageStorage<HistoryData>.Instance.StorageData.HistoryElements.Take(takeAmount)
+							.Select(historyElement => (historyElement.TimeStamp,
+								new List<string>()
+								{
+									historyElement.Status,
+									historyElement.Source,
+									historyElement.Message
+								})).ToList());
+				}
+				else
+				{
+					return Task.Run(() =>
+						PageStorage<HistoryData>.Instance.StorageData.HistoryElements
+							.SkipWhile(element => element.TimeStamp != primaryKey).Take(takeAmount)
+							.Select(historyElement => (historyElement.TimeStamp,
+								new List<string>()
+								{
+									historyElement.Status,
+									historyElement.Source,
+									historyElement.Message
+								})).ToList());
+				}
+			}
+		}
+
 		protected override void Dispose(bool disposing)
 		{
 			PageStorage<ManualData>.Instance.Save();
@@ -61,27 +158,13 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.History
 
 		private List<(string, List<string>)> CreateHistoryTableContent()
 		{
+			throw new NotSupportedException();
 			List<(string, List<string>)> returnval = new List<(string, List<string>)>();
-			foreach (AutomaticHistoryElement automaticHistoryElement in PageStorage<HistoryData>.Instance.StorageData.AutomaticHistoryElements)
+			foreach (HistoryElement historyElement in PageStorage<HistoryData>.Instance.StorageData.HistoryElements)
 			{
 				returnval.Add((
-					automaticHistoryElement.TimeStamp.ToShortTimeString() + " " +
-					automaticHistoryElement.TimeStamp.ToShortDateString(),
-					new List<string>() { automaticHistoryElement.Status, "Automatic", automaticHistoryElement.Message }));
-			}
-			foreach (ManualHistoryElement manualHistoryElement in PageStorage<HistoryData>.Instance.StorageData.ManualHistoryElements)
-			{
-				returnval.Add((
-					manualHistoryElement.TimeStamp.ToShortTimeString() + " " +
-					manualHistoryElement.TimeStamp.ToShortDateString(),
-					new List<string>() { manualHistoryElement.Status, "Manual", manualHistoryElement.Message }));
-			}
-			foreach (SystemHistoryElement systemHistoryElement in PageStorage<HistoryData>.Instance.StorageData.SystemHistoryElements)
-			{
-				returnval.Add((
-					systemHistoryElement.TimeStamp.ToShortTimeString() + " " +
-					systemHistoryElement.TimeStamp.ToShortDateString(),
-					new List<string>() { systemHistoryElement.Status, "System", systemHistoryElement.Message }));
+					historyElement.TimeStamp.ToShortDateString() + " " + historyElement.TimeStamp.ToLongTimeString(),
+					new List<string>() { historyElement.Status, historyElement.Source, historyElement.Message }));
 			}
 
 			return returnval;

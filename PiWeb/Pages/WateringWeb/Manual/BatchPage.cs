@@ -146,8 +146,7 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
 				startButton.IsDisabled = true;
 				try
 				{
-					ManualActionExecutionData.CreateBatchAction(batch, overrideInputGroup.Value);
-					ManualActionExecutionData.ExecuteAction();
+					CreateBatchAction(batch, overrideInputGroup.Value);
 					startButton.Text = "Gestartet";
 				}
 				catch (Exception)
@@ -311,6 +310,16 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
 				_appendToJobButton.IsHidden = false;
 				_removeFromJobButton.IsHidden = true;
 			};
+		}
+
+		private static void CreateBatchAction(BatchEntry batch, int durationOverride)
+		{
+			PageStorage<ManualActionExecutionData>.Instance.StorageData.ExecutionList = new List<ManualActionExecutionData.ManualActionExecution>()
+			{
+				new ManualActionExecutionData.ManualActionExecution(batch.ChannelId, batch.Duration, batch.ActivateMasterChannel, durationOverride)
+			};
+			PageStorage<ManualActionExecutionData>.Instance.Save();
+			PageStorage<ManualActionExecutionData>.Instance.StorageData.ExecutionList = null;
 		}
 	}
 }

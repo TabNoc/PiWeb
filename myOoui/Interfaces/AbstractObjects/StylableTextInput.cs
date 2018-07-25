@@ -7,7 +7,7 @@ using TabNoc.MyOoui.Interfaces.Enums;
 
 namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 {
-	public class StylableTextInput : TextInput, IStylableElement, IAutoComplete
+	public class StylableTextInput : TextInput, IStylableElement, IAutoComplete, ITextInput
 	{
 		private readonly List<Style> _styles = new List<Style>();
 		private BorderKind _borderKind;
@@ -67,6 +67,43 @@ $.get(""{src}"", function(data) {{
 }},'json');");
 			AppendChild(script);
 		}
+
+		#region Can Be deleted
+
+		private bool _typingEventHooked = false;
+		private string typingComputedTextValue = "";
+
+		public event StringChangeEventHandler TypingText
+		{
+			add
+			{
+				if (!_typingEventHooked)
+				{
+					_typingEventHooked = true;
+					this.KeyDown += OnKeyDown;
+					this.Input += OnInput;
+				}
+
+				_typingText += value;
+			}
+			remove => _typingText -= value;
+		}
+
+		private event StringChangeEventHandler _typingText;
+
+		private void OnInput(object sender, TargetEventArgs e)
+		{
+			typingComputedTextValue = this.Value;
+			_typingText?.Invoke(sender, new StringChangeEventHandlerArgs(typingComputedTextValue));
+		}
+
+		private void OnKeyDown(object sender, TargetEventArgs e)
+
+		{
+			SetAttribute("bla", this.Value);
+		}
+
+		#endregion Can Be deleted
 
 		public void AddStyling(StylingOption styling, int value = 0, BreakPoint breakPoint = BreakPoint.None)
 		{

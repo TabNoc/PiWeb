@@ -31,7 +31,7 @@ namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 			{
 				bool cacheTimeout = DateTime.Now - _lastLoadDateTime > _cacheTimeSpan;
 
-				if (!WriteOnly && (_changed == false && cacheTimeout && _storageData != null))
+				if (!ReadOnly && (_changed == false && cacheTimeout && _storageData != null))
 				{
 					// überprüfen ob der gecachet wert sich verändert hat. Wenn ja, dann darf dieser nicht verworfen werden
 					if (GetWriteData(_storageData) != _loadedData)

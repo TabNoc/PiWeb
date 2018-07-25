@@ -1,30 +1,30 @@
 ﻿using System;
-using TabNoc.MyOoui.UiComponents;
+using TabNoc.PiWeb.DataTypes;
 using TabNoc.PiWeb.Storage.WateringWeb.Channels;
 
 namespace TabNoc.PiWeb.Storage.WateringWeb.Overview
 {
 	public class AutomaticOverviewEntry
 	{
-		[Table.TableHeadingDefinition(0, "Kanal")]
+		[TableHeadingDefinition(0, "Kanal")]
 		public string ChannelName;
 
-		[Table.TableHeadingDefinition(1, "Master")]
+		[TableHeadingDefinition(1, "Master")]
 		public bool MasterEnabled;
 
-		[Table.TableHeadingDefinition(2, "Start")]
+		[TableHeadingDefinition(2, "Start")]
 		public TimeSpan StartTime;
 
-		[Table.TableHeadingDefinition(3, "Ende")]
+		[TableHeadingDefinition(3, "Ende")]
 		public TimeSpan EndTime;
 
-		[Table.TableHeadingDefinition(4, "Wetter")]
+		[TableHeadingDefinition(4, "Wetter")]
 		public bool WeatherEnabled;
 
-		[Table.TableHeadingDefinition(5, "Tage")]
+		[TableHeadingDefinition(5, "Tage")]
 		public ChannelProgramData.Weekdays ActiveWeekdays;
 
-		[Table.TableHeadingDefinition(6, "Aktiv")]
+		[TableHeadingDefinition(6, "Aktiv")]
 		public bool ChannelEnabled;
 
 		public static AutomaticOverviewEntry CreateNew() => new AutomaticOverviewEntry

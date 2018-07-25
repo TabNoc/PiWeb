@@ -1,8 +1,6 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+using Npgsql;
 
 namespace WateringWebServer.Controllers
 {
@@ -10,6 +8,13 @@ namespace WateringWebServer.Controllers
 	[ApiController]
 	public class ValuesController : ControllerBase
 	{
+		private readonly NpgsqlConnection _connection;
+
+		public ValuesController(NpgsqlConnection connection)
+		{
+			_connection = connection;
+		}
+
 		// GET api/values
 		[HttpGet]
 		public ActionResult<IEnumerable<string>> Get()

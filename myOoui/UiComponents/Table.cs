@@ -2,25 +2,50 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using TabNoc.MyOoui.HtmlElements;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
 using TabNoc.MyOoui.Interfaces.Enums;
 
 namespace TabNoc.MyOoui.UiComponents
 {
-	public class Table : StylableElement
+	public delegate Task<List<(T, List<string>)>> FetchEntriesDelegate<T>(T fetchFromPrimaryKey, int takeAmount);
+
+	public delegate string PrimaryKeyConverterDelegate<in T>(T primaryKeyValue);
+
+	public delegate Task<List<(T, List<string>)>> SearchFetchEntriesDelegate<T>(string searchString, int collumn, int amount);
+
+	public class Table<T> : StylableElement
 	{
-		private readonly List<(string, List<string>)> _entries;
+		private readonly List<(T, List<string>)> _entries = new List<(T, List<string>)>();
+		private readonly HashSet<T> _entriesHashSet = new HashSet<T>();
+		private readonly Func<Task<int>> _fetchAmount;
+		private readonly FetchEntriesDelegate<T> _fetchEntries;
 		private readonly List<string> _header;
 		private readonly TableRow _headTableRow;
+		private readonly Dictionary<T, string> _primaryCellToStringDictionary = new Dictionary<T, string>();
+		private readonly PrimaryKeyConverterDelegate<T> _primaryKeyConverter;
+		private readonly SearchFetchEntriesDelegate<T> _searchFetchEntries;
 		private readonly TableRow _searchTableRow;
 		private readonly TableBody _tableBody;
+		private readonly int _visibleTablePageItems = int.MaxValue;
+		private int _activeTablePage = 1;
+		private T _lastNormalFetchedPrimaryKey = default(T);
+
+		/// <summary>
+		/// Gibt die Menge an Entries an, die mit der normalen Sortierung linear abgerufen wurden
+		/// </summary>
+		private int _normalFetchedEntries = 0;
+
+		private Pagination _pagination;
+		private int _totalTableAmount;
+		private bool _updateMode;
 
 		#region FilterFields
 
 		private bool _caseSensitive;
 		private TableHeadEntry _filteredByTableHeadEntry;
-		private List<(string, List<string>)> _filteredEntries;
+		private List<(T, List<string>)> _filteredEntries;
 		private string _filterValue;
 
 		#endregion FilterFields
@@ -28,20 +53,19 @@ namespace TabNoc.MyOoui.UiComponents
 		#region sorted Fields
 
 		private TableHeadEntry _sortedByTableHeadEntry;
-		private List<(string, List<string>)> _sortedEntries;
+		private List<(T, List<string>)> _sortedEntries;
 
 		#endregion sorted Fields
 
 		#region SearchField
 
-		private List<(string, List<string>)> _searchedEntries;
+		private List<(T, List<string>)> _searchedEntries;
 
 		#endregion SearchField
 
 		#region Cell Color Fields
 
 		private readonly List<CellColoring> _cellColorings = new List<CellColoring>();
-		private bool _updateMode;
 
 		private class CellColoring
 		{
@@ -61,42 +85,11 @@ namespace TabNoc.MyOoui.UiComponents
 
 		#endregion Cell Color Fields
 
-		/*
-<table class="table table-hover">
-  <thead>
-    <tr>
-      <th scope="col">#</th>
-      <th scope="col">First</th>
-      <th scope="col">Last</th>
-      <th scope="col">Handle</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <th scope="row">1</th>
-      <td>Mark</td>
-      <td>Otto</td>
-      <td>@mdo</td>
-    </tr>
-    <tr>
-      <th scope="row">2</th>
-      <td>Jacob</td>
-      <td>Thornton</td>
-      <td>@fat</td>
-    </tr>
-    <tr>
-      <th scope="row">3</th>
-      <td colspan="2">Larry the Bird</td>
-      <td>@twitter</td>
-    </tr>
-  </tbody>
-</table>
-		 */
-
-		public Table(List<string> header, List<(string, List<string>)> entries, bool inUpdateMode = false) : base("table")
+		public Table(List<string> header, List<(T, List<string>)> entries, PrimaryKeyConverterDelegate<T> primaryKeyConverter, bool inUpdateMode = false) : base("table")
 		{
 			_header = header;
 			_entries = entries;
+			_primaryKeyConverter = primaryKeyConverter;
 			ClassName = "table table-hover";
 
 			TableHead head = new TableHead();
@@ -121,7 +114,7 @@ namespace TabNoc.MyOoui.UiComponents
 			_searchTableRow = new TableRow();
 			head.AppendChild(_searchTableRow);
 
-			foreach (string headerEnty in header)
+			foreach (string _ in header)
 			{
 				const bool centeredText = false;
 				const string textInputGhostMessage = "Search";
@@ -150,8 +143,95 @@ namespace TabNoc.MyOoui.UiComponents
 			{
 				StartUpdate();
 			}
-
 			ReCalculateTableContent();
+		}
+
+		public Table(List<string> header, FetchEntriesDelegate<T> fetchEntries, SearchFetchEntriesDelegate<T> searchFetchEntries, Func<Task<int>> fetchAmount, PrimaryKeyConverterDelegate<T> primaryKeyConverter, bool inUpdateMode = false, int visibleTablePageItems = 10) : base("table")
+		{
+			_header = header;
+			_fetchEntries = fetchEntries;
+			_searchFetchEntries = searchFetchEntries;
+			_fetchAmount = fetchAmount;
+			_primaryKeyConverter = primaryKeyConverter;
+			_visibleTablePageItems = visibleTablePageItems;
+			ClassName = "table table-hover";
+
+			TableHead head = new TableHead();
+			AppendChild(head);
+
+			#region Table Head Row
+
+			_headTableRow = new TableRow();
+			head.AppendChild(_headTableRow);
+
+			foreach (string headerEnty in header)
+			{
+				TableHeadEntry tableHeadEntry = new TableHeadEntry("col", headerEnty, TableHeadEntry.CaretStyle.UpDown);
+				tableHeadEntry.Click += TableHeadEntryOnClick;
+				_headTableRow.AppendChild(tableHeadEntry);
+			}
+
+			#endregion Table Head Row
+
+			#region Table Search Row
+
+			_searchTableRow = new TableRow();
+			head.AppendChild(_searchTableRow);
+
+			for (int headerIndex = 0; headerIndex < header.Count; headerIndex++)
+			{
+				const bool centeredText = false;
+				const string textInputGhostMessage = "Search";
+
+				StylableTextInput textInput = new StylableTextInput();
+				textInput.SetAttribute("type", "text");
+				textInput.ClassName = "form-control" + (centeredText ? " text-center" : "");
+				textInput.SetAttribute("placeholder", textInputGhostMessage);
+				textInput.SetAttribute("aria-label", textInputGhostMessage);
+
+				textInput.KeyUp += (sender, args) =>
+				{
+					SearchTableContent();
+					RedrawTableContent();
+				};
+
+				int index = headerIndex;
+				textInput.Change += (sender, args) =>
+				{
+					SearchTableContent();
+					RedrawTableContent();
+					QuerySearch((StylableTextInput)sender, index);
+				};
+
+				_searchTableRow.AppendChild(new TableDataEntry(textInput));
+			}
+
+			#endregion Table Search Row
+
+			_tableBody = new TableBody();
+			AppendChild(_tableBody);
+
+			if (inUpdateMode)
+			{
+				StartUpdate();
+			}
+			TableFoot tableFoot = new TableFoot();
+			AppendChild(tableFoot);
+
+			Task<List<(T, List<string>)>> entriesTask = _fetchEntries(_lastNormalFetchedPrimaryKey, 5 * _visibleTablePageItems);
+			_fetchAmount().ContinueWith(task =>
+			{
+				_totalTableAmount = task.Result;
+				int pages = (int)Math.Ceiling((decimal)task.Result / _visibleTablePageItems);
+				if (pages > 1)
+				{
+					_pagination = new Pagination(SwitchPageCallback, pages);
+					tableFoot.AppendChild(_pagination);
+				}
+
+				AddEntriesToCache(entriesTask, true);
+				ReCalculateTableContent();
+			});
 		}
 
 		public void EndUpdate()
@@ -216,19 +296,35 @@ namespace TabNoc.MyOoui.UiComponents
 			_updateMode = true;
 		}
 
-		private void AppendTableRow(List<string> entryList, string tableIndex)
+		private void AddEntriesToCache(Task<List<(T, List<string>)>> task, bool wasNormalFetch = false)
+		{
+			List<(T, List<string>)> additionalEntries = task.Result.Where(tuple => _entriesHashSet.Contains(tuple.Item1) == false).ToList();
+			foreach ((T, List<string>) entry in additionalEntries)
+			{
+				_entries.Add(entry);
+				_entriesHashSet.Add(entry.Item1);
+			}
+
+			if (wasNormalFetch && task.Result.Count > 0)
+			{
+				_lastNormalFetchedPrimaryKey = task.Result.Last().Item1;
+				_normalFetchedEntries += task.Result.Count;
+			}
+		}
+
+		private void AppendTableRow(List<string> entryList, T tableIndex)
 		{
 			TableRow tableRow = new TableRow();
 			_tableBody.AppendChild(tableRow);
 
-			CellColoring headCellColoring = _cellColorings.LastOrDefault(coloring => coloring.TableHeadIndex == 0 && coloring.TextValue == tableIndex);
+			CellColoring headCellColoring = _cellColorings.LastOrDefault(coloring => coloring.TableHeadIndex == 0 && coloring.TextValue == GetValueFromPrimaryCell(tableIndex));
 			if (headCellColoring != null)
 			{
-				tableRow.AppendChild(new TableHeadEntry("row", tableIndex, color: headCellColoring.Color));
+				tableRow.AppendChild(new TableHeadEntry("row", GetValueFromPrimaryCell(tableIndex), color: headCellColoring.Color));
 			}
 			else
 			{
-				tableRow.AppendChild(new TableHeadEntry("row", tableIndex));
+				tableRow.AppendChild(new TableHeadEntry("row", GetValueFromPrimaryCell(tableIndex)));
 			}
 
 			for (int index = 0; index < entryList.Count; index++)
@@ -265,7 +361,11 @@ namespace TabNoc.MyOoui.UiComponents
 			{
 				if (indexOf == 0)
 				{
-					_filteredEntries = _filteredEntries.Where(tuple => (_caseSensitive ? tuple.Item1 : tuple.Item1.ToLower()) == _filterValue).ToList();
+					_filteredEntries = _filteredEntries.Where(tuple =>
+					{
+						string primaryCellValue = GetValueFromPrimaryCell(tuple.Item1);
+						return (_caseSensitive ? primaryCellValue : primaryCellValue.ToLower()) == _filterValue;
+					}).ToList();
 				}
 				else
 				{
@@ -274,8 +374,35 @@ namespace TabNoc.MyOoui.UiComponents
 			}
 		}
 
+		private string GetValueFromPrimaryCell(T cellValue)
+		{
+			if (!_primaryCellToStringDictionary.ContainsKey(cellValue))
+			{
+				_primaryCellToStringDictionary.Add(cellValue, _primaryKeyConverter(cellValue));
+			}
+
+			return _primaryCellToStringDictionary[cellValue];
+		}
+
+		private void QuerySearch(StylableTextInput sender, int headerIndex)
+		{
+			int neededTotalTablePageItems = 5 * _visibleTablePageItems;
+			if (neededTotalTablePageItems > _searchedEntries.Count && _normalFetchedEntries < _totalTableAmount)
+			{
+				_searchFetchEntries(sender.Value, headerIndex, neededTotalTablePageItems - _searchedEntries.Count).ContinueWith(task =>
+				{
+					AddEntriesToCache(task, false);
+					ReCalculateTableContent();
+				});
+			}
+		}
+
 		private void ReCalculateTableContent()
 		{
+			if (_entries == null)
+			{
+				return;
+			}
 			FilterTableContent();
 			SortTableContent();
 			SearchTableContent();
@@ -289,11 +416,13 @@ namespace TabNoc.MyOoui.UiComponents
 				return;
 			}
 
+			_pagination?.ChangeMaxPages((int)Math.Ceiling((decimal)_searchedEntries.Count / _visibleTablePageItems));
+
 			while (_tableBody.Children.Count > 0)
 			{
 				_tableBody.RemoveChild(_tableBody.FirstChild);
 			}
-			foreach ((string tableIndex, List<string> entryList) in _searchedEntries)
+			foreach ((T tableIndex, List<string> entryList) in _searchedEntries.Skip((_activeTablePage - 1) * _visibleTablePageItems).Take(_visibleTablePageItems))
 			{
 				AppendTableRow(entryList, tableIndex);
 			}
@@ -316,7 +445,7 @@ namespace TabNoc.MyOoui.UiComponents
 					string searchString = textInput.Value.ToLower();
 					if (index == 0)
 					{
-						_searchedEntries = _searchedEntries.Where(tuple => tuple.Item1.ToLower().Contains(searchString)).ToList();
+						_searchedEntries = _searchedEntries.Where(tuple => GetValueFromPrimaryCell(tuple.Item1).ToLower().Contains(searchString)).ToList();
 					}
 					else
 					{
@@ -347,7 +476,7 @@ namespace TabNoc.MyOoui.UiComponents
 				case TableHeadEntry.CaretStyle.Down:
 					if (indexOf == 0)
 					{
-						_sortedEntries.Sort((firstSet, secondSet) => String.Compare(firstSet.Item1, secondSet.Item1, StringComparison.Ordinal));
+						_sortedEntries.Sort((firstSet, secondSet) => String.Compare(GetValueFromPrimaryCell(firstSet.Item1), GetValueFromPrimaryCell(secondSet.Item1), StringComparison.Ordinal));
 					}
 					else
 					{
@@ -381,6 +510,21 @@ namespace TabNoc.MyOoui.UiComponents
 			}
 		}
 
+		private void SwitchPageCallback(int newPage)
+		{
+			_activeTablePage = newPage;
+			RedrawTableContent();
+			int neededTotalTablePageItems = (newPage + 2) * _visibleTablePageItems;
+			if (neededTotalTablePageItems > _normalFetchedEntries && _normalFetchedEntries < _totalTableAmount)
+			{
+				_fetchEntries(_lastNormalFetchedPrimaryKey, neededTotalTablePageItems - _normalFetchedEntries).ContinueWith(task =>
+				{
+					AddEntriesToCache(task, true);
+					ReCalculateTableContent();
+				});
+			}
+		}
+
 		private void TableHeadEntryOnClick(object sender, TargetEventArgs e)
 		{
 			if (!(sender is TableHeadEntry tableHeadEntry))
@@ -408,9 +552,9 @@ namespace TabNoc.MyOoui.UiComponents
 			}
 		}
 
-		private class TableDataEntry : StylableElement
+		private sealed class TableDataEntry : StylableElement
 		{
-			public StylableTextInput SearchTextInput;
+			public readonly StylableTextInput SearchTextInput;
 
 			public TableDataEntry(string value, int colspan = 1, StylingColor color = StylingColor.Light) : base("td")
 			{
@@ -453,6 +597,13 @@ namespace TabNoc.MyOoui.UiComponents
 			}
 		}
 
+		private class TableFoot : Element
+		{
+			public TableFoot() : base("tfoot")
+			{
+			}
+		}
+
 		private class TableHead : Element
 		{
 			public TableHead() : base("thead")
@@ -460,7 +611,7 @@ namespace TabNoc.MyOoui.UiComponents
 			}
 		}
 
-		private class TableHeadEntry : Element
+		private sealed class TableHeadEntry : Element
 		{
 			public CaretStyle CurrentCaretStyle;
 
@@ -545,17 +696,5 @@ namespace TabNoc.MyOoui.UiComponents
 		}
 
 		#endregion SubClasses
-
-		public class TableHeadingDefinitionAttribute : Attribute
-		{
-			public readonly string HeadingName;
-			public readonly int Position;
-
-			public TableHeadingDefinitionAttribute(int position, string headingName)
-			{
-				Position = position;
-				HeadingName = headingName;
-			}
-		}
 	}
 }

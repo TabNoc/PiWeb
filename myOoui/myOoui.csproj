@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\baseOoui\Ooui\Ooui.csproj" />
+    <ProjectReference Include="..\PiWebDataTypes\PiWebDataTypes.csproj" />
   </ItemGroup>
 
 </Project>

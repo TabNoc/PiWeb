@@ -14,7 +14,6 @@ namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 		protected Publisher(string publishPath) : base(publishPath)
 		{
 			PublishPath = publishPath;
-			Initialize();
 		}
 
 		protected abstract NavigationBar CreateNavigationBar();

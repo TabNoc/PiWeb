@@ -1,29 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Npgsql;
+using TabNoc.PiWeb.WateringWebServer;
 
 namespace WateringWebServer
 {
 	public class Startup
 	{
+		public IConfiguration Configuration
+		{
+			get;
+		}
+
 		public Startup(IConfiguration configuration)
 		{
 			Configuration = configuration;
 		}
 
-		public IConfiguration Configuration
+		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+		public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
 		{
-			get;
+			if (env.IsDevelopment())
+			{
+				//app.UseDeveloperExceptionPage();
+			}
+			app.UseDeveloperExceptionPage();
+			// loggerFactory.AddConsole(LogLevel.Critical);
+			app.UseMvc();
 		}
 
 		// This method gets called by the runtime. Use this method to add services to the container.
@@ -31,35 +38,9 @@ namespace WateringWebServer
 		{
 			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-			services.AddDbContext<ApplicationDbContext>(options =>
-			{
-				NpgsqlConnectionStringBuilder connectionStringBuilder = new NpgsqlConnectionStringBuilder
-				{
-					Host = "192.168.1.133",
-					Database = "piweb",
-					Username = "piweb",
-					Password = "raspberry!"
-				};
-				options.UseNpgsql(Configuration.GetConnectionString(connectionStringBuilder.ToString()));
-			});
-		}
-
-		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-		public void Configure(IApplicationBuilder app, IHostingEnvironment env)
-		{
-			if (env.IsDevelopment())
-			{
-				app.UseDeveloperExceptionPage();
-			}
-
-			app.UseMvc();
-		}
-	}
-
-	public class ApplicationDbContext : DbContext
-	{
-		public ApplicationDbContext(DbContextOptions dbContextOptions) : base(dbContextOptions)
-		{
+			NpgsqlConnection connection = new NpgsqlConnection(PrivateData.ConnectionStringBuilder.ToString());
+			connection.Open();
+			services.AddSingleton<NpgsqlConnection>(connection);
 		}
 	}
 }

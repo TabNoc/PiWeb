@@ -1,26 +1,26 @@
 ﻿using System;
-using TabNoc.MyOoui.UiComponents;
+using TabNoc.PiWeb.DataTypes;
 
 namespace TabNoc.PiWeb.Storage.WateringWeb.Overview
 {
 	public class ManualOverviewEntry
 	{
-		[Table.TableHeadingDefinition(0, "Reihenfolge")]
+		[TableHeadingDefinition(0, "Reihenfolge")]
 		public int ActivationPriority;
 
-		[Table.TableHeadingDefinition(1, "Name")]
+		[TableHeadingDefinition(1, "Name")]
 		public string ActionName;
 
-		[Table.TableHeadingDefinition(2, "Kanal")]
+		[TableHeadingDefinition(2, "Kanal")]
 		public string ChannelName;
 
-		[Table.TableHeadingDefinition(3, "Start")]
+		[TableHeadingDefinition(3, "Start")]
 		public TimeSpan StartTime;
 
-		[Table.TableHeadingDefinition(4, "Ende")]
+		[TableHeadingDefinition(4, "Ende")]
 		public TimeSpan EndTime;
 
-		[Table.TableHeadingDefinition(5, "Master")]
+		[TableHeadingDefinition(5, "Master")]
 		public bool MasterEnabled;
 
 		public static ManualOverviewEntry CreateNew() => new ManualOverviewEntry

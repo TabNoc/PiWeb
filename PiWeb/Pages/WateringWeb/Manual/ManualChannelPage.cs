@@ -1,5 +1,6 @@
 ﻿using Ooui;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
 using TabNoc.MyOoui.Interfaces.Enums;
@@ -90,8 +91,8 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
 					startButton.IsDisabled = true;
 					try
 					{
-						ManualActionExecutionData.CreateChannelAction(channel, TimeSpan.Parse(durationTextInput.Value), masterEnabledTwoStateButtonGroup.FirstButtonActive, 100);
-						ManualActionExecutionData.ExecuteAction();
+						CreateChannelAction(channel, TimeSpan.Parse(durationTextInput.Value), masterEnabledTwoStateButtonGroup.FirstButtonActive, 100);
+
 						startButton.Text = "Gestartet";
 					}
 					catch (Exception)
@@ -158,6 +159,16 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
 			secondContainer.AppendChild(appendToBatchButton);
 
 			#endregion AddToBatch
+		}
+
+		private static void CreateChannelAction(ChannelData channel, TimeSpan duration, bool activateMasterChannel, int durationOverride = 100)
+		{
+			PageStorage<ManualActionExecutionData>.Instance.StorageData.ExecutionList = new List<ManualActionExecutionData.ManualActionExecution>()
+			{
+				new ManualActionExecutionData.ManualActionExecution(channel.ChannelId, duration, activateMasterChannel, durationOverride)
+			};
+			PageStorage<ManualActionExecutionData>.Instance.Save();
+			PageStorage<ManualActionExecutionData>.Instance.StorageData.ExecutionList = null;
 		}
 	}
 }
