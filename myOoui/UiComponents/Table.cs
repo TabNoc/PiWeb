@@ -14,6 +14,10 @@ namespace TabNoc.MyOoui.UiComponents
 	{
 		private readonly List<(T, List<string>)> _entries = new List<(T, List<string>)>();
 		private readonly HashSet<T> _entriesHashSet = new HashSet<T>();
+
+		private readonly List<(T, List<string>)> _cachedSearchEntries = new List<(T, List<string>)>();
+		private readonly HashSet<T> _cachedSearchEntriesHashSet = new HashSet<T>();
+
 		private readonly Func<Task<int>> _fetchAmount;
 		private readonly FetchEntriesDelegate<T> _fetchEntries;
 		private readonly List<string> _header;
@@ -186,16 +190,32 @@ namespace TabNoc.MyOoui.UiComponents
 
 				textInput.KeyUp += (sender, args) =>
 				{
-					SearchTableContent();
-					RedrawTableContent();
+					try
+					{
+						SearchTableContent();
+						RedrawTableContent();
+					}
+					catch (Exception e)
+					{
+						Logging.Error("Beim ausführen von textInput.KeyUp ist ein Fehler aufgetreten!", e);
+						throw;
+					}
 				};
 
 				int index = headerIndex;
 				textInput.Change += (sender, args) =>
 				{
-					SearchTableContent();
-					RedrawTableContent();
-					QuerySearch((StylableTextInput)sender, index);
+					try
+					{
+						SearchTableContent();
+						RedrawTableContent();
+						QuerySearch(((StylableTextInput)sender).Value, index);
+					}
+					catch (Exception e)
+					{
+						Logging.Error("Beim ausführen von textInput.Change ist ein Fehler aufgetreten!", e);
+						throw;
+					}
 				};
 
 				_searchTableRow.AppendChild(new TableDataEntry(textInput));
@@ -216,16 +236,26 @@ namespace TabNoc.MyOoui.UiComponents
 			Task<List<(T, List<string>)>> entriesTask = _fetchEntries(_lastNormalFetchedPrimaryKey, 5 * _visibleTablePageItems);
 			_fetchAmount().ContinueWith(task =>
 			{
-				_totalTableAmount = task.Result;
-				int pages = (int)Math.Ceiling((decimal)task.Result / _visibleTablePageItems);
-				if (pages > 1)
+				try
 				{
-					_pagination = new Pagination(SwitchPageCallback, pages);
-					tableFoot.AppendChild(_pagination);
-				}
+					_totalTableAmount = task.Result;
+					int pages = (int)Math.Ceiling((decimal)task.Result / _visibleTablePageItems);
+					if (pages > 1)
+					{
+						_pagination = new Pagination(SwitchPageCallback, pages);
+						tableFoot.AppendChild(_pagination);
+					}
 
-				AddEntriesToCache(entriesTask, true);
-				ReCalculateTableContent();
+					if (AddEntriesToCache(entriesTask, true))
+					{
+						ReCalculateTableContent();
+					}
+				}
+				catch (Exception e)
+				{
+					Logging.Error("Beim ausführen von Table._fetchAmount ist ein Fehler aufgetreten!", e);
+					throw;
+				}
 			});
 		}
 
@@ -282,6 +312,7 @@ namespace TabNoc.MyOoui.UiComponents
 			{
 				_filteredByTableHeadEntry = null;
 			}
+			QuerySearch(_filterValue, _header.IndexOf(rowHeader));
 
 			ReCalculateTableContent();
 		}
@@ -291,13 +322,40 @@ namespace TabNoc.MyOoui.UiComponents
 			_updateMode = true;
 		}
 
-		private void AddEntriesToCache(Task<List<(T, List<string>)>> task, bool wasNormalFetch = false)
+		private bool AddEntriesToCache(Task<List<(T, List<string>)>> task, bool wasNormalFetch = false)
 		{
-			List<(T, List<string>)> additionalEntries = task.Result.Where(tuple => _entriesHashSet.Contains(tuple.Item1) == false).ToList();
-			foreach ((T, List<string>) entry in additionalEntries)
+			bool changed = false;
+			List<(T, List<string>)> additionalEntries = task.Result.Where(tuple =>
+				_entriesHashSet.Contains(tuple.Item1) == false && wasNormalFetch == true ||
+				(_entriesHashSet.Contains(tuple.Item1) == false && _cachedSearchEntriesHashSet.Contains(tuple.Item1) == false) && wasNormalFetch == false)
+				.ToList();
+			lock (_entries)
 			{
-				_entries.Add(entry);
-				_entriesHashSet.Add(entry.Item1);
+				foreach ((T, List<string>) entry in additionalEntries)
+				{
+					if (entry.Item1.Equals(default(T)) || entry.Item2 == null)
+					{
+						throw new NullReferenceException("Mindestends ein abgerufener Datensatz hat nur standardWerte!");
+					}
+
+					if (wasNormalFetch)
+					{
+						_entries.Add(entry);
+						_entriesHashSet.Add(entry.Item1);
+						if (_cachedSearchEntriesHashSet.Contains(entry.Item1))
+						{
+							_cachedSearchEntriesHashSet.Remove(entry.Item1);
+							_cachedSearchEntries.Remove(entry);
+						}
+					}
+					else
+					{
+						_cachedSearchEntries.Add(entry);
+						_cachedSearchEntriesHashSet.Add(entry.Item1);
+					}
+
+					changed = true;
+				}
 			}
 
 			if (wasNormalFetch && task.Result.Count > 0)
@@ -305,6 +363,8 @@ namespace TabNoc.MyOoui.UiComponents
 				_lastNormalFetchedPrimaryKey = task.Result.Last().Item1;
 				_normalFetchedEntries += task.Result.Count;
 			}
+
+			return changed;
 		}
 
 		private void AppendTableRow(List<string> entryList, T tableIndex)
@@ -344,7 +404,9 @@ namespace TabNoc.MyOoui.UiComponents
 				return;
 			}
 
-			_filteredEntries = _entries.ToArray().ToList();
+			_filteredEntries = new List<(T, List<string>)>();
+			_filteredEntries.AddRange(_entries);
+			_filteredEntries.AddRange(_cachedSearchEntries);
 
 			if (_filteredByTableHeadEntry == null)
 			{
@@ -379,29 +441,46 @@ namespace TabNoc.MyOoui.UiComponents
 			return _primaryCellToStringDictionary[cellValue];
 		}
 
-		private void QuerySearch(StylableTextInput sender, int headerIndex)
+		private void QuerySearch(string searchString, int headerIndex)
 		{
+			if (headerIndex < 0)
+			{
+				return;
+			}
 			int neededTotalTablePageItems = 5 * _visibleTablePageItems;
 			if (neededTotalTablePageItems > _searchedEntries.Count && _normalFetchedEntries < _totalTableAmount)
 			{
-				_searchFetchEntries(sender.Value, headerIndex, neededTotalTablePageItems - _searchedEntries.Count).ContinueWith(task =>
+				_searchFetchEntries(searchString, headerIndex, neededTotalTablePageItems - _searchedEntries.Count).ContinueWith(task =>
 				{
-					AddEntriesToCache(task, false);
-					ReCalculateTableContent();
+					try
+					{
+						if (AddEntriesToCache(task, false))
+						{
+							ReCalculateTableContent();
+						}
+					}
+					catch (Exception e)
+					{
+						Logging.Error("Beim ausführen von Table.QuerySearch ist ein Fehler aufgetreten!", e);
+						throw;
+					}
 				});
 			}
 		}
 
 		private void ReCalculateTableContent()
 		{
-			if (_entries == null)
+			lock (_entries)
 			{
-				return;
+				if (_entries == null)
+				{
+					return;
+				}
+				FilterTableContent();
+				SortTableContent();
+				SearchTableContent();
+				RedrawTableContent();
 			}
-			FilterTableContent();
-			SortTableContent();
-			SearchTableContent();
-			RedrawTableContent();
 		}
 
 		private void RedrawTableContent()
@@ -514,8 +593,18 @@ namespace TabNoc.MyOoui.UiComponents
 			{
 				_fetchEntries(_lastNormalFetchedPrimaryKey, neededTotalTablePageItems - _normalFetchedEntries).ContinueWith(task =>
 				{
-					AddEntriesToCache(task, true);
-					ReCalculateTableContent();
+					try
+					{
+						if (AddEntriesToCache(task, true))
+						{
+							ReCalculateTableContent();
+						}
+					}
+					catch (Exception e)
+					{
+						Logging.Error("Beim ausführen von Table.SwitchPageCallback ist ein Fehler aufgetreten!", e);
+						throw;
+					}
 				});
 			}
 		}

@@ -2,11 +2,14 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
 using System.Reflection;
 using System.Text;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
 using TabNoc.MyOoui.Storage;
+using TabNoc.MyOoui.UiComponents;
 using TabNoc.PiWeb.DataTypes.WateringWeb.Channels;
+using TabNoc.PiWeb.DataTypes.WateringWeb.History;
 using TabNoc.PiWeb.DataTypes.WateringWeb.Settings;
 using TabNoc.PiWeb.PagePublisher;
 using TabNoc.PiWeb.PagePublisher.WateringWeb;
@@ -15,8 +18,29 @@ namespace TabNoc.PiWeb
 {
 	internal static class Program
 	{
+		public static void Error(string message, Exception ex)
+		{
+			Console.ForegroundColor = ConsoleColor.Red;
+			Console.WriteLine("{0}: {1}", message, ex);
+			Console.ResetColor();
+			WriteLog("System", "Error", $"{message}: {ex}");
+		}
+
+		public static void WriteLog(string source, string status, string message, DateTime timestamp = default(DateTime))
+		{
+			if (timestamp == default(DateTime))
+			{
+				timestamp = DateTime.Now;
+			}
+			new HttpClient().PostAsync("http://localhost:5000/api/history",
+				new StringContent(JsonConvert.SerializeObject(
+					new HistoryElement(timestamp, source, status, message)), Encoding.UTF8, "application/json"));
+		}
+
 		private static void Main(string[] args)
 		{
+			Logging.ErrorAction = Error;
+			Logging.LogAction = (time, s, arg3, arg4) => WriteLog(s, arg3, arg4, time);
 			UI.HeadHtml = "<script src=\"https://code.jquery.com/jquery-3.3.1.min.js\" crossorigin=\"anonymous\"></script>";
 			UI.HeadHtml += "<script src=\"https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js\" integrity=\"sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49\" crossorigin=\"anonymous\"></script>";
 			UI.HeadHtml += "<script src=\"https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js\" integrity=\"sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T\" crossorigin=\"anonymous\"></script>";

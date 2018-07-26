@@ -235,7 +235,7 @@ namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 			if (typeof(T) != typeof(BackendData))
 			{
 				Dictionary<string, BackedProperties> backedPropertieses = PageStorage<BackendData>.Instance.StorageData.BackedPropertieses;
-				if (backedPropertieses.ContainsKey(key) && backedPropertieses[key].SendDataToBackend == true)
+				if (backedPropertieses.ContainsKey(key) && backedPropertieses[key].RequestDataFromBackend == true)
 				{
 					HttpClient httpClient = new HttpClient();
 					StringContent httpContent = new StringContent(data, Encoding.UTF8, "application/json");

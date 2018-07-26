@@ -4,16 +4,16 @@ namespace TabNoc.PiWeb.DataTypes.WateringWeb.History
 {
 	public class HistoryElement
 	{
-		// "timestamp" timestamp without time zone[] NOT NULL,
+		// msgtimestamp timestamp without time zone NOT NULL,
 		public DateTime TimeStamp;
 
-		// source text[]
+		// source text
 		public string Source;
 
-		// status text[], -- Status: INFO, OK, WARN, ERROR, CRIT
+		// status text, -- Status: INFO, OK, WARN, ERROR, CRIT
 		public string Status;
 
-		// message text[]
+		// message text
 		public string Message;
 
 		public HistoryElement(DateTime timeStamp, string source, string status, string message)

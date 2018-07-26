@@ -233,14 +233,12 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 				{
 					backendPath.SetValidation(true, false);
 					backedProperties.RequestDataFromBackend = backendEnabled.FirstButtonActive;
-					backedProperties.SendDataToBackend = backendEnabled.FirstButtonActive;
 					backedProperties.DataSourcePath = backendPath.Value;
 				}
 				else if (backendEnabled.SecondButtonActive)
 				{
 					backendPath.SetValidation(true, false);
 					backedProperties.RequestDataFromBackend = backendEnabled.FirstButtonActive;
-					backedProperties.SendDataToBackend = backendEnabled.FirstButtonActive;
 				}
 				else
 				{

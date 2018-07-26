@@ -1,21 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
 using TabNoc.MyOoui.Interfaces.Enums;
+using TabNoc.MyOoui.Storage;
 using TabNoc.MyOoui.UiComponents;
 using TabNoc.MyOoui.UiComponents.FormControl;
 using TabNoc.PiWeb.DataTypes.WateringWeb.History;
-using TabNoc.PiWeb.DataTypes.WateringWeb.Manual;
 using Button = TabNoc.MyOoui.HtmlElements.Button;
+using JsonConvert = Newtonsoft.Json.JsonConvert;
 
 namespace TabNoc.PiWeb.Pages.WateringWeb.History
 {
+	public static class HttpExtensions
+	{
+		public static Task<HttpResponseMessage> EnsureResultSuccessStatusCode(this Task<HttpResponseMessage> task)
+		{
+			if (task.Result.IsSuccessStatusCode == false)
+			{
+				throw new HttpRequestException(task.Result.ReasonPhrase + "(" + (int)task.Result.StatusCode + "):" + task.Result.Content.ReadAsStringAsync().Result);
+			}
+			else
+			{
+				Console.WriteLine("Valid Response:" + task.Result.RequestMessage);
+			}
+
+			return task;
+		}
+
+		public static string GetQueryString(string baseQueryString, string subQueryString, params (string, object)[] valueTuples) =>
+					baseQueryString + "/" + subQueryString + "?" + valueTuples.Aggregate("",
+				(s, tuple) => $"{s}{(s.Length > 0 ? "&" : "")}{tuple.Item1}={tuple.Item2.ToString()}");
+	}
+
 	internal class HistoryPage : StylableElement
 	{
-		private const bool UseServerApiQuery = false;
-
 		public HistoryPage() : base("div")
 		{
 			Container wrappingContainer = new Container();
@@ -52,38 +73,20 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.History
 			};
 
 			historyTable.SetCellValueColor("Status", "OK", StylingColor.Success);
+			historyTable.SetCellValueColor("Status", "Warn", StylingColor.Warning);
 			historyTable.SetCellValueColor("Status", "Warnung", StylingColor.Warning);
+			historyTable.SetCellValueColor("Status", "Error", StylingColor.Danger);
 			historyTable.SetCellValueColor("Status", "Fehler", StylingColor.Danger);
 
 			historyTable.EndUpdate();
 			AppendChild(wrappingContainer);
 		}
 
-		protected override void Dispose(bool disposing)
-		{
-			PageStorage<ManualData>.Instance.Save();
-			base.Dispose(disposing);
-		}
-
-		private List<(string, List<string>)> CreateHistoryTableContent()
-		{
-			throw new NotSupportedException();
-			List<(string, List<string>)> returnval = new List<(string, List<string>)>();
-			foreach (HistoryElement historyElement in PageStorage<HistoryData>.Instance.StorageData.HistoryElements)
-			{
-				returnval.Add((
-					historyElement.TimeStamp.ToShortDateString() + " " + historyElement.TimeStamp.ToLongTimeString(),
-					new List<string>() { historyElement.Status, historyElement.Source, historyElement.Message }));
-			}
-
-			return returnval;
-		}
-
 		private Task<int> FetchAmount()
 		{
-			if (UseServerApiQuery)
+			if (PageStorage<BackendData>.Instance.StorageData.BackedPropertieses["History"].RequestDataFromBackend)
 			{
-				throw new NotImplementedException();
+				return new HttpClient().GetAsync($"{PageStorage<BackendData>.Instance.StorageData.BackedPropertieses["History"].DataSourcePath}/amount").ContinueWith(task => JsonConvert.DeserializeObject<int>(task.EnsureResultSuccessStatusCode().Result.Content.ReadAsStringAsync().Result));
 			}
 			else
 			{
@@ -93,23 +96,32 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.History
 
 		private Task<List<(DateTime, List<string>)>> FetchEntries(DateTime primaryKey, int takeAmount)
 		{
-			if (UseServerApiQuery)
+			if (PageStorage<BackendData>.Instance.StorageData.BackedPropertieses["History"].RequestDataFromBackend)
 			{
-				throw new NotImplementedException();
+				return new HttpClient()
+					.GetAsync(HttpExtensions.GetQueryString(PageStorage<BackendData>.Instance.StorageData.BackedPropertieses["History"].DataSourcePath, "range", ("primaryKey", primaryKey), ("takeAmount", takeAmount)))
+					.ContinueWith(task => JsonConvert
+						.DeserializeObject<List<HistoryElement>>(task.EnsureResultSuccessStatusCode().Result.Content.ReadAsStringAsync().Result)
+						.Select(historyElement => (TimeStamp: historyElement.TimeStamp,
+							new List<string>()
+							{
+								historyElement.Status,
+								historyElement.Source,
+								historyElement.Message
+							})).ToList());
 			}
 			else
 			{
 				if (primaryKey == default(DateTime))
 				{
-					return Task.Run(() =>
-						PageStorage<HistoryData>.Instance.StorageData.HistoryElements.Take(takeAmount)
-							.Select(historyElement => (historyElement.TimeStamp,
-								new List<string>()
-								{
-									historyElement.Status,
-									historyElement.Source,
-									historyElement.Message
-								})).ToList());
+					return Task.Run(() => PageStorage<HistoryData>.Instance.StorageData.HistoryElements.Take(takeAmount)
+						.Select(historyElement => (historyElement.TimeStamp,
+							new List<string>()
+							{
+								historyElement.Status,
+								historyElement.Source,
+								historyElement.Message
+							})).ToList());
 				}
 				else
 				{
@@ -129,9 +141,19 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.History
 
 		private Task<List<(DateTime, List<string>)>> FetchSearchEntries(string searchstring, int collumn, int amount)
 		{
-			if (UseServerApiQuery)
+			if (PageStorage<BackendData>.Instance.StorageData.BackedPropertieses["History"].RequestDataFromBackend)
 			{
-				throw new NotImplementedException();
+				return new HttpClient().GetAsync(
+						$"{PageStorage<BackendData>.Instance.StorageData.BackedPropertieses["History"].DataSourcePath}/search?searchstring={searchstring.Replace(".", "%").Replace(":", "%")}&collumn={collumn}&amount={amount}")
+					.ContinueWith(task => JsonConvert
+						.DeserializeObject<List<HistoryElement>>(task.EnsureResultSuccessStatusCode().Result.Content.ReadAsStringAsync().Result)
+						.Select(historyElement => ((TimeStamp: historyElement.TimeStamp,
+							new List<string>()
+							{
+								historyElement.Status,
+								historyElement.Source,
+								historyElement.Message
+							}))).ToList());
 			}
 			else
 			{
@@ -139,7 +161,6 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.History
 					.Where(element => GetElementCollumn(element, collumn).Contains(searchstring)).Take(amount).Select(historyElement =>
 						(historyElement.TimeStamp, new List<string>() { historyElement.Status, historyElement.Source, historyElement.Message }))
 					.ToList());
-				;
 			}
 		}
 
