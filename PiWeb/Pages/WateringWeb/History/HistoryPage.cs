@@ -14,33 +14,16 @@ using JsonConvert = Newtonsoft.Json.JsonConvert;
 
 namespace TabNoc.PiWeb.Pages.WateringWeb.History
 {
-	public static class HttpExtensions
-	{
-		public static Task<HttpResponseMessage> EnsureResultSuccessStatusCode(this Task<HttpResponseMessage> task)
-		{
-			if (task.Result.IsSuccessStatusCode == false)
-			{
-				throw new HttpRequestException(task.Result.ReasonPhrase + "(" + (int)task.Result.StatusCode + "):" + task.Result.Content.ReadAsStringAsync().Result);
-			}
-			else
-			{
-				Console.WriteLine("Valid Response:" + task.Result.RequestMessage);
-			}
-
-			return task;
-		}
-
-		public static string GetQueryString(string baseQueryString, string subQueryString, params (string, object)[] valueTuples) =>
-					baseQueryString + "/" + subQueryString + "?" + valueTuples.Aggregate("",
-				(s, tuple) => $"{s}{(s.Length > 0 ? "&" : "")}{tuple.Item1}={tuple.Item2.ToString()}");
-	}
-
 	internal class HistoryPage : StylableElement
 	{
 		public HistoryPage() : base("div")
 		{
-			Container wrappingContainer = new Container();
-			Grid grid = new Grid(wrappingContainer);
+			AddStyling(StylingOption.MarginRight, 5);
+			AddStyling(StylingOption.MarginLeft, 5);
+			AddStyling(StylingOption.PaddingRight, 5);
+			AddStyling(StylingOption.PaddingLeft, 5);
+			//Container wrappingContainer = new Container(this);
+			Grid grid = new Grid(this);
 
 			Dropdown messageKindDropdown = new Dropdown(new Button(StylingColor.Light, false, text: "Quelle auswählen!"));
 			grid.AddRow().AppendCollum(messageKindDropdown, autoSize: true);
@@ -79,7 +62,6 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.History
 			historyTable.SetCellValueColor("Status", "Fehler", StylingColor.Danger);
 
 			historyTable.EndUpdate();
-			AppendChild(wrappingContainer);
 		}
 
 		private Task<int> FetchAmount()

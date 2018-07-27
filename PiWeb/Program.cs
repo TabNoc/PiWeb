@@ -100,6 +100,8 @@ namespace TabNoc.PiWeb
 
 			#endregion PiWeb
 
+			Logging.WriteLog("System", "OK", "PiWebSite wurde gestartet!");
+
 			Console.ReadLine();
 			PageStorage<ChannelsData>.Instance.Dispose();
 			PageStorage<SettingsData>.Instance.Dispose();

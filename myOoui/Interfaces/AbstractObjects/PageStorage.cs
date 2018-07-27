@@ -6,7 +6,9 @@ using System.Net;
 using System.Net.Http;
 using System.Text;
 using TabNoc.MyOoui.Storage;
+using TabNoc.MyOoui.UiComponents;
 using TabNoc.PiWeb.DataTypes;
+using TabNoc.PiWeb.Pages.WateringWeb.History;
 
 namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 {
@@ -30,25 +32,33 @@ namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 		{
 			get
 			{
-				bool cacheTimeout = DateTime.Now - _lastLoadDateTime > _cacheTimeSpan;
-
-				if (!ReadOnly && (_changed == false && cacheTimeout && _storageData != null))
+				try
 				{
-					// überprüfen ob der gecachet wert sich verändert hat. Wenn ja, dann darf dieser nicht verworfen werden
-					if (GetWriteData(_storageData) != _loadedData)
+					bool cacheTimeout = DateTime.Now - _lastLoadDateTime > _cacheTimeSpan;
+
+					if (!ReadOnly && (_changed == false && cacheTimeout && _storageData != null))
 					{
-						_changed = true;
+						// überprüfen ob der gecachet wert sich verändert hat. Wenn ja, dann darf dieser nicht verworfen werden
+						if (GetWriteData(_storageData) != _loadedData)
+						{
+							_changed = true;
+						}
 					}
-				}
 
-				if (_storageData == null || (cacheTimeout && _changed == false))
-				{
-					_storageData = null;
-					Load();
+					if (_storageData == null || (cacheTimeout && _changed == false))
+					{
+						_storageData = null;
+						Load();
+						return _storageData;
+					}
+
 					return _storageData;
 				}
-
-				return _storageData;
+				catch (Exception e)
+				{
+					Logging.Error("Beim Abrufen der Daten von " + this.GetType().Name + "<" + typeof(T).Name + "> ist ein Fehler aufgetreten!", e);
+					throw;
+				}
 			}
 		}
 
@@ -140,25 +150,32 @@ namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 
 		public void Save()
 		{
-			if (ReadOnly == true)
+			try
 			{
-				throw new InvalidOperationException($"This PageStorage<{typeof(T).Name}> is ReadOnly -> You can't save it.");
-			}
-			if (_isDisposed)
-			{
-				throw new ObjectDisposedException(typeof(T).Name);
-			}
-			if (_saveDataCallback == null)
-			{
-				throw new NullReferenceException($"{nameof(Initialize)} has to be called before Saving the PageStorage<{typeof(T).Name}>");
-			}
+				if (ReadOnly == true)
+				{
+					throw new InvalidOperationException($"This PageStorage<{typeof(T).Name}> is ReadOnly -> You can't save it.");
+				}
+				if (_isDisposed)
+				{
+					throw new ObjectDisposedException(typeof(T).Name);
+				}
+				if (_saveDataCallback == null)
+				{
+					throw new NullReferenceException($"{nameof(Initialize)} has to be called before Saving the PageStorage<{typeof(T).Name}>");
+				}
 
-			string writeData = GetWriteData(_storageData);
-			if (writeData != _loadedData)
+				string writeData = GetWriteData(_storageData);
+				if (writeData != _loadedData)
+				{
+					//TODO: Maybe Merge Server data?
+					_saveDataCallback(writeData);
+					_changed = false;
+				}
+			}
+			catch (Exception e)
 			{
-				//TODO: Maybe Merge Server data?
-				_saveDataCallback(writeData);
-				_changed = false;
+				Logging.Error("Beim Speichern der Daten von " + this.GetType().Name + "<" + typeof(T).Name + "> ist ein kritischer Fehler aufgetreten!", e);
 			}
 		}
 
@@ -211,8 +228,7 @@ namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 				}
 				if (backedPropertieses[key].RequestDataFromBackend == true)
 				{
-					HttpClient httpClient = new HttpClient();
-					return httpClient.GetStringAsync(backedPropertieses[key].DataSourcePath).Result;
+					return new HttpClient().GetAsync(backedPropertieses[key].DataSourcePath).EnsureResultSuccessStatusCode().Result.Content.ReadAsStringAsync().Result;
 				}
 			}
 
@@ -237,9 +253,8 @@ namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 				Dictionary<string, BackedProperties> backedPropertieses = PageStorage<BackendData>.Instance.StorageData.BackedPropertieses;
 				if (backedPropertieses.ContainsKey(key) && backedPropertieses[key].RequestDataFromBackend == true)
 				{
-					HttpClient httpClient = new HttpClient();
-					StringContent httpContent = new StringContent(data, Encoding.UTF8, "application/json");
-					HttpResponseMessage message = httpClient.PutAsync(backedPropertieses[key].DataSourcePath, httpContent).Result;
+					HttpResponseMessage message = new HttpClient().PutAsync(backedPropertieses[key].DataSourcePath,
+						new StringContent(data, Encoding.UTF8, "application/json")).EnsureResultSuccessStatusCode().Result;
 					if (HttpStatusCode.NoContent != message.StatusCode)
 					{
 						throw new ApplicationException("Wrong Server Response Statuscode");

@@ -1,30 +1,58 @@
 #!/bin/bash
 #
 # die erste Zeile gibt mit welchem Programm das nachfolgende Scipt susgefuert werder soll. Sinnvoll ist das Script mit x Rechten auszustatten chmod +x script
-#Progamm xyz >! .... !, fuert das Programm xyz aus und Ã¼bergibt den zwischen ! gespeicherten Text, der Variablen ${V}  enthalten kann.
+#Progamm xyz >! .... !, fuert das Programm xyz aus und ÃƒÂ¼bergibt den zwischen ! gespeicherten Text, der Variablen ${V}  enthalten kann.
 
 echo
 echo %%%   Hi, das ist das Docker Script fuer PiWeb   %%%
 echo
 echo
-cd dotnet/deploy/
+cd /home/pi/dotnet/deploy/
 
-dockerTagName="tabnoc/piweb"
-echo Der Docker TagName lautet: $dockerTagName
+dockerWebsiteTagName="tabnoc/piweb"
+dockerServerTagName="tabnoc/wateringserver"
+echo Der Docker TagName fuer die Website lautet: $dockerWebsiteTagName
+echo Der Docker TagName fuer den Server lautet:  $dockerServerTagName
 
 echo
-dockerRunningContainer=$(sudo docker ps -a -q --filter ancestor=$dockerTagName --format="{{.ID}}")
+dockerRunningWebsiteContainer=$(sudo docker ps -a -q --filter ancestor=$dockerWebsiteTagName --format="{{.ID}}")
+dockerRunningServerContainer=$(sudo docker ps -a -q --filter ancestor=$dockerServerTagName --format="{{.ID}}")
 echo
 
-if [ -n "$dockerRunningContainer" ]; then
-	echo Es wurde der Container $dockerRunningContainer mit dem TagName $dockerTagName gefunden. 
-	echo Dieser wird nun gestoppt!
-	echo
-	sudo docker stop $dockerRunningContainer
-	echo
-else
-	echo Es wurde kein laufender Docker Container mit dem TagName $dockerTagName gefunden
-	echo
+if [[ $1 = [Ww][Ee][Bb][Ss][Ii][Tt][Ee] ]]; then
+cd PiWeb
+selectedWebSite=true
+selectedServer=false
+fi
+if [[ $1 = [Ss][Ee][Rr][Vv][Ee][Rr] ]]; then
+cd WateringServer
+selectedWebSite=false
+selectedServer=true
+fi
+
+if [ "$selectedWebSite" = "true" ]; then
+	if [ -n "$dockerRunningWebsiteContainer" ]; then
+		echo Es wurde der Container $dockerRunningWebsiteContainer mit dem TagName $dockerWebsiteTagName gefunden. 
+		echo Dieser wird nun gestoppt!
+		echo
+		sudo docker stop $dockerRunningWebsiteContainer
+		echo
+	else
+		echo Es wurde kein laufender Docker Container mit dem TagName $dockerWebsiteTagName gefunden
+		echo
+	fi
+fi
+if [ "$selectedServer" = "true" ]; then
+	if [ -n "$dockerRunningServerContainer" ]; then
+		echo Es wurde der Container $dockerRunningServerContainer mit dem TagName $dockerServerTagName gefunden. 
+		echo Dieser wird nun gestoppt!
+		echo
+		sudo docker stop $dockerRunningServerContainer
+		echo
+	else
+		echo Es wurde kein laufender Docker Container mit dem TagName $dockerServerTagName gefunden
+		echo
+	fi
 fi
 
 #if ! [[ $1 = [Ss][Tt][Aa][Rr][Tt] ]]; then 
@@ -34,28 +62,48 @@ fi
 #fi
 
 ## if [ $# -gt 0 ]; then 
-if [[ $1 = [Ss][Tt][Oo][Pp] ]]; then 
+if [[ $2 = [Ss][Tt][Oo][Pp] ]]; then 
 	echo
 	echo Der Docker Container sollte nur gestoppt werden!
 	echo
 	exit 0
 fi
 
-if [[ $1 = [Ss][Tt][Aa][Rr][Tt] ]]; then 
+if [[ $2 = [Ss][Tt][Aa][Rr][Tt] ]]; then 
 	echo
-	echo Der Docker Container sollt<e nur gestartet werden, build wird uebersprungen!
+	echo Der Docker Container sollte nur gestartet werden, build wird uebersprungen!
 	echo
 else
 	echo
 	echo Der Container wird erstellt
 	echo
-	sudo docker build . -t $dockerTagName
+	if [ "$selectedServer" = "true" ]; then
+		sudo docker build . -t $dockerServerTagName
+	fi
+
+	if [ "$selectedWebSite" = "true" ]; then
+		sudo docker build . -t $dockerWebsiteTagName
+	fi
 	echo
 fi
 
 echo Der Conatiner wird gestartet und anschliessend beobachtet
 echo
-sudo docker logs $(sudo docker run -it --init --restart unless-stopped -d -p 8080:8080 $dockerTagName) -f
+if [ "$selectedServer" = "true" ]; then
+	echo Der alte Container fuer den Namen WebPiServer wird zuerst noch geloescht
+	sudo docker rm WebPiServer
+	sudo docker run -it --init --restart unless-stopped -d -p 5000:5000 --name WebPiServer $dockerServerTagName
+	echo Anwendung wurde mit IP $(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' WebPiServer) gestartet
+	sudo docker logs WebPiServer -f
+fi
+
+if [ "$selectedWebSite" = "true" ]; then
+	echo Der alte Container fuer den Namen WebPiSite wird zuerst noch geloescht
+	sudo docker rm WebPiSite
+	sudo docker run -it --init --restart unless-stopped -d -p 8080:8080 --name WebPiSite $dockerWebsiteTagName
+	echo Anwendung wurde mit IP $(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' WebPiSite) gestartet
+	sudo docker logs WebPiSite -f
+fi
 echo
 
 echo !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

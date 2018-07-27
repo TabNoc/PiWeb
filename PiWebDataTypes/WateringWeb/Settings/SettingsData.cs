@@ -7,7 +7,7 @@ namespace TabNoc.PiWeb.DataTypes.WateringWeb.Settings
 		public bool Enabled;
 		public Dictionary<string, string> HumiditySensors;
 		public string Location;
-		public string LocationName;
+		public string LocationFriendlyName;
 		public int OverrideValue;
 		public bool WeatherEnabled;
 

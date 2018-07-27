@@ -15,6 +15,7 @@ namespace TabNoc.PiWeb.PagePublisher.WateringWeb
 		public SettingsPagePublisher(string publishPath) : base(publishPath)
 		{
 			PageStorage<SettingsData>.Instance.Initialize("Settings", new TimeSpan(0, 0, 5));
+			PageStorage<HumiditySensorData>.Instance.ReadOnly = true;
 			PageStorage<HumiditySensorData>.Instance.Initialize("Humidity", new TimeSpan(0, 0, 5));
 		}
 

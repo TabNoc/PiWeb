@@ -62,10 +62,11 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Channels
 
 			#region InputGroup > TwoStateButtonGroup ProgrammStatus
 
-			_programmEnabled = new TwoStateButtonGroup("Aktiv", "Inaktiv", channelProgram.Enabled, !channelProgram.Enabled);
-			InputGroup programmEnabledInputGroup = new InputGroup("Programmstatus", _programmEnabled, labelSize);
-			programmEnabledInputGroup.AddStyling(StylingOption.MarginBottom, 2);
-			grid.AddRow().AppendCollum(programmEnabledInputGroup, autoSize: true);
+			MultiInputGroup programmEnabledMultiInputGroup = new MultiInputGroup();
+			programmEnabledMultiInputGroup.AppendLabel("Programmstatus", labelSize);
+			programmEnabledMultiInputGroup.AddStyling(StylingOption.MarginBottom, 2);
+			_programmEnabled = programmEnabledMultiInputGroup.AppendCustomElement(new TwoStateButtonGroup("Aktiv", "Inaktiv", channelProgram.Enabled, !channelProgram.Enabled), false);
+			grid.AddRow().AppendCollum(programmEnabledMultiInputGroup, autoSize: true);
 
 			#endregion InputGroup > TwoStateButtonGroup ProgrammStatus
 
@@ -126,7 +127,7 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Channels
 			_weekdaysChoosenToggleButtonGroup.AddToggleButton("Fr", (channelProgram.ChoosenWeekdays & ChannelProgramData.Weekdays.Freitag) != ChannelProgramData.Weekdays.None);
 			_weekdaysChoosenToggleButtonGroup.AddToggleButton("Sa", (channelProgram.ChoosenWeekdays & ChannelProgramData.Weekdays.Samstag) != ChannelProgramData.Weekdays.None);
 			_weekdaysChoosenToggleButtonGroup.AddToggleButton("So", (channelProgram.ChoosenWeekdays & ChannelProgramData.Weekdays.Sonntag) != ChannelProgramData.Weekdays.None);
-			_weekDaysChoosenRadioButtonInputGroup = new RadioButtonInputGroup(GetCheckedWeekdays(channelProgram.ChoosenWeekdays) == 4, _weekdaysChoosenToggleButtonGroup, _weekdaysMoMiFrRadioButtonLabeledInputGroup.RadioButtonGroupName);
+			_weekDaysChoosenRadioButtonInputGroup = new RadioButtonInputGroup(GetCheckedWeekdays(channelProgram.ChoosenWeekdays) == 4, _weekdaysChoosenToggleButtonGroup, _weekdaysMoMiFrRadioButtonLabeledInputGroup.RadioButtonGroupName, false);
 			_weekDaysChoosenRadioButtonInputGroup.AddStyling(StylingOption.MarginLeft, 2);
 			grid.AddRow().AppendCollum(_weekDaysChoosenRadioButtonInputGroup, autoSize: true);
 
@@ -134,20 +135,22 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Channels
 
 			#region InputGroup > TwoStateButtonGroup WetterInfos
 
-			_weatherInfo = new TwoStateButtonGroup("Aktiv", "Inaktiv", channelProgram.ActivateWeatherInfo, !channelProgram.ActivateWeatherInfo);
-			InputGroup idontKnowThatInputGroup = new InputGroup("WetterInfos verwenden", _weatherInfo, labelSize);
-			idontKnowThatInputGroup.AddStyling(StylingOption.MarginBottom, 2);
-			otherRow.AppendCollum(idontKnowThatInputGroup, autoSize: true);
-			otherRow.AddNewLine();
+			MultiInputGroup weatherEnabledMultiInputGroup = new MultiInputGroup();
+			weatherEnabledMultiInputGroup.AppendLabel("WetterInfos verwenden", labelSize);
+			weatherEnabledMultiInputGroup.AddStyling(StylingOption.MarginBottom, 2);
+			_weatherInfo = weatherEnabledMultiInputGroup.AppendCustomElement(new TwoStateButtonGroup("Aktiv", "Inaktiv", channelProgram.ActivateWeatherInfo, !channelProgram.ActivateWeatherInfo), false);
+			otherRow.AppendCollum(weatherEnabledMultiInputGroup, autoSize: true);
 
 			#endregion InputGroup > TwoStateButtonGroup WetterInfos
 
+			otherRow.AddNewLine();
+
 			#region InputGroup > TwoStateButtonGroup Master Kanal
 
-			_activateMasterChannel = new TwoStateButtonGroup("Aktiv", "Inaktiv", channelProgram.EnableMasterChannel, !channelProgram.EnableMasterChannel);
-			InputGroup activateMasterChannelInputGroup = new InputGroup("Master Kanal auch Einschalten", _activateMasterChannel, labelSize);
-			//activateMasterChannelInputGroup.AddStyling(StylingOption.MarginBottom, 2);
-			otherRow.AppendCollum(activateMasterChannelInputGroup, autoSize: true);
+			MultiInputGroup activateMasterMultiInputGroup = new MultiInputGroup();
+			activateMasterMultiInputGroup.AppendLabel("Master Kanal auch Einschalten", labelSize);
+			_activateMasterChannel = activateMasterMultiInputGroup.AppendCustomElement(new TwoStateButtonGroup("Aktiv", "Inaktiv", channelProgram.EnableMasterChannel, !channelProgram.EnableMasterChannel), false);
+			otherRow.AppendCollum(activateMasterMultiInputGroup, autoSize: true);
 
 			#endregion InputGroup > TwoStateButtonGroup Master Kanal
 

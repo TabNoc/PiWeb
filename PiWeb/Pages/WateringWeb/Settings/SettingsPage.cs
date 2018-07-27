@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
 using TabNoc.MyOoui.Interfaces.Enums;
 using TabNoc.MyOoui.Storage;
@@ -10,7 +11,9 @@ using TabNoc.MyOoui.UiComponents.FormControl;
 using TabNoc.MyOoui.UiComponents.FormControl.InputGroups;
 using TabNoc.MyOoui.UiComponents.FormControl.InputGroups.Components;
 using TabNoc.PiWeb.DataTypes.WateringWeb.Settings;
+using TabNoc.PiWeb.Pages.WateringWeb.History;
 using Button = TabNoc.MyOoui.HtmlElements.Button;
+using JsonConvert = Newtonsoft.Json.JsonConvert;
 
 namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 {
@@ -24,7 +27,7 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 		public SettingsPage(PageStorage<SettingsData> settingsData) : base("div")
 		{
 			this.AddScriptDependency("/lib/bootstrap3-typeahead.min.js");
-			const int labelSize = 115;
+			const int labelSize = 140;
 
 			_settingsData = settingsData;
 
@@ -42,21 +45,29 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 
 			#region AutoEnabled
 
-			TwoStateButtonGroup enabledButtonGroup = new TwoStateButtonGroup("Aktiv", "Inaktiv", settingsData.StorageData.Enabled, !settingsData.StorageData.Enabled);
-			enabledButtonGroup.FirstButtonStateChange += (sender, args) => settingsData.StorageData.Enabled = args.NewButtonState;
-			InputGroup inputGroup = new InputGroup("Automatik", enabledButtonGroup, labelSize);
-			inputGroup.AddStyling(StylingOption.MarginBottom, 2);
-			grid.AddRow().AppendCollum(inputGroup, autoSize: true);
+			MultiInputGroup autoEnabledMultiInputGroup = new MultiInputGroup();
+			autoEnabledMultiInputGroup.AppendLabel("Automatik", labelSize);
+			autoEnabledMultiInputGroup
+				.AppendCustomElement(
+					new TwoStateButtonGroup("Aktiv", "Inaktiv", settingsData.StorageData.Enabled,
+						!settingsData.StorageData.Enabled), false).FirstButtonStateChange += (sender, args) =>
+				settingsData.StorageData.Enabled = args.NewButtonState;
+			autoEnabledMultiInputGroup.AddStyling(StylingOption.MarginBottom, 2);
+			grid.AddRow().AppendCollum(autoEnabledMultiInputGroup, autoSize: true);
 
 			#endregion AutoEnabled
 
 			#region WeatherEnabled
 
-			TwoStateButtonGroup weatherEnabledButtonGroup = new TwoStateButtonGroup("Aktiv", "Inaktiv", settingsData.StorageData.WeatherEnabled, !settingsData.StorageData.WeatherEnabled);
-			weatherEnabledButtonGroup.FirstButtonStateChange += (sender, args) => settingsData.StorageData.WeatherEnabled = args.NewButtonState;
-			InputGroup weatherInputGroup = new InputGroup("Wetter", weatherEnabledButtonGroup, labelSize);
-			weatherInputGroup.AddStyling(StylingOption.MarginBottom, 2);
-			grid.AddRow().AppendCollum(weatherInputGroup, autoSize: true);
+			MultiInputGroup weatherEnabledMultiInputGroup = new MultiInputGroup();
+			weatherEnabledMultiInputGroup.AppendLabel("Wetterdaten verwenden", labelSize);
+			weatherEnabledMultiInputGroup
+				.AppendCustomElement(
+					new TwoStateButtonGroup("Aktiv", "Inaktiv", settingsData.StorageData.WeatherEnabled,
+						!settingsData.StorageData.WeatherEnabled), false).FirstButtonStateChange += (sender, args) =>
+				settingsData.StorageData.WeatherEnabled = args.NewButtonState;
+			weatherEnabledMultiInputGroup.AddStyling(StylingOption.MarginBottom, 2);
+			grid.AddRow().AppendCollum(weatherEnabledMultiInputGroup, autoSize: true);
 
 			#endregion WeatherEnabled
 
@@ -68,14 +79,14 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 			weatherLocationMultiInputGroup.AppendLabel("Standort", labelSize);
 
 			StylableTextInput weatherLocationTextInput = weatherLocationMultiInputGroup.AppendTextInput("Bitte Eintragen...", false);
-			weatherLocationTextInput.Value = settingsData.StorageData.LocationName;
+			weatherLocationTextInput.Value = settingsData.StorageData.LocationFriendlyName;
 
 			#region Hidden TextInputs
 
-			TextInput weatherLocationChangeTextInput = new TextInput { IsHidden = true };
+			TextInput weatherLocationChangeTextInput = new TextInput { IsHidden = true, Value = settingsData.StorageData.Location };
 
 			locationRow.AppendChild(weatherLocationChangeTextInput);
-			TextInput weatherLocationNameChangeTextInput = new TextInput { IsHidden = true };
+			TextInput weatherLocationNameChangeTextInput = new TextInput { IsHidden = true, Value = settingsData.StorageData.LocationFriendlyName };
 
 			locationRow.AppendChild(weatherLocationNameChangeTextInput);
 
@@ -106,8 +117,8 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 				{
 					weatherLocationTextInput.SetValidation(false, false);
 					settingsData.StorageData.Location = weatherLocationChangeTextInput.Value;
-					settingsData.StorageData.LocationName = weatherLocationNameChangeTextInput.Value;
-					weatherLocationTextInput.Value = settingsData.StorageData.LocationName;
+					settingsData.StorageData.LocationFriendlyName = weatherLocationNameChangeTextInput.Value;
+					weatherLocationTextInput.Value = settingsData.StorageData.LocationFriendlyName;
 				}
 			};
 			locationRow.AppendCollum(saveLocationButton, autoSize: true);
@@ -231,9 +242,30 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 				backendPath.SetValidation(false, false);
 				if (backendEnabled.FirstButtonActive && Uri.IsWellFormedUriString(backendPath.Value, UriKind.Absolute))
 				{
-					backendPath.SetValidation(true, false);
-					backedProperties.RequestDataFromBackend = backendEnabled.FirstButtonActive;
-					backedProperties.DataSourcePath = backendPath.Value;
+					try
+					{
+						if (JsonConvert.DeserializeObject<bool>(new HttpClient().GetAsync(backendPath.Value + "/enabled").EnsureResultSuccessStatusCode().Result.Content.ReadAsStringAsync().Result) == false)
+						{
+							//TODO: ich brauche eine Messagebox
+							backendPath.Value = "Der Server hat diese API verweigert! Pfad:" + backendPath.Value;
+							throw new Exception(backendPath.Value);
+						}
+						backendPath.SetValidation(true, false);
+						backedProperties.RequestDataFromBackend = backendEnabled.FirstButtonActive;
+						backedProperties.DataSourcePath = backendPath.Value;
+					}
+					catch (Exception e)
+					{
+						backendPath.Value = "Der Verbindungsversuch ist fehlgeschlagen! Pfad:" + backendPath.Value;
+						Console.ForegroundColor = ConsoleColor.Yellow;
+						Console.WriteLine("Beim Versuch die neuen BackendEinstellungen zu Testen ist ein Fehler aufgetreten.");
+						Console.ResetColor();
+
+						Logging.WriteLog("System", "Warn", $"Beim Versuch die Backendeinstellungen für {name} des Servers zu validieren ist es zu folgendem Fehler gekommen:\r\n{e.Message}");
+
+						backendPath.SetValidation(false, true);
+						//TODO: ich brauche eine Messagebox
+					}
 				}
 				else if (backendEnabled.SecondButtonActive)
 				{
