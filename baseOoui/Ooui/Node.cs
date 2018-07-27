@@ -216,8 +216,18 @@ namespace Ooui
 
 	    public void Dispose()
 	    {
-		    Dispose(true);
-		    GC.SuppressFinalize(this);
+		    try
+		    {
+			    Dispose(true);
+			    GC.SuppressFinalize(this);
+		    }
+		    catch (Exception e)
+		    {
+			    Console.ForegroundColor = ConsoleColor.Red;
+				Console.WriteLine(e);
+				Console.ResetColor();
+			    throw;
+		    }
 	    }
 
 	    ~Node()
