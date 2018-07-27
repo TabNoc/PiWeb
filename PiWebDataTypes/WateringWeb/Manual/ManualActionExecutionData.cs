@@ -23,6 +23,7 @@ namespace TabNoc.PiWeb.DataTypes.WateringWeb.Manual
 			public int ChannelId;
 			public TimeSpan Duration;
 			public int DurationOverride;
+			public string Guid = System.Guid.NewGuid().ToString();
 
 			public ManualActionExecution(int channelId, TimeSpan duration, bool activateMasterChannel, int durationOverride)
 			{

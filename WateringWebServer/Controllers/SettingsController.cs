@@ -3,6 +3,7 @@ using Npgsql;
 using NpgsqlTypes;
 using System.Collections.Generic;
 using TabNoc.PiWeb.DataTypes.WateringWeb.Settings;
+using TabNoc.PiWeb.WateringWebServer.other;
 
 namespace TabNoc.PiWeb.WateringWebServer.Controllers
 {
@@ -10,11 +11,8 @@ namespace TabNoc.PiWeb.WateringWebServer.Controllers
 	[ApiController]
 	public class SettingsController : ControllerBase
 	{
-		private readonly NpgsqlConnection _connection;
-
-		public SettingsController(NpgsqlConnection connection)
+		public SettingsController()
 		{
-			_connection = connection;
 		}
 
 		[HttpGet]
@@ -25,9 +23,9 @@ namespace TabNoc.PiWeb.WateringWebServer.Controllers
 				Valid = true,
 				HumiditySensors = new Dictionary<string, string>()
 			};
-			lock (_connection)
+			using (ConnectionPool.ConnectionUsable usable = new ConnectionPool.ConnectionUsable())
 			{
-				using (NpgsqlCommand command = _connection.CreateCommand())
+				using (NpgsqlCommand command = usable.Connection.CreateCommand())
 				{
 					command.CommandText = "select enabled, location, location_friendly_name, override_value, weather_enabled from t_settings;";
 					using (NpgsqlDataReader dataReader = command.ExecuteReader())
@@ -64,11 +62,11 @@ namespace TabNoc.PiWeb.WateringWebServer.Controllers
 		[HttpPut]
 		public ActionResult Put([FromBody] SettingsData settingsData)
 		{
-			lock (_connection)
+			using (ConnectionPool.ConnectionUsable usable = new ConnectionPool.ConnectionUsable())
 			{
-				using (NpgsqlCommand command = _connection.CreateCommand())
+				using (NpgsqlCommand command = usable.Connection.CreateCommand())
 				{
-					command.Transaction = _connection.BeginTransaction();
+					command.Transaction = usable.Connection.BeginTransaction();
 					command.CommandText = "select 1 from t_settings;";
 					NpgsqlDataReader reader = command.ExecuteReader();
 					if (reader.Read() == false)

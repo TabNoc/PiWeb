@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Npgsql;
 using System.Collections.Generic;
 using TabNoc.PiWeb.DataTypes.WateringWeb.Settings;
 
@@ -9,11 +8,8 @@ namespace TabNoc.PiWeb.WateringWebServer.Controllers
 	[ApiController]
 	public class HumidityController : ControllerBase
 	{
-		private readonly NpgsqlConnection _connection;
-
-		public HumidityController(NpgsqlConnection connection)
+		public HumidityController()
 		{
-			_connection = connection;
 		}
 
 		[HttpGet]

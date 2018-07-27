@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc;
-using Npgsql;
+﻿using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 
 namespace TabNoc.PiWeb.WateringWebServer.Controllers
 {
@@ -8,11 +7,14 @@ namespace TabNoc.PiWeb.WateringWebServer.Controllers
 	[ApiController]
 	public class ValuesController : ControllerBase
 	{
-		private readonly NpgsqlConnection _connection;
-
-		public ValuesController(NpgsqlConnection connection)
+		public ValuesController()
 		{
-			_connection = connection;
+		}
+
+		// DELETE api/values/5
+		[HttpDelete("{id}")]
+		public void Delete(int id)
+		{
 		}
 
 		// GET api/values
@@ -38,12 +40,6 @@ namespace TabNoc.PiWeb.WateringWebServer.Controllers
 		// PUT api/values/5
 		[HttpPut("{id}")]
 		public void Put(int id, [FromBody] string value)
-		{
-		}
-
-		// DELETE api/values/5
-		[HttpDelete("{id}")]
-		public void Delete(int id)
 		{
 		}
 	}

@@ -4,6 +4,7 @@ using NpgsqlTypes;
 using System;
 using System.Collections.Generic;
 using TabNoc.PiWeb.DataTypes.WateringWeb.History;
+using TabNoc.PiWeb.WateringWebServer.other;
 
 namespace TabNoc.PiWeb.WateringWebServer.Controllers
 {
@@ -11,46 +12,41 @@ namespace TabNoc.PiWeb.WateringWebServer.Controllers
 	[ApiController]
 	public class HistoryController : ControllerBase
 	{
-		private readonly NpgsqlConnection _connection;
-
-		public HistoryController(NpgsqlConnection connection)
+		public HistoryController()
 		{
-			_connection = connection;
+		}
+
+		public static void AddLogEntry(HistoryElement element)
+		{
+			using (ConnectionPool.ConnectionUsable usable = new ConnectionPool.ConnectionUsable())
+			{
+				using (NpgsqlCommand command = usable.Connection.CreateCommand())
+				{
+					command.CommandText = $"INSERT INTO t_history(msgtimestamp, source, status, message) Values (@time, '{element.Source}', '{element.Status}', '{element.Message}');";
+					command.Parameters.AddWithValue("@time", NpgsqlDbType.Timestamp, element.TimeStamp);
+					command.ExecuteNonQuery();
+				}
+			}
 		}
 
 		[HttpPost]
 		public ActionResult CreateNewEntry(HistoryElement element)
 		{
-			try
+			if (!ModelState.IsValid)
 			{
-				if (!ModelState.IsValid)
+				return BadRequest(ModelState);
+			}
+			using (ConnectionPool.ConnectionUsable usable = new ConnectionPool.ConnectionUsable())
+			{
+				using (NpgsqlCommand command = usable.Connection.CreateCommand())
 				{
-					return BadRequest(ModelState);
+					command.CommandText = $"INSERT INTO t_history(msgtimestamp, source, status, message) Values (@time, '{element.Source}', '{element.Status}', '{element.Message}');";
+					command.Parameters.AddWithValue("@time", NpgsqlDbType.Timestamp, element.TimeStamp);
+					command.ExecuteNonQuery();
 				}
-				lock (_connection)
-				{
-					using (NpgsqlCommand command = _connection.CreateCommand())
-					{
-						command.CommandText = $"INSERT INTO t_history(msgtimestamp, source, status, message) Values (@time, '{element.Source}', '{element.Status}', '{element.Message}');";
-						command.Parameters.AddWithValue("@time", NpgsqlDbType.Timestamp, element.TimeStamp);
-						command.ExecuteNonQuery();
-					}
-				}
+			}
 
-				return Ok();
-			}
-			catch (System.InvalidOperationException invalidOperationException)
-			{
-				if (invalidOperationException.Message.Contains("Connection is not open"))
-				{
-					lock (_connection)
-					{
-						Console.WriteLine("Verbindung wird neu geöffnet");
-						_connection.Open();
-					}
-				}
-				throw;
-			}
+			return Ok();
 		}
 
 		/// <summary>
@@ -60,39 +56,26 @@ namespace TabNoc.PiWeb.WateringWebServer.Controllers
 		[HttpGet]
 		public ActionResult<HistoryData> Get()
 		{
-			try
+			HistoryData data = new HistoryData
 			{
-				HistoryData data = new HistoryData
+				Valid = true
+			};
+
+			using (ConnectionPool.ConnectionUsable usable = new ConnectionPool.ConnectionUsable())
+			{
+				using (NpgsqlCommand command = usable.Connection.CreateCommand())
 				{
-					Valid = true
-				};
-				lock (_connection)
-				{
-					using (NpgsqlCommand npgsqlCommand = _connection.CreateCommand())
+					command.CommandText = "select * from t_history order by msgtimestamp desc;";
+					using (NpgsqlDataReader dataReader = command.ExecuteReader())
 					{
-						npgsqlCommand.CommandText = "select * from t_history order by msgtimestamp desc;";
-						using (NpgsqlDataReader dataReader = npgsqlCommand.ExecuteReader())
+						while (dataReader.Read())
 						{
-							while (dataReader.Read())
-							{
-								data.HistoryElements.Add(new HistoryElement((DateTime)dataReader[0], (string)dataReader[1], (string)dataReader[2], (string)dataReader[3]));
-							}
+							data.HistoryElements.Add(new HistoryElement((DateTime)dataReader[0], (string)dataReader[1], (string)dataReader[2], (string)dataReader[3]));
 						}
 					}
 				}
+
 				return Ok(data);
-			}
-			catch (System.InvalidOperationException invalidOperationException)
-			{
-				if (invalidOperationException.Message.Contains("Connection is not open"))
-				{
-					lock (_connection)
-					{
-						Console.WriteLine("Verbindung wird neu geöffnet");
-						_connection.Open();
-					}
-				}
-				throw;
 			}
 		}
 
@@ -104,37 +87,22 @@ namespace TabNoc.PiWeb.WateringWebServer.Controllers
 		[HttpGet("{primaryKey}")]
 		public ActionResult<HistoryElement> Get(DateTime primaryKey)
 		{
-			try
+			using (ConnectionPool.ConnectionUsable usable = new ConnectionPool.ConnectionUsable())
 			{
-				lock (_connection)
+				using (NpgsqlCommand command = usable.Connection.CreateCommand())
 				{
-					using (NpgsqlCommand command = _connection.CreateCommand())
+					command.CommandText = "select * from t_history where msgtimestamp == @primaryKey;";
+					command.Parameters.AddWithValue("@primaryKey", NpgsqlDbType.Timestamp, primaryKey);
+					using (NpgsqlDataReader dataReader = command.ExecuteReader())
 					{
-						command.CommandText = "select * from t_history where msgtimestamp == @primaryKey;";
-						command.Parameters.AddWithValue("@primaryKey", NpgsqlDbType.Timestamp, primaryKey);
-						using (NpgsqlDataReader dataReader = command.ExecuteReader())
+						while (dataReader.Read())
 						{
-							while (dataReader.Read())
-							{
-								return Ok(new HistoryElement((DateTime)dataReader[0], (string)dataReader[1], (string)dataReader[2], (string)dataReader[3]));
-							}
+							return Ok(new HistoryElement((DateTime)dataReader[0], (string)dataReader[1], (string)dataReader[2], (string)dataReader[3]));
 						}
 					}
 				}
-				throw new Exception("Dieser Punkt darf nicht erreicht werden!");
 			}
-			catch (System.InvalidOperationException invalidOperationException)
-			{
-				if (invalidOperationException.Message.Contains("Connection is not open"))
-				{
-					lock (_connection)
-					{
-						Console.WriteLine("Verbindung wird neu geöffnet");
-						_connection.Open();
-					}
-				}
-				throw;
-			}
+			throw new Exception("Dieser Punkt darf nicht erreicht werden!");
 		}
 
 		/// <summary>
@@ -144,36 +112,21 @@ namespace TabNoc.PiWeb.WateringWebServer.Controllers
 		[HttpGet("amount")]
 		public ActionResult<int> GetAmount()
 		{
-			try
+			using (ConnectionPool.ConnectionUsable usable = new ConnectionPool.ConnectionUsable())
 			{
-				lock (_connection)
+				using (NpgsqlCommand command = usable.Connection.CreateCommand())
 				{
-					using (NpgsqlCommand npgsqlCommand = _connection.CreateCommand())
+					command.CommandText = "select count(*) from t_history;";
+					using (NpgsqlDataReader dataReader = command.ExecuteReader())
 					{
-						npgsqlCommand.CommandText = "select count(*) from t_history;";
-						using (NpgsqlDataReader dataReader = npgsqlCommand.ExecuteReader())
+						while (dataReader.Read())
 						{
-							while (dataReader.Read())
-							{
-								return Ok(dataReader[0]);
-							}
+							return Ok(dataReader[0]);
 						}
 					}
 				}
-				throw new Exception("Dieser Punkt darf nicht erreicht werden!");
 			}
-			catch (System.InvalidOperationException invalidOperationException)
-			{
-				if (invalidOperationException.Message.Contains("Connection is not open"))
-				{
-					lock (_connection)
-					{
-						Console.WriteLine("Verbindung wird neu geöffnet");
-						_connection.Open();
-					}
-				}
-				throw;
-			}
+			throw new Exception("Dieser Punkt darf nicht erreicht werden!");
 		}
 
 		[HttpGet("enabled")]
@@ -185,87 +138,57 @@ namespace TabNoc.PiWeb.WateringWebServer.Controllers
 		[HttpGet("range")]
 		public ActionResult<IEnumerable<HistoryElement>> GetRange([FromQuery(Name = "primaryKey")] DateTime primaryKey, [FromQuery(Name = "takeAmount")] int takeAmount)
 		{
-			try
+			List<HistoryElement> returnval = new List<HistoryElement>();
+			using (ConnectionPool.ConnectionUsable usable = new ConnectionPool.ConnectionUsable())
 			{
-				List<HistoryElement> returnval = new List<HistoryElement>();
-				lock (_connection)
+				using (NpgsqlCommand command = usable.Connection.CreateCommand())
 				{
-					using (NpgsqlCommand command = _connection.CreateCommand())
+					if (primaryKey == default(DateTime))
 					{
-						if (primaryKey == default(DateTime))
-						{
-							command.CommandText = "select * from t_history order by msgtimestamp desc limit @amount;";
-						}
-						else
-						{
-							command.CommandText = "select * from t_history where msgtimestamp <= @fromTime order by msgtimestamp desc limit @amount;";
-							command.Parameters.AddWithValue("@fromTime", NpgsqlDbType.Timestamp, primaryKey);
-						}
+						command.CommandText = "select * from t_history order by msgtimestamp desc limit @amount;";
+					}
+					else
+					{
+						command.CommandText = "select * from t_history where msgtimestamp <= @fromTime order by msgtimestamp desc limit @amount;";
+						command.Parameters.AddWithValue("@fromTime", NpgsqlDbType.Timestamp, primaryKey);
+					}
 
-						command.Parameters.AddWithValue("@amount", NpgsqlDbType.Integer, takeAmount);
-						using (NpgsqlDataReader dataReader = command.ExecuteReader())
+					command.Parameters.AddWithValue("@amount", NpgsqlDbType.Integer, takeAmount);
+					using (NpgsqlDataReader dataReader = command.ExecuteReader())
+					{
+						while (dataReader.Read())
 						{
-							while (dataReader.Read())
-							{
-								returnval.Add(new HistoryElement((DateTime)dataReader[0], (string)dataReader[1], (string)dataReader[2], (string)dataReader[3]));
-							}
+							returnval.Add(new HistoryElement((DateTime)dataReader[0], (string)dataReader[1], (string)dataReader[2], (string)dataReader[3]));
 						}
 					}
 				}
+			}
 
-				return Ok(returnval);
-			}
-			catch (System.InvalidOperationException invalidOperationException)
-			{
-				if (invalidOperationException.Message.Contains("Connection is not open"))
-				{
-					lock (_connection)
-					{
-						Console.WriteLine("Verbindung wird neu geöffnet");
-						_connection.Open();
-					}
-				}
-				throw;
-			}
+			return Ok(returnval);
 		}
 
 		[HttpGet("search")]
 		public ActionResult<IEnumerable<HistoryElement>> GetSearched([FromQuery(Name = "searchString")] string searchString, [FromQuery(Name = "collumn")]int collumn, [FromQuery(Name = "amount")]int amount)
 		{
-			try
+			List<HistoryElement> returnval = new List<HistoryElement>();
+			using (ConnectionPool.ConnectionUsable usable = new ConnectionPool.ConnectionUsable())
 			{
-				List<HistoryElement> returnval = new List<HistoryElement>();
-				lock (_connection)
+				using (NpgsqlCommand command = usable.Connection.CreateCommand())
 				{
-					using (NpgsqlCommand command = _connection.CreateCommand())
+					command.CommandText = "select * from t_history where " + GetCollumnName(collumn) + "::text like '%" + searchString + "%' order by msgtimestamp desc limit @amount;";
+					//command.Parameters.AddWithValue("@tableName", GetCollumnName(collumn));
+					//command.Parameters.AddWithValue("@searchstring", searchString);
+					command.Parameters.AddWithValue("@amount", NpgsqlDbType.Integer, amount);
+					using (NpgsqlDataReader dataReader = command.ExecuteReader())
 					{
-						command.CommandText = "select * from t_history where " + GetCollumnName(collumn) + "::text like '%" + searchString + "%' order by msgtimestamp desc limit @amount;";
-						//command.Parameters.AddWithValue("@tableName", GetCollumnName(collumn));
-						//command.Parameters.AddWithValue("@searchstring", searchString);
-						command.Parameters.AddWithValue("@amount", NpgsqlDbType.Integer, amount);
-						using (NpgsqlDataReader dataReader = command.ExecuteReader())
+						while (dataReader.Read())
 						{
-							while (dataReader.Read())
-							{
-								returnval.Add(new HistoryElement((DateTime)dataReader[0], (string)dataReader[1], (string)dataReader[2], (string)dataReader[3]));
-							}
+							returnval.Add(new HistoryElement((DateTime)dataReader[0], (string)dataReader[1], (string)dataReader[2], (string)dataReader[3]));
 						}
 					}
 				}
-				return Ok(returnval);
 			}
-			catch (System.InvalidOperationException invalidOperationException)
-			{
-				if (invalidOperationException.Message.Contains("Connection is not open"))
-				{
-					lock (_connection)
-					{
-						Console.WriteLine("Verbindung wird neu geöffnet");
-						_connection.Open();
-					}
-				}
-				throw;
-			}
+			return Ok(returnval);
 		}
 
 		private string GetCollumnName(int collumn)
