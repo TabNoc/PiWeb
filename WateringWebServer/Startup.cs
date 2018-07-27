@@ -9,6 +9,8 @@ using Npgsql;
 using System;
 using System.Globalization;
 using System.Threading.Tasks;
+using Hangfire;
+using Hangfire.PostgreSql;
 
 namespace TabNoc.PiWeb.WateringWebServer
 {
@@ -96,6 +98,11 @@ namespace TabNoc.PiWeb.WateringWebServer
 				}
 				return false;
 			});
+
+			app.UseHangfireServer();
+			//app.UseHangfireDashboard();
+
+			RecurringJob.AddOrUpdate(() => GC.Collect(), Cron.Minutely);
 		}
 
 		// This method gets called by the runtime. Use this method to add services to the container.
@@ -115,6 +122,11 @@ namespace TabNoc.PiWeb.WateringWebServer
 			NpgsqlConnection connection = new NpgsqlConnection(PrivateData.ConnectionStringBuilder.ToString());
 			connection.Open();
 			services.AddSingleton<NpgsqlConnection>(connection);
+
+			services.AddHangfire(config =>
+			{
+				config.UsePostgreSqlStorage(PrivateData.ConnectionStringBuilder.ToString());
+			});
 		}
 	}
 }
