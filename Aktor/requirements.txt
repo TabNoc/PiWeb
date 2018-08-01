@@ -1,0 +1,4 @@
+flask
+flask_http2_push
+smbus2
+pyopenssl
