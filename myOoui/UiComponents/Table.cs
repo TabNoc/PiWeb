@@ -10,14 +10,12 @@ using TabNoc.MyOoui.Interfaces.Enums;
 
 namespace TabNoc.MyOoui.UiComponents
 {
-	public class Table<T> : StylableElement
+	public class Table<T> : StylableElement, IDisposable
 	{
-		private readonly List<(T, List<string>)> _entries = new List<(T, List<string>)>();
-		private readonly HashSet<T> _entriesHashSet = new HashSet<T>();
-
 		private readonly List<(T, List<string>)> _cachedSearchEntries = new List<(T, List<string>)>();
 		private readonly HashSet<T> _cachedSearchEntriesHashSet = new HashSet<T>();
-
+		private readonly List<(T, List<string>)> _entries = new List<(T, List<string>)>();
+		private readonly HashSet<T> _entriesHashSet = new HashSet<T>();
 		private readonly Func<Task<int>> _fetchAmount;
 		private readonly FetchEntriesDelegate<T> _fetchEntries;
 		private readonly List<string> _header;
@@ -84,11 +82,12 @@ namespace TabNoc.MyOoui.UiComponents
 
 		#endregion Cell Color Fields
 
-		public Table(List<string> header, List<(T, List<string>)> entries, PrimaryKeyConverterDelegate<T> primaryKeyConverter, bool inUpdateMode = false) : base("table")
+		public Table(List<string> header, List<(T, List<string>)> entries, PrimaryKeyConverterDelegate<T> primaryKeyConverter, int visibleTablePageItems = 10, bool inUpdateMode = false) : base("table")
 		{
 			_header = header;
 			_entries = entries;
 			_primaryKeyConverter = primaryKeyConverter;
+			_visibleTablePageItems = visibleTablePageItems;
 			ClassName = "table table-hover";
 
 			TableHead head = new TableHead();
@@ -142,6 +141,17 @@ namespace TabNoc.MyOoui.UiComponents
 			{
 				StartUpdate();
 			}
+			TableFoot tableFoot = new TableFoot();
+			AppendChild(tableFoot);
+
+			_normalFetchedEntries = _totalTableAmount = entries.Count;
+			int pages = (int)Math.Ceiling((decimal)_totalTableAmount / _visibleTablePageItems);
+			if (pages > 1)
+			{
+				_pagination = new Pagination(SwitchPageCallback, pages);
+				tableFoot.AppendChild(_pagination);
+			}
+
 			ReCalculateTableContent();
 		}
 
@@ -257,6 +267,15 @@ namespace TabNoc.MyOoui.UiComponents
 					throw;
 				}
 			});
+
+			Task.Run(() =>
+			{
+				while (_disposed == false)
+				{
+					RefreshBeginningTableContentAsync();
+					System.Threading.Thread.Sleep(10000);
+				}
+			});
 		}
 
 		public void EndUpdate()
@@ -267,6 +286,44 @@ namespace TabNoc.MyOoui.UiComponents
 
 				ReCalculateTableContent();
 			}
+		}
+
+		public void RefreshBeginningTableContent()
+		{
+			_fetchEntries(default(T), 10).ContinueWith(task =>
+			{
+				try
+				{
+					if (AddEntriesToCache(task, true))
+					{
+						ReCalculateTableContent();
+					}
+				}
+				catch (Exception e)
+				{
+					Logging.Error("Beim ausführen von Table.RefreshBeginningTableContent ist ein Fehler aufgetreten!", e);
+					throw;
+				}
+			}).Wait();
+		}
+
+		public void RefreshBeginningTableContentAsync()
+		{
+			_fetchEntries(default(T), 10).ContinueWith(task =>
+			{
+				try
+				{
+					if (AddEntriesToCache(task, true))
+					{
+						ReCalculateTableContent();
+					}
+				}
+				catch (Exception e)
+				{
+					Logging.Error("Beim ausführen von Table.RefreshBeginningTableContent ist ein Fehler aufgetreten!", e);
+					throw;
+				}
+			});
 		}
 
 		public void RemoveCellValueColor(string rowHeader, string value, StylingColor color)
@@ -626,6 +683,60 @@ namespace TabNoc.MyOoui.UiComponents
 
 			ReCalculateTableContent();
 		}
+
+		#region Dispose Pattern
+
+		private bool _disposed;
+
+		~Table()
+		{
+			try
+			{
+				Dispose(false);
+			}
+			catch (Exception e)
+			{
+				Console.ForegroundColor = ConsoleColor.Red;
+				Console.WriteLine(e);
+				Console.ResetColor();
+			}
+		}
+
+		public new void Dispose()
+		{
+			try
+			{
+				Dispose(true);
+				GC.SuppressFinalize(this);
+			}
+			catch (Exception e)
+			{
+				Console.ForegroundColor = ConsoleColor.Red;
+				Console.WriteLine(e);
+				Console.ResetColor();
+			}
+			base.Dispose();
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			try
+			{
+				if (_disposed)
+					return;
+
+				_disposed = true;
+			}
+			catch (Exception e)
+			{
+				Console.ForegroundColor = ConsoleColor.Red;
+				Console.WriteLine(e);
+				Console.ResetColor();
+			}
+			base.Dispose(disposing);
+		}
+
+		#endregion Dispose Pattern
 
 		#region SubClasses
 

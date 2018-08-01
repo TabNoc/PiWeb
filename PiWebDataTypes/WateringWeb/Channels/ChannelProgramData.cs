@@ -4,29 +4,16 @@ namespace TabNoc.PiWeb.DataTypes.WateringWeb.Channels
 {
 	public class ChannelProgramData
 	{
-		public string Name;
+		public bool ActivateWeatherInfo;
+		public Weekdays ChoosenWeekdays;
 		public string Description;
-		public int Id;
+		public TimeSpan Duration;
 		public bool Enabled;
 		public bool EnableMasterChannel;
-		public bool ActivateWeatherInfo;
+		public string Guid = System.Guid.NewGuid().ToString();
+		public int Id;
+		public string Name;
 		public TimeSpan StartTime;
-		public TimeSpan Duration;
-
-		public Weekdays ChoosenWeekdays;
-
-		[Flags]
-		public enum Weekdays
-		{
-			None = 0,
-			Montag = 1,
-			Dienstag = 2,
-			Mittwoch = 4,
-			Donnerstag = 8,
-			Freitag = 16,
-			Samstag = 32,
-			Sonntag = 64
-		}
 
 		public static ChannelProgramData CreateNew(int id) => new ChannelProgramData()
 		{
@@ -40,5 +27,18 @@ namespace TabNoc.PiWeb.DataTypes.WateringWeb.Channels
 			Name = id.ToString(),
 			Description = ""
 		};
+
+		[Flags]
+		public enum Weekdays
+		{
+			None = 1,
+			Montag = 2,
+			Dienstag = 4,
+			Mittwoch = 8,
+			Donnerstag = 16,
+			Freitag = 32,
+			Samstag = 64,
+			Sonntag = 128
+		}
 	}
 }

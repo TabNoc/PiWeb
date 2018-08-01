@@ -8,17 +8,20 @@ namespace TabNoc.PiWeb.DataTypes.WateringWeb.Manual
 		public readonly int ChannelId;
 		public readonly TimeSpan Duration;
 		public readonly int DurationOverride;
-		public readonly int UniqueID;
 		public string Name;
 
-		public BatchEntry(string name, int channelId, TimeSpan duration, bool activateMasterChannel, int durationOverride, int uniqueID)
+		public BatchEntry(string name, int channelId, TimeSpan duration, bool activateMasterChannel, int durationOverride)
 		{
 			Name = name;
 			ChannelId = channelId;
 			Duration = duration;
 			ActivateMasterChannel = activateMasterChannel;
 			DurationOverride = durationOverride;
-			UniqueID = uniqueID;
+		}
+
+		public override string ToString()
+		{
+			return $"(ChNr.:{ChannelId}) -> {Duration} [Master:{ActivateMasterChannel}]";
 		}
 	}
 }

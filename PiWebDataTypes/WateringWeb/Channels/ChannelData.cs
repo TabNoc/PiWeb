@@ -5,11 +5,11 @@ namespace TabNoc.PiWeb.DataTypes.WateringWeb.Channels
 {
 	public class ChannelData
 	{
-		public List<ChannelProgramData> ProgramList;
-		public string Name;
 		public int ChannelId;
-		public bool HumiditySensorEnabled;
 		public string HumiditySensor;
+		public bool HumiditySensorEnabled;
+		public string Name;
+		public List<ChannelProgramData> ProgramList;
 
 		public static ChannelData CreateNew(int channelId, bool isMasterChannel = false) => new ChannelData
 		{

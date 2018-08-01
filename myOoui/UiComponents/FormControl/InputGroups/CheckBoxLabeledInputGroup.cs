@@ -32,7 +32,7 @@ namespace TabNoc.MyOoui.UiComponents.FormControl.InputGroups
 
 			_checkBox = new Input();
 			_checkBox.SetAttribute("type", "checkbox");
-			_checkBox.SetAttribute("aria-label", new Guid().ToString());
+			_checkBox.SetAttribute("aria-label", Guid.NewGuid().ToString());
 			checkBoxDiv2.AppendChild(_checkBox);
 
 			// end checkbox

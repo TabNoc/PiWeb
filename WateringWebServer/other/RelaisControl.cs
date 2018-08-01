@@ -9,33 +9,39 @@ using TabNoc.PiWeb.WateringWebServer.Controllers;
 
 namespace TabNoc.PiWeb.WateringWebServer.other
 {
-	internal class RelaisControl
+	internal static class RelaisControl
 	{
-		public static void Activate(int channelId, bool activateWithMasterChannel)
+		public static void Activate(int channelId, bool activateWithMasterChannel, string operatingMode, TimeSpan duration)
 		{
-			string result = new HttpClient(GetHttpClientHandler()).GetAsync($"https://piw/watering/ctrl/{channelId}/on/?master={(activateWithMasterChannel ? "on" : "off")}").EnsureResultSuccessStatusCode().Result.Content.ReadAsStringAsync().Result;
-			ResultClass deserializeObject = JsonConvert.DeserializeObject<ResultClass>(result);
-			if (deserializeObject.CurrentState == true)
+			if (WaterRelaisControl.Instance.Activate(channelId, activateWithMasterChannel, operatingMode, duration))
 			{
-				HistoryController.AddLogEntry(new HistoryElement(DateTime.Now, "Manual", "OK", $"Der Kanal {channelId} wurde {(activateWithMasterChannel ? "mit" : "ohne")} den MasterKanal aktiviert.\r\nDie Antwort des Servers lautet: {result}"));
-			}
-			else
-			{
-				HistoryController.AddLogEntry(new HistoryElement(DateTime.Now, "Manual", "Error", $"Es wurde versucht, den Kanal {channelId} {(activateWithMasterChannel ? "mit" : "ohne")} dem MasterKanal zu aktiviert, dies ist Fehlgeschlagen.\r\nDie Antwort des Servers lautet: {result}"));
+				string result = new HttpClient(GetHttpClientHandler()).GetAsync($"https://piw/watering/ctrl/{channelId}/on/?master={(activateWithMasterChannel ? "on" : "off")}").EnsureResultSuccessStatusCode().Result.Content.ReadAsStringAsync().Result;
+				ResultClass deserializeObject = JsonConvert.DeserializeObject<ResultClass>(result);
+				if (deserializeObject.CurrentState == true)
+				{
+					HistoryController.AddLogEntry(new HistoryElement(DateTime.Now, operatingMode, "OK", $"Der Kanal {channelId} wurde {(activateWithMasterChannel ? "mit" : "ohne")} den MasterKanal aktiviert.\r\nDie Antwort des Servers lautet: {result}"));
+				}
+				else
+				{
+					HistoryController.AddLogEntry(new HistoryElement(DateTime.Now, operatingMode, "Error", $"Es wurde versucht, den Kanal {channelId} {(activateWithMasterChannel ? "mit" : "ohne")} dem MasterKanal zu aktiviert, dies ist Fehlgeschlagen.\r\nDie Antwort des Servers lautet: {result}"));
+				}
 			}
 		}
 
-		public static void Deactivate(int channelId)
+		public static void Deactivate(int channelId, string operatingMode)
 		{
-			string result = new HttpClient(GetHttpClientHandler()).GetAsync($"https://piw/watering/ctrl/{channelId}/off/").EnsureResultSuccessStatusCode().Result.Content.ReadAsStringAsync().Result;
-			ResultClass deserializeObject = JsonConvert.DeserializeObject<ResultClass>(result);
-			if (deserializeObject.CurrentState == false)
+			if (WaterRelaisControl.Instance.Deactivate(channelId))
 			{
-				HistoryController.AddLogEntry(new HistoryElement(DateTime.Now, "Manual", "OK", $"Der Kanal {channelId} wurde deaktiviert.\r\nDie Antwort des Servers lautet: {result}"));
-			}
-			else
-			{
-				HistoryController.AddLogEntry(new HistoryElement(DateTime.Now, "Manual", "Error", $"Es wurde versucht, den Kanal {channelId} zu deaktiviert, dies ist Fehlgeschlagen.\r\nDie Antwort des Servers lautet: {result}"));
+				string result = new HttpClient(GetHttpClientHandler()).GetAsync($"https://piw/watering/ctrl/{channelId}/off/").EnsureResultSuccessStatusCode().Result.Content.ReadAsStringAsync().Result;
+				ResultClass deserializeObject = JsonConvert.DeserializeObject<ResultClass>(result);
+				if (deserializeObject.CurrentState == false)
+				{
+					HistoryController.AddLogEntry(new HistoryElement(DateTime.Now, operatingMode, "OK", $"Der Kanal {channelId} wurde deaktiviert.\r\nDie Antwort des Servers lautet: {result}"));
+				}
+				else
+				{
+					HistoryController.AddLogEntry(new HistoryElement(DateTime.Now, operatingMode, "Error", $"Es wurde versucht, den Kanal {channelId} zu deaktiviert, dies ist Fehlgeschlagen.\r\nDie Antwort des Servers lautet: {result}"));
+				}
 			}
 		}
 

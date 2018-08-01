@@ -26,7 +26,9 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.History
 			Grid grid = new Grid(this);
 
 			Dropdown messageKindDropdown = new Dropdown(new Button(StylingColor.Light, false, text: "Quelle auswählen!"));
-			grid.AddRow().AppendCollum(messageKindDropdown, autoSize: true);
+			Row headerRow = new Grid(grid.AddRow()).AddRow();
+
+			headerRow.AppendCollum(messageKindDropdown, 6);
 			messageKindDropdown.AddStyling(StylingOption.MarginBottom, 4);
 
 			// Table historyTable = new Table(new List<string>() { "Zeitpunkt", "Status", "Quelle", "Meldung" }, CreateHistoryTableContent(), true);
@@ -60,6 +62,22 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.History
 			historyTable.SetCellValueColor("Status", "Warnung", StylingColor.Warning);
 			historyTable.SetCellValueColor("Status", "Error", StylingColor.Danger);
 			historyTable.SetCellValueColor("Status", "Fehler", StylingColor.Danger);
+
+			Button refreshButton = headerRow.AppendCollum(new Button(StylingColor.Primary, true, Button.ButtonSize.Normal, false, "Inhalt Aktualisieren! "), 2, false);
+			refreshButton.Click += (sender, args) =>
+			{
+				refreshButton.IsDisabled = true;
+				historyTable.RefreshBeginningTableContent();
+				refreshButton.IsDisabled = false;
+				if (refreshButton.Text.Contains(" !"))
+				{
+					refreshButton.Text = refreshButton.Text.Replace(" !", "! ");
+				}
+				else
+				{
+					refreshButton.Text = refreshButton.Text.TrimEnd(' ', '!') + " !";
+				}
+			};
 
 			historyTable.EndUpdate();
 		}

@@ -120,13 +120,13 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Channels
 			weekDaysRow.AddNewLine();
 
 			_weekdaysChoosenToggleButtonGroup = new ToggleButtonGroup(StylingColor.Primary, StylingColor.Secondary);
-			_weekdaysChoosenToggleButtonGroup.AddToggleButton("Mo", (channelProgram.ChoosenWeekdays & ChannelProgramData.Weekdays.Montag) != ChannelProgramData.Weekdays.None);
-			_weekdaysChoosenToggleButtonGroup.AddToggleButton("Di", (channelProgram.ChoosenWeekdays & ChannelProgramData.Weekdays.Dienstag) != ChannelProgramData.Weekdays.None);
-			_weekdaysChoosenToggleButtonGroup.AddToggleButton("Mi", (channelProgram.ChoosenWeekdays & ChannelProgramData.Weekdays.Mittwoch) != ChannelProgramData.Weekdays.None);
-			_weekdaysChoosenToggleButtonGroup.AddToggleButton("Do", (channelProgram.ChoosenWeekdays & ChannelProgramData.Weekdays.Donnerstag) != ChannelProgramData.Weekdays.None);
-			_weekdaysChoosenToggleButtonGroup.AddToggleButton("Fr", (channelProgram.ChoosenWeekdays & ChannelProgramData.Weekdays.Freitag) != ChannelProgramData.Weekdays.None);
-			_weekdaysChoosenToggleButtonGroup.AddToggleButton("Sa", (channelProgram.ChoosenWeekdays & ChannelProgramData.Weekdays.Samstag) != ChannelProgramData.Weekdays.None);
-			_weekdaysChoosenToggleButtonGroup.AddToggleButton("So", (channelProgram.ChoosenWeekdays & ChannelProgramData.Weekdays.Sonntag) != ChannelProgramData.Weekdays.None);
+			_weekdaysChoosenToggleButtonGroup.AddToggleButton("Mo", (channelProgram.ChoosenWeekdays & ChannelProgramData.Weekdays.Montag) == ChannelProgramData.Weekdays.Montag);
+			_weekdaysChoosenToggleButtonGroup.AddToggleButton("Di", (channelProgram.ChoosenWeekdays & ChannelProgramData.Weekdays.Dienstag) == ChannelProgramData.Weekdays.Dienstag);
+			_weekdaysChoosenToggleButtonGroup.AddToggleButton("Mi", (channelProgram.ChoosenWeekdays & ChannelProgramData.Weekdays.Mittwoch) == ChannelProgramData.Weekdays.Mittwoch);
+			_weekdaysChoosenToggleButtonGroup.AddToggleButton("Do", (channelProgram.ChoosenWeekdays & ChannelProgramData.Weekdays.Donnerstag) == ChannelProgramData.Weekdays.Donnerstag);
+			_weekdaysChoosenToggleButtonGroup.AddToggleButton("Fr", (channelProgram.ChoosenWeekdays & ChannelProgramData.Weekdays.Freitag) == ChannelProgramData.Weekdays.Freitag);
+			_weekdaysChoosenToggleButtonGroup.AddToggleButton("Sa", (channelProgram.ChoosenWeekdays & ChannelProgramData.Weekdays.Samstag) == ChannelProgramData.Weekdays.Samstag);
+			_weekdaysChoosenToggleButtonGroup.AddToggleButton("So", (channelProgram.ChoosenWeekdays & ChannelProgramData.Weekdays.Sonntag) == ChannelProgramData.Weekdays.Sonntag);
 			_weekDaysChoosenRadioButtonInputGroup = new RadioButtonInputGroup(GetCheckedWeekdays(channelProgram.ChoosenWeekdays) == 4, _weekdaysChoosenToggleButtonGroup, _weekdaysMoMiFrRadioButtonLabeledInputGroup.RadioButtonGroupName, false);
 			_weekDaysChoosenRadioButtonInputGroup.AddStyling(StylingOption.MarginLeft, 2);
 			grid.AddRow().AppendCollum(_weekDaysChoosenRadioButtonInputGroup, autoSize: true);
@@ -302,7 +302,7 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Channels
 			else if (_weekDaysChoosenRadioButtonInputGroup.Checked == true)
 
 			{
-				ChannelProgramData.Weekdays weekdays = ChannelProgramData.Weekdays.None;
+				ChannelProgramData.Weekdays weekdays = 0;
 				foreach (Button activeButton in _weekdaysChoosenToggleButtonGroup.GetActiveButtons())
 				{
 					weekdays |= GetWeekday(activeButton.Text);

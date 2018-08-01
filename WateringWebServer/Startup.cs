@@ -1,4 +1,5 @@
 ﻿using Hangfire;
+using Hangfire.Dashboard;
 using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using TabNoc.PiWeb.WateringWebServer.other;
 
@@ -49,11 +51,13 @@ namespace TabNoc.PiWeb.WateringWebServer
 				}
 				return false;
 			});
-
-			app.UseHangfireServer();
-			app.UseHangfireDashboard();
+			app.UseHangfireServer(new BackgroundJobServerOptions { SchedulePollingInterval = TimeSpan.FromMilliseconds(2000) });
+			app.UseHangfireDashboard(options: new DashboardOptions() { AppPath = "http://piw:8080/", Authorization = new IDashboardAuthorizationFilter[1] { new MyAuthorizationFilter() } });
 
 			RecurringJob.AddOrUpdate(() => GC.Collect(), Cron.Minutely);
+			//RecurringJob.AddOrUpdate("pg_dump", () => PG_Dump(), Cron.Yearly);
+			//BackgroundJob.Enqueue(() => PG_Dump());
+			RecurringJob.RemoveIfExists("pg_dump");
 		}
 
 		// This method gets called by the runtime. Use this method to add services to the container.
@@ -74,6 +78,39 @@ namespace TabNoc.PiWeb.WateringWebServer
 			{
 				config.UsePostgreSqlStorage(PrivateData.ConnectionStringBuilder.ToString());
 			});
+		}
+
+		public void PG_Dump()
+		{
+			Console.WriteLine("\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\nStart pg_dump execution!\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n\r\n");
+			Process p = new Process
+			{
+				StartInfo = new ProcessStartInfo("/usr/bin/pg_dump", "--host localhost --port 5433 --username \"postgres\" --no-password  --format custom --blobs --verbose \"piweb\"")
+				{
+					UseShellExecute = false,
+					RedirectStandardOutput = true,
+					RedirectStandardError = true
+				}
+			};
+			p.OutputDataReceived += (sender, args) =>
+			{
+				lock (p)
+				{
+					Console.WriteLine("received output: {0}", args.Data);
+				}
+			};
+			p.ErrorDataReceived += (sender, args) =>
+			{
+				lock (p)
+				{
+					Console.ForegroundColor = ConsoleColor.Red;
+					Console.WriteLine("received error: {0}", args.Data);
+					Console.ResetColor();
+				}
+			};
+			p.Start();
+			p.BeginOutputReadLine();
+			p.BeginErrorReadLine();
 		}
 	}
 }

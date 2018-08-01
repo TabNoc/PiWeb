@@ -9,6 +9,7 @@ namespace TabNoc.PiWeb.DataTypes.WateringWeb.Manual
 		public string EventSource = "Manual";
 #pragma warning restore 169
 		public List<ManualActionExecution> ExecutionList;
+		public string Name;
 
 		private ManualActionExecutionData()
 		{

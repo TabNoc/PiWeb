@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
 using TabNoc.MyOoui.Interfaces.Enums;
 using TabNoc.MyOoui.UiComponents;
@@ -118,6 +119,13 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
 					CreateJobAction(job, overrideInputGroup.Value);
 
 					startButton.Text = "Gestartet";
+					Task.Run(() =>
+					{
+						startButton.Text = "Starten!";
+						startButton.SetFontAwesomeIcon("play");
+						System.Threading.Thread.Sleep(5000);
+						return startButton.IsDisabled = false;
+					});
 				}
 				catch (Exception)
 				{
@@ -136,12 +144,13 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
 			List batchEntries = grid.AddRow().AppendCollum(new List(false), autoSize: true);
 			foreach (BatchEntry jobBatchEntry in job.BatchEntries)
 			{
-				batchEntries.AppendChild(new ListItem() { Text = jobBatchEntry.Name });
+				batchEntries.AppendChild(new ListItem() { Text = $"{jobBatchEntry.Name} {jobBatchEntry.ToString()}" });
 			}
 		}
 
 		private static void CreateJobAction(JobEntry job, int durationOverride)
 		{
+			PageStorage<ManualActionExecutionData>.Instance.StorageData.Name = job.Name;
 			PageStorage<ManualActionExecutionData>.Instance.StorageData.ExecutionList = new List<ManualActionExecutionData.ManualActionExecution>();
 			foreach (BatchEntry jobBatchEntry in job.BatchEntries)
 			{
@@ -150,6 +159,7 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
 						jobBatchEntry.ActivateMasterChannel, durationOverride));
 			}
 			PageStorage<ManualActionExecutionData>.Instance.Save();
+			PageStorage<ManualActionExecutionData>.Instance.StorageData.Name = "";
 			PageStorage<ManualActionExecutionData>.Instance.StorageData.ExecutionList = null;
 		}
 	}

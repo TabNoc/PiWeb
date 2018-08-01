@@ -46,7 +46,7 @@ namespace TabNoc.MyOoui.UiComponents
 
 		public void AddElement(bool active, string text, string address)
 		{
-			Anchor anchor = new Anchor(address, text) { ClassName = "nav-item nav-link" + (active == true ? " active" : "") };
+			Anchor anchor = new Anchor(address, text) { ClassName = "nav-item nav-link" + (active == true ? " active" : ""), Style = { ZIndex = 1060 } };
 
 			_navigationList.AppendChild(anchor);
 		}

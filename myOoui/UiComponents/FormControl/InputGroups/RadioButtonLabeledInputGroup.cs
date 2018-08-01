@@ -7,6 +7,7 @@ namespace TabNoc.MyOoui.UiComponents.FormControl.InputGroups
 {
 	public class RadioButtonLabeledInputGroup : InputGroupControl
 	{
+		public readonly string RadioButtonGroupName;
 		private readonly RadioButton _radioButton;
 
 		public bool Checked
@@ -14,8 +15,6 @@ namespace TabNoc.MyOoui.UiComponents.FormControl.InputGroups
 			get => _radioButton.IsChecked;
 			set => _radioButton.IsChecked = value;
 		}
-
-		public readonly string RadioButtonGroupName;
 
 		public RadioButtonLabeledInputGroup(bool @checked, string labelText, string radioButtonGroupName = "")
 		{

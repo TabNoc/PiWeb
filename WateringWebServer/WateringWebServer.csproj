@@ -11,6 +11,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="HangFire" Version="1.6.19" />
+		<PackageReference Include="Hangfire.Dashboard.Authorization" Version="2.1.0" />
 		<PackageReference Include="Hangfire.PostgreSql.ahydrax" Version="1.5.5.1" />
 		<PackageReference Include="Microsoft.AspNetCore.App" />
 		<PackageReference Include="Npgsql" Version="4.0.2" />

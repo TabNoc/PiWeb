@@ -16,12 +16,14 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Overview
 			Container wrappingContainer = new Container();
 			Grid grid = new Grid(wrappingContainer);
 
-			Table<string> table = new Table<string>(CreateAutomaticTableHeading(), CreateAutomaticTableBody(), value => value);
+			grid.AddRow().AppendCollum(new Heading(2, "Automatische Aufträge") { ClassName = "text-center" });
+
+			Table<string> table = new Table<string>(CreateAutomaticTableHeading(), CreateAutomaticTableBody(), value => value, 5);
 			grid.AddRow().AppendCollum(table);
 
 			grid.AddRow().AppendCollum(new Heading(2, "Manuelle Aufträge") { ClassName = "text-center" });
 
-			Table<string> table2 = new Table<string>(CreateManualTableHeading(), CreateManualTableBody(), value => value);
+			Table<string> table2 = new Table<string>(CreateManualTableHeading(), CreateManualTableBody(), value => value, 5);
 			grid.AddRow().AppendCollum(table2);
 			AppendChild(wrappingContainer);
 		}

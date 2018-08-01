@@ -26,6 +26,7 @@ namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 		private string _loadedData;
 		private Action<string> _saveDataCallback;
 		private T _storageData;
+		private bool _useSafeLoading;
 		public static PageStorage<T> Instance => _instance ?? (_instance = new PageStorage<T>());
 
 		public T StorageData
@@ -128,7 +129,7 @@ namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 			}
 			if (_initialized)
 			{
-				throw new InvalidOperationException($"Ein wieferholtes aufrufen von Initialize ist nicht zulässig!");
+				throw new InvalidOperationException($"Ein wiederholtes aufrufen von Initialize ist nicht zulässig!");
 			}
 
 			if (_initialized == false)
@@ -169,7 +170,10 @@ namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 				if (writeData != _loadedData)
 				{
 					//TODO: Maybe Merge Server data?
-					_saveDataCallback(writeData);
+					if (!_useSafeLoading)
+					{
+						_saveDataCallback(writeData);
+					}
 					_changed = false;
 				}
 			}
@@ -177,6 +181,26 @@ namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 			{
 				Logging.Error("Beim Speichern der Daten von " + this.GetType().Name + "<" + typeof(T).Name + "> ist ein kritischer Fehler aufgetreten!", e);
 			}
+		}
+
+		public bool TryLoad()
+		{
+			try
+			{
+				if (StorageData.Valid)
+				{
+				}
+				return true;
+			}
+			catch (Exception)
+			{
+				return false;
+			}
+		}
+
+		public void UseSafeLoading()
+		{
+			_useSafeLoading = true;
 		}
 
 		private T FromReadData(string loadData)
@@ -200,7 +224,7 @@ namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 				throw new NullReferenceException($"{nameof(Initialize)} has to be called before Loading the PageStorage<{typeof(T).Name}>");
 			}
 
-			_loadedData = WriteOnly ? "" : _loadDataCallback();
+			_loadedData = WriteOnly ? "" : (_useSafeLoading ? "" : _loadDataCallback());
 			_storageData = FromReadData(_loadedData) ?? (T)typeof(T).GetMethod("CreateNew").Invoke(null, null);
 
 			// Get the Data from this Machine to compare it later

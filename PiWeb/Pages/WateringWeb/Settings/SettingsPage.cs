@@ -13,12 +13,14 @@ using TabNoc.MyOoui.UiComponents.FormControl.InputGroups.Components;
 using TabNoc.PiWeb.DataTypes.WateringWeb.Settings;
 using TabNoc.PiWeb.Pages.WateringWeb.History;
 using Button = TabNoc.MyOoui.HtmlElements.Button;
+using Color = System.Drawing.Color;
 using JsonConvert = Newtonsoft.Json.JsonConvert;
 
 namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 {
 	internal class SettingsPage : StylableElement
 	{
+		private readonly Dictionary<string, StylableTextInput> _backendPathTextInputDictionary = new Dictionary<string, StylableTextInput>();
 		private readonly Dropdown _humidityDropdown;
 		private readonly TextInputGroup _humiditySensorTextInputGroup;
 		private readonly OverrideInputGroup _overrideInputGroup;
@@ -26,6 +28,17 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 
 		public SettingsPage(PageStorage<SettingsData> settingsData) : base("div")
 		{
+			bool useSafeLoading = false;
+			if (settingsData.TryLoad() == false)
+			{
+				settingsData.UseSafeLoading();
+				useSafeLoading = true;
+			}
+			if (PageStorage<HumiditySensorData>.Instance.TryLoad() == false)
+			{
+				PageStorage<HumiditySensorData>.Instance.UseSafeLoading();
+				useSafeLoading = true;
+			}
 			this.AddScriptDependency("/lib/bootstrap3-typeahead.min.js");
 			const int labelSize = 140;
 
@@ -42,6 +55,11 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 			grid.AddStyling(StylingOption.MarginBottom, 2);
 
 			#endregion Initialize Grid
+
+			if (useSafeLoading)
+			{
+				grid.AddRow().AppendCollum(new Heading(3, "Wegen Verbindungsproblemem wurden keine Daten geladen!") { Style = { Color = Color.Red } });
+			}
 
 			#region AutoEnabled
 
@@ -196,6 +214,7 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 			{
 				humidityRow.IsHidden = true;
 			}
+			humidityRow.AddStyling(StylingOption.MarginBottom, 2);
 
 			#endregion Rename HumiditySensors
 
@@ -210,6 +229,19 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 				backendServerRow.AddNewLine();
 				backendServerRow.AppendCollum(CreateBackendCollum(name, backedProperties), autoSize: true);
 			}
+
+			backendServerRow.AddNewLine();
+			backendServerRow.AddNewLine();
+			backendServerRow.AppendCollum(new Button(StylingColor.Light, false, Button.ButtonSize.Normal, false, "Standardkonfiguration eintragen")).Click += (sender, args) =>
+			{
+				foreach ((string name, BackedProperties backedProperties) in PageStorage<BackendData>.Instance.StorageData.BackedPropertieses)
+				{
+					if (_backendPathTextInputDictionary[name].Value == "")
+					{
+						_backendPathTextInputDictionary[name].Value = "http://172.17.0.4:5000/api/" + name;
+					}
+				}
+			};
 
 			#endregion Backend Server Path
 		}
@@ -234,6 +266,7 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 			backendMultiInputGroup.AppendLabel(name, 115 + 80);
 			TwoStateButtonGroup backendEnabled = backendMultiInputGroup.AppendCustomElement(new TwoStateButtonGroup("Vom Server", "Als Debug", backedProperties.RequestDataFromBackend, !backedProperties.RequestDataFromBackend), false);
 			StylableTextInput backendPath = backendMultiInputGroup.AppendTextInput("Pfad zur WebAPI", startText: backedProperties.DataSourcePath);
+			_backendPathTextInputDictionary.Add(name, backendPath);
 			backendMultiInputGroup.AppendValidation("Einstellungen OK", "Einstellungen sind nicht OK", false);
 			Button backendSaveSettings = backendMultiInputGroup.AppendCustomElement(new Button(StylingColor.Success, true, text: "Speichern", fontAwesomeIcon: "save"), false);
 

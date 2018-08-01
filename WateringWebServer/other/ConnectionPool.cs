@@ -20,11 +20,11 @@ namespace TabNoc.PiWeb.WateringWebServer.other
 			{
 				NpgsqlConnection connection = new NpgsqlConnection(PrivateData.ConnectionStringBuilder.ToString());
 				connection.Open();
-				_pool.Add(new ConnectionPoolItem(connection));
+				_pool.Add(new ConnectionPoolItem(connection, i));
 			}
 		}
 
-		public NpgsqlConnection GetConnection()
+		public ConnectionPoolItem GetConnection()
 		{
 			while (true)
 			{
@@ -34,56 +34,64 @@ namespace TabNoc.PiWeb.WateringWebServer.other
 					{
 						ConnectionPoolItem connectionPoolItem = _pool.First(item => item.ConnectionIsUsed == false);
 						connectionPoolItem.ConnectionIsUsed = true;
-						return connectionPoolItem.Connection;
+						return connectionPoolItem;
 					}
 				}
 				System.Threading.Thread.Sleep(10);
 			}
 		}
 
-		public void ReleaseConnection(NpgsqlConnection connection)
+		public void ReleaseConnection(ConnectionPoolItem connectionItem)
 		{
 			lock (_pool)
 			{
-				ConnectionPoolItem connectionPoolItem = _pool.First(item => item.Connection == connection);
-				connectionPoolItem.ConnectionIsUsed = false;
+				try
+				{
+					ConnectionPoolItem connectionPoolItem = _pool.First(item => item == connectionItem);
+					connectionPoolItem.ConnectionIsUsed = false;
+				}
+				catch (Exception e)
+				{
+					Console.WriteLine("Das Item:" + connectionItem.Number + " wurde nicht gefunden");
+				}
 			}
 		}
 
 		public class ConnectionUsable : IDisposable
 		{
-			private readonly NpgsqlConnection _connection;
+			private readonly ConnectionPoolItem _connectionPoolItem;
 
 			public NpgsqlConnection Connection
 			{
 				get
 				{
-					lock (_connection)
+					lock (_connectionPoolItem)
 					{
-						if (_connection.State != ConnectionState.Open)
+						if (_connectionPoolItem.Connection.State != ConnectionState.Open)
 						{
-							_connection.Open();
+							_connectionPoolItem.Connection.Open();
 						}
-						return _connection;
+						return _connectionPoolItem.Connection;
 					}
 				}
 			}
 
 			public ConnectionUsable()
 			{
-				_connection = ConnectionPool.Instance.GetConnection();
+				_connectionPoolItem = ConnectionPool.Instance.GetConnection();
 			}
 
 			public void Dispose()
 			{
-				ConnectionPool.Instance.ReleaseConnection(_connection);
+				ConnectionPool.Instance.ReleaseConnection(_connectionPoolItem);
 			}
 		}
 
-		private class ConnectionPoolItem
+		public class ConnectionPoolItem
 		{
 			public bool ConnectionIsUsed;
 			private readonly NpgsqlConnection _connection;
+			public readonly int Number;
 
 			public NpgsqlConnection Connection
 			{
@@ -100,9 +108,10 @@ namespace TabNoc.PiWeb.WateringWebServer.other
 				}
 			}
 
-			public ConnectionPoolItem(NpgsqlConnection connection)
+			public ConnectionPoolItem(NpgsqlConnection connection, int number)
 			{
 				_connection = connection;
+				Number = number;
 				ConnectionIsUsed = false;
 			}
 		}

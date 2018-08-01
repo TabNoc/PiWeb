@@ -40,8 +40,11 @@ namespace TabNoc.PiWeb.WateringWebServer.Controllers
 			{
 				using (NpgsqlCommand command = usable.Connection.CreateCommand())
 				{
-					command.CommandText = $"INSERT INTO t_history(msgtimestamp, source, status, message) Values (@time, '{element.Source}', '{element.Status}', '{element.Message}');";
+					command.CommandText = $"INSERT INTO t_history(msgtimestamp, source, status, message) Values (@time, @source, @status, @message);";
 					command.Parameters.AddWithValue("@time", NpgsqlDbType.Timestamp, element.TimeStamp);
+					command.Parameters.AddWithValue("@source", NpgsqlDbType.Text, element.Source);
+					command.Parameters.AddWithValue("@status", NpgsqlDbType.Text, element.Status);
+					command.Parameters.AddWithValue("@message", NpgsqlDbType.Text, element.Message);
 					command.ExecuteNonQuery();
 				}
 			}

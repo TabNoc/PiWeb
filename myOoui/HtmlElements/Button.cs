@@ -21,6 +21,11 @@ namespace TabNoc.MyOoui.HtmlElements
 			{
 				Style.Width = widthInPx;
 			}
+			SetFontAwesomeIcon(fontAwesomeIcon);
+		}
+
+		public void SetFontAwesomeIcon(string fontAwesomeIcon)
+		{
 			if (fontAwesomeIcon != "")
 			{
 				InsertBefore(new MyIElement() { ClassName = "fas fa-" + fontAwesomeIcon + " mr-2" }, FirstChild);

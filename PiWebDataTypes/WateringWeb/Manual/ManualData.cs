@@ -6,19 +6,12 @@ namespace TabNoc.PiWeb.DataTypes.WateringWeb.Manual
 	{
 		public List<BatchEntry> BatchEntries;
 		public List<JobEntry> JobEntries;
-		public int BatchCounter;
 
 		public new static ManualData CreateNew() => new ManualData
 		{
 			Valid = true,
 			BatchEntries = new List<BatchEntry>(),
-			JobEntries = new List<JobEntry>(),
-			BatchCounter = 0
+			JobEntries = new List<JobEntry>()
 		};
-
-		public int GetUniqueID()
-		{
-			return BatchCounter++;
-		}
 	}
 }
