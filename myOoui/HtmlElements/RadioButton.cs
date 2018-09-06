@@ -1,14 +1,19 @@
-﻿using TabNoc.MyOoui.Interfaces.AbstractObjects;
+﻿using System;
+using TabNoc.MyOoui.Interfaces.AbstractObjects;
 using TabNoc.MyOoui.Interfaces.Enums;
 using TabNoc.MyOoui.Storage;
 
 namespace TabNoc.MyOoui.HtmlElements
 {
-	internal class RadioButton : StylableElement
+	internal class RadioButton : StylableElement, IDisposable
 	{
-		private bool _disposed;
-
 		private readonly string _radioButtonGroupName;
+
+		public bool IsChecked
+		{
+			get => RadioButtonStorage.GetRadioButtonState(_radioButtonGroupName, this);
+			set => RadioButtonStorage.SetRadioButtonState(_radioButtonGroupName, this, value);
+		}
 
 		public RadioButton(string radioButtonGroupName, bool isChecked) : base("button")
 		{
@@ -30,30 +35,60 @@ namespace TabNoc.MyOoui.HtmlElements
 			RadioButtonStorage.ChangeRadioButtonState(_radioButtonGroupName, (RadioButton)sender, e);
 		}
 
-		public bool IsChecked
+		#region Dispose Pattern
+
+		private bool _disposed;
+
+		~RadioButton()
 		{
-			get => RadioButtonStorage.GetRadioButtonState(_radioButtonGroupName, this);
-			set => RadioButtonStorage.SetRadioButtonState(_radioButtonGroupName, this, value);
+			try
+			{
+				Dispose(false);
+			}
+			catch (Exception e)
+			{
+				Console.ForegroundColor = ConsoleColor.Red;
+				Console.WriteLine(e);
+				Console.ResetColor();
+			}
+		}
+
+		public new void Dispose()
+		{
+			try
+			{
+				Dispose(true);
+				GC.SuppressFinalize(this);
+			}
+			catch (Exception e)
+			{
+				Console.ForegroundColor = ConsoleColor.Red;
+				Console.WriteLine(e);
+				Console.ResetColor();
+			}
 		}
 
 		protected override void Dispose(bool disposing)
 		{
-			if (!_disposed)
+			try
 			{
-				if (disposing)
+				if (!_disposed)
 				{
 					RadioButtonStorage.UnRegisterRadioButton(_radioButtonGroupName, this);
+
+					_disposed = true;
 				}
 
-				_disposed = true;
+				base.Dispose(disposing);
 			}
-
-			base.Dispose(disposing);
+			catch (Exception e)
+			{
+				Console.ForegroundColor = ConsoleColor.Red;
+				Console.WriteLine(e);
+				Console.ResetColor();
+			}
 		}
 
-		~RadioButton()
-		{
-			this.Dispose();
-		}
+		#endregion Dispose Pattern
 	}
 }
