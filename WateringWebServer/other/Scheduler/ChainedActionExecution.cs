@@ -7,9 +7,12 @@ namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler
 	{
 		public abstract class ChainedActionExecution
 		{
-			public readonly TimeSpan Duration;
-			public readonly int DurationOverride;
-			public readonly string Guid;
+			// ReSharper disable FieldCanBeMadeReadOnly.Global
+			public TimeSpan Duration;
+
+			public int DurationOverride;
+			public string Guid;
+			// ReSharper restore FieldCanBeMadeReadOnly.Global
 
 			protected ChainedActionExecution(string guid, TimeSpan duration, int durationOverride)
 			{

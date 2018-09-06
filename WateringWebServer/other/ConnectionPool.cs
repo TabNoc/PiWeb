@@ -6,33 +6,29 @@ using System.Linq;
 
 namespace TabNoc.PiWeb.WateringWebServer.other
 {
-	public class ConnectionPool
+	public static class ConnectionPool
 	{
-		private static ConnectionPool _instance;
+		private static readonly List<ConnectionPoolItem> Pool = new List<ConnectionPoolItem>();
 
-		private readonly List<ConnectionPoolItem> _pool = new List<ConnectionPoolItem>();
-
-		public static ConnectionPool Instance => _instance ?? (_instance = new ConnectionPool());
-
-		private ConnectionPool()
+		static ConnectionPool()
 		{
 			for (int i = 0; i < Environment.ProcessorCount; i++)
 			{
 				NpgsqlConnection connection = new NpgsqlConnection(PrivateData.ConnectionStringBuilder.ToString());
 				connection.Open();
-				_pool.Add(new ConnectionPoolItem(connection, i));
+				Pool.Add(new ConnectionPoolItem(connection, i));
 			}
 		}
 
-		public ConnectionPoolItem GetConnection()
+		public static ConnectionPoolItem GetConnection()
 		{
 			while (true)
 			{
-				lock (_pool)
+				lock (Pool)
 				{
-					if (_pool.Any(item => item.ConnectionIsUsed == false))
+					if (Pool.Any(item => item.ConnectionIsUsed == false))
 					{
-						ConnectionPoolItem connectionPoolItem = _pool.First(item => item.ConnectionIsUsed == false);
+						ConnectionPoolItem connectionPoolItem = Pool.First(item => item.ConnectionIsUsed == false);
 						connectionPoolItem.ConnectionIsUsed = true;
 						return connectionPoolItem;
 					}
@@ -41,18 +37,19 @@ namespace TabNoc.PiWeb.WateringWebServer.other
 			}
 		}
 
-		public void ReleaseConnection(ConnectionPoolItem connectionItem)
+		public static void ReleaseConnection(ConnectionPoolItem connectionItem)
 		{
-			lock (_pool)
+			lock (Pool)
 			{
 				try
 				{
-					ConnectionPoolItem connectionPoolItem = _pool.First(item => item == connectionItem);
+					ConnectionPoolItem connectionPoolItem = Pool.First(item => item == connectionItem);
 					connectionPoolItem.ConnectionIsUsed = false;
 				}
 				catch (Exception e)
 				{
 					Console.WriteLine("Das Item:" + connectionItem.Number + " wurde nicht gefunden");
+					throw;
 				}
 			}
 		}
@@ -78,12 +75,12 @@ namespace TabNoc.PiWeb.WateringWebServer.other
 
 			public ConnectionUsable()
 			{
-				_connectionPoolItem = ConnectionPool.Instance.GetConnection();
+				_connectionPoolItem = ConnectionPool.GetConnection();
 			}
 
 			public void Dispose()
 			{
-				ConnectionPool.Instance.ReleaseConnection(_connectionPoolItem);
+				ConnectionPool.ReleaseConnection(_connectionPoolItem);
 			}
 		}
 

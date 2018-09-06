@@ -12,6 +12,7 @@ namespace TabNoc.MyOoui.UiComponents
 {
 	public class Table<T> : StylableElement, IDisposable
 	{
+		private const int PaginationPageAmount = 10;
 		private readonly List<(T, List<string>)> _cachedSearchEntries = new List<(T, List<string>)>();
 		private readonly HashSet<T> _cachedSearchEntriesHashSet = new HashSet<T>();
 		private readonly List<(T, List<string>)> _entries = new List<(T, List<string>)>();
@@ -148,7 +149,7 @@ namespace TabNoc.MyOoui.UiComponents
 			int pages = (int)Math.Ceiling((decimal)_totalTableAmount / _visibleTablePageItems);
 			if (pages > 1)
 			{
-				_pagination = new Pagination(SwitchPageCallback, pages);
+				_pagination = new Pagination(SwitchPageCallback, pages, PaginationPageAmount);
 				tableFoot.AppendChild(_pagination);
 			}
 
@@ -243,7 +244,7 @@ namespace TabNoc.MyOoui.UiComponents
 			TableFoot tableFoot = new TableFoot();
 			AppendChild(tableFoot);
 
-			Task<List<(T, List<string>)>> entriesTask = _fetchEntries(_lastNormalFetchedPrimaryKey, 5 * _visibleTablePageItems);
+			Task<List<(T, List<string>)>> entriesTask = _fetchEntries(_lastNormalFetchedPrimaryKey, PaginationPageAmount * _visibleTablePageItems);
 			_fetchAmount().ContinueWith(task =>
 			{
 				try
@@ -252,7 +253,7 @@ namespace TabNoc.MyOoui.UiComponents
 					int pages = (int)Math.Ceiling((decimal)task.Result / _visibleTablePageItems);
 					if (pages > 1)
 					{
-						_pagination = new Pagination(SwitchPageCallback, pages);
+						_pagination = new Pagination(SwitchPageCallback, pages, PaginationPageAmount);
 						tableFoot.AppendChild(_pagination);
 					}
 
@@ -292,17 +293,20 @@ namespace TabNoc.MyOoui.UiComponents
 		{
 			_fetchEntries(default(T), 10).ContinueWith(task =>
 			{
-				try
+				lock (_entries)
 				{
-					if (AddEntriesToCache(task, true))
+					try
 					{
-						ReCalculateTableContent();
+						if (AddEntriesToCache(task, false, true))
+						{
+							ReCalculateTableContent();
+						}
 					}
-				}
-				catch (Exception e)
-				{
-					Logging.Error("Beim ausführen von Table.RefreshBeginningTableContent ist ein Fehler aufgetreten!", e);
-					throw;
+					catch (Exception e)
+					{
+						Logging.Error("Beim ausführen von Table.RefreshBeginningTableContent ist ein Fehler aufgetreten!", e);
+						throw;
+					}
 				}
 			}).Wait();
 		}
@@ -311,17 +315,20 @@ namespace TabNoc.MyOoui.UiComponents
 		{
 			_fetchEntries(default(T), 10).ContinueWith(task =>
 			{
-				try
+				lock (_entries)
 				{
-					if (AddEntriesToCache(task, true))
+					try
 					{
-						ReCalculateTableContent();
+						if (AddEntriesToCache(task, false, true))
+						{
+							ReCalculateTableContent();
+						}
 					}
-				}
-				catch (Exception e)
-				{
-					Logging.Error("Beim ausführen von Table.RefreshBeginningTableContent ist ein Fehler aufgetreten!", e);
-					throw;
+					catch (Exception e)
+					{
+						Logging.Error("Beim ausführen von Table.RefreshBeginningTableContentAsync ist ein Fehler aufgetreten!", e);
+						throw;
+					}
 				}
 			});
 		}
@@ -369,9 +376,9 @@ namespace TabNoc.MyOoui.UiComponents
 			{
 				_filteredByTableHeadEntry = null;
 			}
-			QuerySearch(_filterValue, _header.IndexOf(rowHeader));
-
 			ReCalculateTableContent();
+
+			QuerySearch(_filterValue, _header.IndexOf(rowHeader));
 		}
 
 		public void StartUpdate()
@@ -379,15 +386,15 @@ namespace TabNoc.MyOoui.UiComponents
 			_updateMode = true;
 		}
 
-		private bool AddEntriesToCache(Task<List<(T, List<string>)>> task, bool wasNormalFetch = false)
+		private bool AddEntriesToCache(Task<List<(T, List<string>)>> task, bool wasNormalFetch = false, bool wasRefreshFetch = false)
 		{
 			bool changed = false;
-			List<(T, List<string>)> additionalEntries = task.Result.Where(tuple =>
-				_entriesHashSet.Contains(tuple.Item1) == false && wasNormalFetch == true ||
-				(_entriesHashSet.Contains(tuple.Item1) == false && _cachedSearchEntriesHashSet.Contains(tuple.Item1) == false) && wasNormalFetch == false)
-				.ToList();
 			lock (_entries)
 			{
+				List<(T, List<string>)> additionalEntries = task.Result.Where(tuple =>
+						_entriesHashSet.Contains(tuple.Item1) == false && wasNormalFetch == true ||
+						(_entriesHashSet.Contains(tuple.Item1) == false && _cachedSearchEntriesHashSet.Contains(tuple.Item1) == false) && wasNormalFetch == false)
+					.ToList();
 				foreach ((T, List<string>) entry in additionalEntries)
 				{
 					if (entry.Item1.Equals(default(T)) || entry.Item2 == null)
@@ -395,10 +402,14 @@ namespace TabNoc.MyOoui.UiComponents
 						throw new NullReferenceException("Mindestends ein abgerufener Datensatz hat nur standardWerte!");
 					}
 
-					if (wasNormalFetch)
+					if (wasNormalFetch || wasRefreshFetch)
 					{
-						_entries.Add(entry);
+						if (wasNormalFetch)
+						{
+							_entries.Add(entry);
+						}
 						_entriesHashSet.Add(entry.Item1);
+
 						if (_cachedSearchEntriesHashSet.Contains(entry.Item1))
 						{
 							_cachedSearchEntriesHashSet.Remove(entry.Item1);
@@ -412,6 +423,11 @@ namespace TabNoc.MyOoui.UiComponents
 					}
 
 					changed = true;
+				}
+
+				if (wasRefreshFetch)
+				{
+					_entries.InsertRange(0, additionalEntries);
 				}
 			}
 
@@ -504,7 +520,7 @@ namespace TabNoc.MyOoui.UiComponents
 			{
 				return;
 			}
-			int neededTotalTablePageItems = 5 * _visibleTablePageItems;
+			int neededTotalTablePageItems = PaginationPageAmount * _visibleTablePageItems;
 			if (neededTotalTablePageItems > _searchedEntries.Count && _normalFetchedEntries < _totalTableAmount)
 			{
 				_searchFetchEntries(searchString, headerIndex, neededTotalTablePageItems - _searchedEntries.Count).ContinueWith(task =>
@@ -645,7 +661,7 @@ namespace TabNoc.MyOoui.UiComponents
 		{
 			_activeTablePage = newPage;
 			RedrawTableContent();
-			int neededTotalTablePageItems = (newPage + 2) * _visibleTablePageItems;
+			int neededTotalTablePageItems = (newPage + (int)Math.Floor((decimal)(PaginationPageAmount - 0.5) / 2)) * _visibleTablePageItems;
 			if (neededTotalTablePageItems > _normalFetchedEntries && _normalFetchedEntries < _totalTableAmount)
 			{
 				_fetchEntries(_lastNormalFetchedPrimaryKey, neededTotalTablePageItems - _normalFetchedEntries).ContinueWith(task =>

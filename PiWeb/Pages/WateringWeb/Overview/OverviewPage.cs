@@ -18,7 +18,7 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Overview
 
 			grid.AddRow().AppendCollum(new Heading(2, "Automatische Aufträge") { ClassName = "text-center" });
 
-			Table<string> table = new Table<string>(CreateAutomaticTableHeading(), CreateAutomaticTableBody(), value => value, 5);
+			Table<string> table = new Table<string>(CreateAutomaticTableHeading(), CreateAutomaticTableBody(), value => value, 4);
 			grid.AddRow().AppendCollum(table);
 
 			grid.AddRow().AppendCollum(new Heading(2, "Manuelle Aufträge") { ClassName = "text-center" });

@@ -4,8 +4,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using TabNoc.PiWeb.DataTypes.WateringWeb.History;
 using TabNoc.PiWeb.WateringWebServer.Controllers;
+using TabNoc.PiWeb.WateringWebServer.other.Storage;
 
 namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler
 {
@@ -20,7 +22,12 @@ namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler
 			using (DatabaseObjectStorageEntryUsable<ChainScheduleManager<T>> dataInstanceWrapper = GetInstance())
 			{
 				ChainScheduleManager<T> dataInstance = dataInstanceWrapper.Data;
-				if (dataInstance.Jobs.Count == 0 || dataInstance.Jobs.Any(data => data.NextGuid == "") == false)
+				if (dataInstance.CurrentJob == "" && dataInstance.Jobs.Count > 0)
+				{
+					HistoryController.AddLogEntry(new HistoryElement(DateTime.Now, "System", "Warn", $"ChainScheduleManager: Es ist kein aktuell ausgeführter Job spezifiziert, jedoch sind noch {dataInstance.Jobs.Count} Jobs in der Queue. Diese werden nun vom ältesten beginnend abgearbeitet. {JsonConvert.SerializeObject(dataInstance.Jobs.First())}"));
+					Task.Run(() => ActivateJob(dataInstance.Jobs.First().Guid));
+				}
+				if (dataInstance.Jobs.Count == 0 || dataInstance.Jobs.All(data => data.NextGuid != ""))
 				{
 					ChainedExecutionData newChainedExecutionData = new ChainedExecutionData(manualActionExecution, elementEventSource, "");
 					dataInstance.Jobs.Add(newChainedExecutionData);
@@ -51,7 +58,7 @@ namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler
 
 				dataInstance.CurrentJob = "";
 
-				CallNextJob(currentChainedExecutionData);
+				CallNextJob(currentChainedExecutionData, dataInstanceWrapper);
 
 				currentChainedExecutionData.ChainedActionExecutionData.DeactivateAction();
 				dataInstance.Jobs.RemoveAll(data => data.Guid == currentChainedExecutionData.ChainedActionExecutionData.Guid);
@@ -83,16 +90,13 @@ namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler
 			}
 		}
 
-		private static void CallNextJob(ChainedExecutionData currentChainedExecutionData)
+		private static void CallNextJob(ChainedExecutionData currentChainedExecutionData, DatabaseObjectStorageEntryUsable<ChainScheduleManager<T>> dataInstanceWrapper)
 		{
-			using (DatabaseObjectStorageEntryUsable<ChainScheduleManager<T>> dataInstanceWrapper = GetInstance())
+			ChainScheduleManager<T> dataInstance = dataInstanceWrapper.Data;
+			ChainedExecutionData nextChainedExecutionData = dataInstance.Jobs.FirstOrDefault(data => data.Guid == currentChainedExecutionData.NextGuid);
+			if (nextChainedExecutionData != null)
 			{
-				ChainScheduleManager<T> dataInstance = dataInstanceWrapper.Data;
-				ChainedExecutionData nextChainedExecutionData = dataInstance.Jobs.FirstOrDefault(data => data.Guid == currentChainedExecutionData.NextGuid);
-				if (nextChainedExecutionData != null)
-				{
-					ActivateJob(nextChainedExecutionData.Guid);
-				}
+				Task.Run(() => ActivateJob(nextChainedExecutionData.Guid));
 			}
 		}
 
@@ -116,9 +120,8 @@ namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler
 			}
 		}
 
-		private static DatabaseObjectStorageEntryUsable<ChainScheduleManager<T>> GetInstance()
-		{
-			return DatabaseObjectStorageEntryUsable<ChainScheduleManager<T>>.GetData(() => new ChainScheduleManager<T>());
-		}
+		private static DatabaseObjectStorageEntryUsable<ChainScheduleManager<T>> GetInstance() =>
+			DatabaseObjectStorageEntryUsable<ChainScheduleManager<T>>.GetDataLocked(() =>
+				new ChainScheduleManager<T>());
 	}
 }

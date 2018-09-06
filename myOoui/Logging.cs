@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace TabNoc.MyOoui.UiComponents
+namespace TabNoc.MyOoui
 {
 	public class Logging
 	{

@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace TabNoc.PiWeb.WateringWebServer.other
+namespace TabNoc.PiWeb.WateringWebServer.other.Binder
 {
 	public class DateTimeModelBinder : IModelBinder
 	{

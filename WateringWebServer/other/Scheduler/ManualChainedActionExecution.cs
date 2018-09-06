@@ -1,12 +1,14 @@
 ﻿using System;
 using System.ComponentModel;
 using TabNoc.PiWeb.DataTypes.WateringWeb.Manual;
+using TabNoc.PiWeb.WateringWebServer.other.Hardware;
 
 namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler
 {
 	public class ManualChainedActionExecution : ChainScheduleManager<ManualChainedActionExecution>.ChainedActionExecution
 	{
-		public readonly ManualActionExecutionData.ManualActionExecution ManualActionExecution;
+		// ReSharper disable once FieldCanBeMadeReadOnly.Global
+		public ManualActionExecutionData.ManualActionExecution ManualActionExecution;
 
 		[EditorBrowsable(EditorBrowsableState.Never)]
 		public ManualChainedActionExecution()

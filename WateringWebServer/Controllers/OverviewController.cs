@@ -5,6 +5,7 @@ using TabNoc.PiWeb.DataTypes.WateringWeb.Overview;
 using TabNoc.PiWeb.DataTypes.WateringWeb.Settings;
 using TabNoc.PiWeb.WateringWebServer.other;
 using TabNoc.PiWeb.WateringWebServer.other.Scheduler;
+using TabNoc.PiWeb.WateringWebServer.other.Storage;
 
 namespace TabNoc.PiWeb.WateringWebServer.Controllers
 {
@@ -30,7 +31,8 @@ namespace TabNoc.PiWeb.WateringWebServer.Controllers
 			int count = 0;
 
 			//TODO: Group by Name, create Duration if it doesn't exists set startetime to entime from last execution
-			foreach (ChainScheduleManager<ManualChainedActionExecution>.ChainedExecutionData chainedExecutionData in DataBaseObjectStorage.LoadFromDataBase(() => new ChainScheduleManager<ManualChainedActionExecution>()).Jobs)
+			ChainScheduleManager<ManualChainedActionExecution> loadedData = DataBaseObjectStorage.LoadFromDataBase(() => new ChainScheduleManager<ManualChainedActionExecution>());
+			foreach (ChainScheduleManager<ManualChainedActionExecution>.ChainedExecutionData chainedExecutionData in loadedData.Jobs)
 			{
 				returnval.Add(new ManualOverviewEntry()
 				{
@@ -48,7 +50,8 @@ namespace TabNoc.PiWeb.WateringWebServer.Controllers
 
 		private string GetChannelName(int channelId)
 		{
-			return "NotImplemented!";
+			//TODO: implement ChannelName
+			return channelId.ToString();
 		}
 
 		private List<AutomaticOverviewEntry> GetAutomaticEntries()

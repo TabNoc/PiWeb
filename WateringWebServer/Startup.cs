@@ -11,6 +11,7 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using TabNoc.PiWeb.WateringWebServer.other;
+using TabNoc.PiWeb.WateringWebServer.other.Binder;
 
 namespace TabNoc.PiWeb.WateringWebServer
 {
@@ -54,7 +55,8 @@ namespace TabNoc.PiWeb.WateringWebServer
 			app.UseHangfireServer(new BackgroundJobServerOptions { SchedulePollingInterval = TimeSpan.FromMilliseconds(2000) });
 			app.UseHangfireDashboard(options: new DashboardOptions() { AppPath = "http://piw:8080/", Authorization = new IDashboardAuthorizationFilter[1] { new MyAuthorizationFilter() } });
 
-			RecurringJob.AddOrUpdate(() => GC.Collect(), Cron.Minutely);
+			//RecurringJob.AddOrUpdate(() => GC.Collect(), Cron.Minutely);
+			RecurringJob.RemoveIfExists("GC.Collect");
 			//RecurringJob.AddOrUpdate("pg_dump", () => PG_Dump(), Cron.Yearly);
 			//BackgroundJob.Enqueue(() => PG_Dump());
 			RecurringJob.RemoveIfExists("pg_dump");

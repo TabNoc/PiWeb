@@ -1,10 +1,7 @@
 ﻿using Ooui;
 using System;
-using System.Net.Http;
-using System.Text;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
 using TabNoc.MyOoui.Interfaces.Enums;
-using TabNoc.PiWeb.DataTypes.WateringWeb.History;
 using TabNoc.PiWeb.DataTypes.WateringWeb.Settings;
 using TabNoc.PiWeb.Pages.WateringWeb.Settings;
 
@@ -30,10 +27,6 @@ namespace TabNoc.PiWeb.PagePublisher.WateringWeb
 
 		protected override void Initialize()
 		{
-			Console.WriteLine("Initialize" + this.GetType().Name);
-			new HttpClient().PostAsync("http://localhost:5000/api/history",
-				new StringContent(JsonConvert.SerializeObject(
-					new HistoryElement(DateTime.Now, "Test", "Info", "Initialized " + this.GetType().Name)), Encoding.UTF8, "application/json"));
 		}
 	}
 }

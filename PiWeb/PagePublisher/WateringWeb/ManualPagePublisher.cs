@@ -6,7 +6,6 @@ using System.Net.Http;
 using System.Text;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
 using TabNoc.MyOoui.Storage;
-using TabNoc.PiWeb.DataTypes.WateringWeb.History;
 using TabNoc.PiWeb.DataTypes.WateringWeb.Manual;
 using TabNoc.PiWeb.Pages.WateringWeb.Manual;
 
@@ -18,7 +17,6 @@ namespace TabNoc.PiWeb.PagePublisher.WateringWeb
 		{
 			PageStorage<ManualActionExecutionData>.Instance.WriteOnly = true;
 			PageStorage<ManualActionExecutionData>.Instance.Initialize(null, SaveManualActionExecutionDataCallback, new TimeSpan(0, 0, 5));
-			// TODO implement manualExecutionData Server Comunication
 			PageStorage<ManualData>.Instance.Initialize("Manual", new TimeSpan(0, 0, 5));
 		}
 
@@ -29,14 +27,10 @@ namespace TabNoc.PiWeb.PagePublisher.WateringWeb
 
 		protected override void Initialize()
 		{
-			Console.WriteLine("Initialize" + this.GetType().Name);
-			new HttpClient().PostAsync("http://localhost:5000/api/history",
-				new StringContent(JsonConvert.SerializeObject(
-					new HistoryElement(DateTime.Now, "Test", "Info", "Initialized " + this.GetType().Name)), Encoding.UTF8, "application/json"));
 		}
 
 		private void SaveManualActionExecutionDataCallback(string data)
-		{//TODO: implement
+		{
 			const string key = "ManualActionExecution";
 			Dictionary<string, BackedProperties> backedPropertieses = PageStorage<BackendData>.Instance.StorageData.BackedPropertieses;
 			if (backedPropertieses.ContainsKey(key) && backedPropertieses[key].RequestDataFromBackend == true)

@@ -6,12 +6,15 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Include="..\myOoui\HttpExtensions.cs" Link="other\HttpExtensions.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<Folder Include="wwwroot\" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="HangFire" Version="1.6.19" />
-		<PackageReference Include="Hangfire.Dashboard.Authorization" Version="2.1.0" />
+		<PackageReference Include="HangFire" Version="1.6.20" />
 		<PackageReference Include="Hangfire.PostgreSql.ahydrax" Version="1.5.5.1" />
 		<PackageReference Include="Microsoft.AspNetCore.App" />
 		<PackageReference Include="Npgsql" Version="4.0.2" />
@@ -29,6 +32,6 @@
 	</ProjectExtensions>
 
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="if /I $(ConfigurationName) EQU Release (&#xD;&#xA;    cd $(ProjectDir)&#xD;&#xA;    mkdir bin\PiDeployment\&#xD;&#xA;    copy Dockerfile bin\PiDeployment\Dockerfile&#xD;&#xA;    dotnet publish --output bin/PiDeployment/netcoreapp2.1&#xD;&#xA;    REM dotnet publish -r linux-arm --output bin/PiDeployment/netcoreapp2.1&#xD;&#xA;    REM dotnet publish --configuration Release -r linux-arm&#xD;&#xA;    &quot;C:\_\winscp577\publish2.bat&quot;&#xD;&#xA;)" />
+		<Exec Command="if /I $(ConfigurationName) EQU Release (&#xD;&#xA;    cd $(ProjectDir)&#xD;&#xA;    mkdir bin\PiDeployment\&#xD;&#xA;    copy Dockerfile bin\PiDeployment\Dockerfile&#xD;&#xA;    xcopy &quot;bin\Release\netcoreapp2.1&quot; &quot;bin\PiDeployment\netcoreapp2.1\&quot; /y/s/h/e/k/f/c/i&#xD;&#xA;    REM dotnet publish --output bin/PiDeployment/netcoreapp2.1&#xD;&#xA;    REM dotnet publish -r linux-arm --output bin/PiDeployment/netcoreapp2.1&#xD;&#xA;    REM dotnet publish --configuration Release -r linux-arm&#xD;&#xA;    &quot;C:\_\winscp577\publish2.bat&quot;&#xD;&#xA;)" />
 	</Target>
 </Project>

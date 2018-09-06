@@ -16,13 +16,13 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Channels
 	internal class ChannelPage : StylableElement
 	{
 		private readonly ChannelData _channel;
-		private StylableTextInput _channelNameTextInput;
 		private readonly List<ChannelProgrammPage> _channelProgrammPages = new List<ChannelProgrammPage>();
 		private readonly Button _deleteChannelButton;
 		private readonly bool _isMasterChannel;
 		private readonly ChannelsPage _parentChannelsPage;
 		private readonly Dictionary<ChannelProgramData, Anchor> _tabDictionary = new Dictionary<ChannelProgramData, Anchor>();
 		private readonly TabNavigation _tabNavigation;
+		private readonly StylableTextInput _channelNameTextInput;
 		private Dropdown _humiditySensorDropdown;
 		private TwoStateButtonGroup _humiditySensorEnabledTwoStateButtonGroup;
 
@@ -119,7 +119,7 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Channels
 
 		public void ApplyName(ChannelProgramData channelProgram)
 		{
-			_tabDictionary[channelProgram].Text = channelProgram.Name.Substring(0, Math.Min(channelProgram.Name.Length, 3));
+			_tabDictionary[channelProgram].Text = channelProgram.Name.Substring(0, Math.Min(channelProgram.Name.Length, 20));
 		}
 
 		public void RemoveProgramm(ChannelProgrammPage channelProgrammPage, ChannelProgramData channelProgram)

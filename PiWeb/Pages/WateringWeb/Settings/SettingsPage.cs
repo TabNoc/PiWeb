@@ -2,7 +2,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
+using TabNoc.MyOoui;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
 using TabNoc.MyOoui.Interfaces.Enums;
 using TabNoc.MyOoui.Storage;
@@ -238,7 +240,7 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 				{
 					if (_backendPathTextInputDictionary[name].Value == "")
 					{
-						_backendPathTextInputDictionary[name].Value = "http://172.17.0.4:5000/api/" + name;
+						_backendPathTextInputDictionary[name].Value = $"http://{Dns.GetHostAddresses("WebPiServer.PiWeb")[0].ToString()}:5000/api/{name}";
 					}
 				}
 			};

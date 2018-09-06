@@ -140,7 +140,7 @@ echo
 if [ "$selectedServer" = "true" ]; then
 	echo Der alte Container fuer den Namen WebPiServer wird zuerst noch geloescht
 	sudo docker rm WebPiServer
-	sudo docker run -it --init --restart unless-stopped -d -p 5000:5000 --name WebPiServer $dockerServerTagName
+	sudo docker run -it --init --restart unless-stopped -d -p 5000:5000 --net PiWeb --hostname pampers --name WebPiServer $dockerServerTagName
 	echo Anwendung wurde mit IP \"$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' WebPiServer)\" gestartet
 	sudo docker logs WebPiServer -f
 fi
@@ -148,7 +148,7 @@ fi
 if [ "$selectedWebSite" = "true" ]; then
 	echo Der alte Container fuer den Namen WebPiSite wird zuerst noch geloescht
 	sudo docker rm WebPiSite
-	sudo docker run -it --init --restart unless-stopped -d -p 8080:8080 --name WebPiSite $dockerWebsiteTagName
+	sudo docker run -it --init --restart unless-stopped -d -p 8080:8080 --net PiWeb --name WebPiSite $dockerWebsiteTagName
 	echo Anwendung wurde mit IP \"$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' WebPiSite)\" gestartet
 	sudo docker logs WebPiSite -f
 fi
@@ -156,7 +156,7 @@ fi
 if [ "$selectedAktor" = "true" ]; then
 	echo Der alte Container fuer den Namen WebPiAktor wird zuerst noch geloescht
 	sudo docker rm WebPiAktor
-	sudo docker run -it --init --restart unless-stopped -d -p 443:443 --name WebPiAktor --device /dev/i2c-1 $dockerAktorTagName
+	sudo docker run -it --init --restart unless-stopped -d -p 443:443 --net PiWeb --name WebPiAktor --device /dev/i2c-1 $dockerAktorTagName
 	echo Anwendung wurde mit IP \"$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' WebPiAktor)\" gestartet
 	sudo docker logs WebPiAktor -f
 fi

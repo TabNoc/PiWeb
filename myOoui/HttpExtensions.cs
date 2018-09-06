@@ -3,19 +3,24 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace TabNoc.PiWeb.Pages.WateringWeb.History
+namespace TabNoc.MyOoui
 {
 	public static class HttpExtensions
 	{
 		public static Task<HttpResponseMessage> EnsureResultSuccessStatusCode(this Task<HttpResponseMessage> task)
 		{
+			task.Wait();
+			if (task.Exception != null)
+			{
+				Console.WriteLine("EnsureResultSuccessStatusCode>Invalid Response: task.Exception != null\r\n" + task.Exception.ToString());
+			}
 			if (task.Result.IsSuccessStatusCode == false)
 			{
 				throw new HttpRequestException(task.Result.ReasonPhrase + "(" + (int)task.Result.StatusCode + "):" + task.Result.Content.ReadAsStringAsync().Result);
 			}
 			else
 			{
-				Console.WriteLine("Valid Response:" + task.Result.RequestMessage);
+				Console.WriteLine($"[{DateTime.Now.ToLongTimeString()}] EnsureResultSuccessStatusCode>Successful Response ({task.Result.Content.ReadAsStringAsync().Result.Length}B) from {task.Result.RequestMessage.RequestUri}");
 			}
 
 			return task;

@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
-namespace TabNoc.PiWeb.WateringWebServer.other
+namespace TabNoc.PiWeb.WateringWebServer.other.Binder
 {
 	public class DateTimeModelBinderProvider : IModelBinderProvider
 	{

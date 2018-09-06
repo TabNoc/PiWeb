@@ -23,7 +23,6 @@ namespace TabNoc.PiWeb.PagePublisher.WateringWeb
 		protected override void Initialize()
 		{
 			Console.WriteLine("Initialize" + this.GetType().Name);
-			Logging.WriteLog("Test", "Info", "Initialized " + this.GetType().Name);
 		}
 	}
 }

@@ -178,7 +178,7 @@ namespace TabNoc.PiWeb.WateringWebServer.Controllers
 			{
 				using (NpgsqlCommand command = usable.Connection.CreateCommand())
 				{
-					command.CommandText = "select * from t_history where " + GetCollumnName(collumn) + "::text like '%" + searchString + "%' order by msgtimestamp desc limit @amount;";
+					command.CommandText = "select * from t_history where lower(" + GetCollumnName(collumn) + "::text) like lower('%" + searchString + "%') order by msgtimestamp desc limit @amount;";
 					//command.Parameters.AddWithValue("@tableName", GetCollumnName(collumn));
 					//command.Parameters.AddWithValue("@searchstring", searchString);
 					command.Parameters.AddWithValue("@amount", NpgsqlDbType.Integer, amount);
@@ -202,10 +202,10 @@ namespace TabNoc.PiWeb.WateringWebServer.Controllers
 					return "msgtimestamp";
 
 				case 1:
-					return "source";
+					return "status";
 
 				case 2:
-					return "status";
+					return "source";
 
 				case 3:
 					return "message";

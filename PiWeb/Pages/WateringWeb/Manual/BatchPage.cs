@@ -42,11 +42,16 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
 			#region JobName
 
 			MultiInputGroup batchNameMultiInputGroup = new MultiInputGroup();
-			batchNameMultiInputGroup.AppendLabel("JobName", labelSize);
+			batchNameMultiInputGroup.AppendLabel("BatchName", labelSize);
 			StylableTextInput batchNameTextInput = batchNameMultiInputGroup.AppendTextInput("Name?", startText: batch.Name);
 			batchNameMultiInputGroup.AppendValidation("", "Ein Batch-Auftrag mit diesem Namen existiert bereits", false);
 			batchNameMultiInputGroup.AppendCustomElement(new Button(StylingColor.Success, asOutline: true, text: "Namen übernehmen", fontAwesomeIcon: "save"), false).Click += (sender, args) =>
 			{
+				if (batchNameTextInput.Value == "")
+				{
+					batchNameTextInput.SetValidation(false, true);
+					return;
+				}
 				if (PageStorage<ManualData>.Instance.StorageData.BatchEntries.Any(entry => entry.Name == batchNameTextInput.Value))
 				{
 					if (batch.Name == batchNameTextInput.Value)
@@ -228,6 +233,11 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
 			_appendToJobButton.AddStyling(StylingOption.MarginTop, 2);
 			_appendToJobButton.Click += (sender, args) =>
 			{
+				if (batchNameTextInput.Value == "")
+				{
+					jobNameTextInput.SetValidation(false, true);
+					return;
+				}
 				if (_jobSelectDropdown.Button.Text == NewJobString)
 				{
 					if (PageStorage<ManualData>.Instance.StorageData.JobEntries.Any(entry => entry.Name == jobNameTextInput.Value) || jobNameTextInput.Value == "")

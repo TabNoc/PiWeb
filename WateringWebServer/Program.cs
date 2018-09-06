@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace TabNoc.PiWeb.WateringWebServer
 {
@@ -14,6 +15,10 @@ namespace TabNoc.PiWeb.WateringWebServer
 			CreateWebHostBuilder(args)
 				.UseKestrel()
 				.UseUrls("http://*:5000/")
+				.ConfigureLogging((hostingContext, logging) =>
+				{
+					logging.AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
+				})
 				.Build().Run();
 		}
 	}

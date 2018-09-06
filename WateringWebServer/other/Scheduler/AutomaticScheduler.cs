@@ -5,6 +5,8 @@ using Hangfire;
 using Npgsql;
 using TabNoc.PiWeb.DataTypes.WateringWeb.Channels;
 using TabNoc.PiWeb.WateringWebServer.Controllers;
+using TabNoc.PiWeb.WateringWebServer.other.Hardware;
+using TabNoc.PiWeb.WateringWebServer.other.Storage;
 
 namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler
 {

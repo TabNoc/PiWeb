@@ -153,6 +153,11 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
 			appendToBatchButton.AddStyling(StylingOption.MarginTop, 2);
 			appendToBatchButton.Click += (sender, args) =>
 			{
+				if (batchNameTextInput.Value == "")
+				{
+					batchNameTextInput.SetValidation(false, true);
+					return;
+				}
 				if (PageStorage<ManualData>.Instance.StorageData.BatchEntries.Any(entry => entry.Name == batchNameTextInput.Value))
 				{
 					batchNameTextInput.SetValidation(false, true);
