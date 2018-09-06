@@ -145,8 +145,7 @@ function getNode (id) {
         case "window": return window;
         case "document": return document;
         case "document.body":
-            const bodyNode = document.getElementById ("ooui-body");
-            return bodyNode || document.body;
+			return document.getElementById("ooui-body") || document.body;
         default: return nodes[id];
     }
 }
@@ -303,7 +302,7 @@ function fixupValue (v, m) {
         return v;
     }
     else if (typeof v === 'string' || v instanceof String) {
-        if ((v.length > 1) && (v[0] === "o") && m != "setAttr") {
+        if ((v.length > 1) && (v[0] === "\u2999") && m != "setAttr") {
             // console.log("V", v);
             return getNode (v);
         }

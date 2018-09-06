@@ -7,8 +7,8 @@ using TabNoc.MyOoui.Interfaces.Enums;
 using TabNoc.MyOoui.UiComponents;
 using TabNoc.MyOoui.UiComponents.FormControl;
 using TabNoc.MyOoui.UiComponents.FormControl.InputGroups;
-using TabNoc.PiWeb.Storage.WateringWeb.Channels;
-using TabNoc.PiWeb.Storage.WateringWeb.Settings;
+using TabNoc.PiWeb.DataTypes.WateringWeb.Channels;
+using TabNoc.PiWeb.DataTypes.WateringWeb.Settings;
 using Button = TabNoc.MyOoui.HtmlElements.Button;
 
 namespace TabNoc.PiWeb.Pages.WateringWeb.Channels
@@ -16,13 +16,13 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Channels
 	internal class ChannelPage : StylableElement
 	{
 		private readonly ChannelData _channel;
-		private readonly TextInputGroup _channelNameInputGroup;
 		private readonly List<ChannelProgrammPage> _channelProgrammPages = new List<ChannelProgrammPage>();
 		private readonly Button _deleteChannelButton;
 		private readonly bool _isMasterChannel;
 		private readonly ChannelsPage _parentChannelsPage;
 		private readonly Dictionary<ChannelProgramData, Anchor> _tabDictionary = new Dictionary<ChannelProgramData, Anchor>();
 		private readonly TabNavigation _tabNavigation;
+		private readonly StylableTextInput _channelNameTextInput;
 		private Dropdown _humiditySensorDropdown;
 		private TwoStateButtonGroup _humiditySensorEnabledTwoStateButtonGroup;
 
@@ -45,20 +45,25 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Channels
 
 			#region TextInputGroup ProgrammName
 
-			_channelNameInputGroup = new TextInputGroup("KanalName", "N/A", centeredText: true);
-			_channelNameInputGroup.AddStyling(StylingOption.MarginBottom, 2);
-			_channelNameInputGroup.TextInput.Value = channel.Name;
+			MultiInputGroup channelNameMultiInputGroup = new MultiInputGroup();
+			channelNameMultiInputGroup.AppendLabel("Kanal:");
+			channelNameMultiInputGroup.AppendLabel(channel.ChannelId.ToString());
+			channelNameMultiInputGroup.AppendLabel("  Name:");
+			_channelNameTextInput = channelNameMultiInputGroup.AppendTextInput("Kanalname?", true, channel.Name);
+
+			channelNameMultiInputGroup.AddStyling(StylingOption.MarginBottom, 2);
+
 			if (!isMasterChannel)
 			{
 				_deleteChannelButton = new Button(StylingColor.Danger, asOutline: true, text: "Kanal Löschen", fontAwesomeIcon: "trash");
 				_deleteChannelButton.Click += DeleteChannelButtonOnClick;
-				_channelNameInputGroup.AddFormElement(_deleteChannelButton);
+				channelNameMultiInputGroup.AppendCustomElement(_deleteChannelButton, false);
 			}
 			else
 			{
-				_channelNameInputGroup.TextInput.IsDisabled = true;
+				_channelNameTextInput.IsDisabled = true;
 			}
-			grid.AddRow().AppendCollum(_channelNameInputGroup);
+			grid.AddRow().AppendCollum(channelNameMultiInputGroup);
 
 			#endregion TextInputGroup ProgrammName
 
@@ -114,7 +119,7 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Channels
 
 		public void ApplyName(ChannelProgramData channelProgram)
 		{
-			_tabDictionary[channelProgram].Text = channelProgram.Name.Substring(0, Math.Min(channelProgram.Name.Length, 3));
+			_tabDictionary[channelProgram].Text = channelProgram.Name.Substring(0, Math.Min(channelProgram.Name.Length, 20));
 		}
 
 		public void RemoveProgramm(ChannelProgrammPage channelProgrammPage, ChannelProgramData channelProgram)
@@ -181,7 +186,7 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Channels
 			_channelProgrammPages.ForEach(page => page.Save());
 			if (!_isMasterChannel)
 			{
-				_channel.Name = _channelNameInputGroup.TextInput.Value;
+				_channel.Name = _channelNameTextInput.Value;
 				_parentChannelsPage.ApplyName(_channel);
 				_channel.HumiditySensorEnabled = _humiditySensorEnabledTwoStateButtonGroup.FirstButtonActive;
 				_channel.HumiditySensor = _humiditySensorDropdown.Button.GetAttribute("data-realName").ToString();

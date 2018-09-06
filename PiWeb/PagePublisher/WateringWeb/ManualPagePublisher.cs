@@ -1,8 +1,13 @@
 ﻿using Ooui;
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
+using System.Text;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
+using TabNoc.MyOoui.Storage;
+using TabNoc.PiWeb.DataTypes.WateringWeb.Manual;
 using TabNoc.PiWeb.Pages.WateringWeb.Manual;
-using TabNoc.PiWeb.Storage.WateringWeb.Manual;
 
 namespace TabNoc.PiWeb.PagePublisher.WateringWeb
 {
@@ -11,8 +16,8 @@ namespace TabNoc.PiWeb.PagePublisher.WateringWeb
 		public ManualPagePublisher(string publishPath) : base(publishPath)
 		{
 			PageStorage<ManualActionExecutionData>.Instance.WriteOnly = true;
-			PageStorage<ManualActionExecutionData>.Instance.Initialize(null, SaveManualActionExecutionDataCallback);
-			PageStorage<ManualData>.Instance.Initialize(LoadDataCallback, SaveDataCallback);
+			PageStorage<ManualActionExecutionData>.Instance.Initialize(null, SaveManualActionExecutionDataCallback, new TimeSpan(0, 0, 5));
+			PageStorage<ManualData>.Instance.Initialize("Manual", new TimeSpan(0, 0, 5));
 		}
 
 		protected override Element CreatePage()
@@ -24,43 +29,26 @@ namespace TabNoc.PiWeb.PagePublisher.WateringWeb
 		{
 		}
 
-		private string LoadDataCallback()
+		private void SaveManualActionExecutionDataCallback(string data)
 		{
-			if (File.Exists("demo_Manual.json"))
+			const string key = "ManualActionExecution";
+			Dictionary<string, BackedProperties> backedPropertieses = PageStorage<BackendData>.Instance.StorageData.BackedPropertieses;
+			if (backedPropertieses.ContainsKey(key) && backedPropertieses[key].RequestDataFromBackend == true)
 			{
-				FileInfo fileInfo = new FileInfo("demo_Manual.json");
-				using (StreamReader streamReader = fileInfo.OpenText())
-				{
-					return streamReader.ReadToEnd();
-				}
+				HttpClient httpClient = new HttpClient();
+				StringContent httpContent = new StringContent(data, Encoding.UTF8, "application/json");
+				HttpResponseMessage message = httpClient.PostAsync(backedPropertieses[key].DataSourcePath, httpContent).Result;
 			}
 			else
 			{
-				return "";
-			}
-		}
-
-		private void SaveDataCallback(string data)
-		{
-			FileInfo fileInfo = new FileInfo("demo_Manual.json");
-			using (StreamWriter streamWriter = fileInfo.CreateText())
-			{
-				streamWriter.Write(data);
-				streamWriter.Flush();
-				streamWriter.Close();
-				streamWriter.Dispose();
-			}
-		}
-
-		private void SaveManualActionExecutionDataCallback(string data)
-		{
-			FileInfo fileInfo = new FileInfo("demo_ManualActionExecution.json");
-			using (StreamWriter streamWriter = fileInfo.CreateText())
-			{
-				streamWriter.Write(data);
-				streamWriter.Flush();
-				streamWriter.Close();
-				streamWriter.Dispose();
+				FileInfo fileInfo = new FileInfo($"demo_{key}.json");
+				using (StreamWriter streamWriter = fileInfo.CreateText())
+				{
+					streamWriter.Write(data);
+					streamWriter.Flush();
+					streamWriter.Close();
+					streamWriter.Dispose();
+				}
 			}
 		}
 	}

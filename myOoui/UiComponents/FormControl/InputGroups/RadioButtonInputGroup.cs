@@ -7,6 +7,7 @@ namespace TabNoc.MyOoui.UiComponents.FormControl.InputGroups
 {
 	public class RadioButtonInputGroup : InputGroupControl
 	{
+		public readonly string RadioButtonGroupName;
 		private readonly RadioButton _radioButton;
 
 		public bool Checked
@@ -15,9 +16,7 @@ namespace TabNoc.MyOoui.UiComponents.FormControl.InputGroups
 			set => _radioButton.IsChecked = value;
 		}
 
-		public readonly string RadioButtonGroupName;
-
-		public RadioButtonInputGroup(bool @checked, StylableElement content, string radioButtonGroupName = "")
+		public RadioButtonInputGroup(bool @checked, StylableElement content, string radioButtonGroupName = "", bool asFormControl = true)
 		{
 			if (string.IsNullOrWhiteSpace(radioButtonGroupName))
 			{
@@ -47,7 +46,7 @@ namespace TabNoc.MyOoui.UiComponents.FormControl.InputGroups
 
 			Div contentDivWrapper = new Div()
 			{
-				ClassName = "input-group-append form-control"
+				ClassName = "input-group-append" + (asFormControl ? "form-control" : "")
 			};
 			contentDivWrapper.AppendChild(content);
 

@@ -4,7 +4,7 @@ using System.Linq;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
 using TabNoc.MyOoui.Interfaces.Enums;
 using TabNoc.MyOoui.UiComponents;
-using TabNoc.PiWeb.Storage.WateringWeb.Channels;
+using TabNoc.PiWeb.DataTypes.WateringWeb.Channels;
 using Button = TabNoc.MyOoui.HtmlElements.Button;
 
 namespace TabNoc.PiWeb.Pages.WateringWeb.Channels

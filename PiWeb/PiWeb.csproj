@@ -19,21 +19,22 @@
   </PropertyGroup>
   
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="if /I $(ConfigurationName) EQU Release (&#xD;&#xA;    cd $(ProjectDir)&#xD;&#xA;    mkdir bin\PiDeployment\&#xD;&#xA;    copy Docker.sh bin\PiDeployment\Docker.sh&#xD;&#xA;    copy Dockerfile bin\PiDeployment\Dockerfile&#xD;&#xA;    dotnet publish -r linux-arm --output bin/PiDeployment/netcoreapp2.1&#xD;&#xA;    REM dotnet publish --configuration Release -r linux-arm&#xD;&#xA;    &quot;C:\_\winscp577\publish.bat&quot;&#xD;&#xA;)" />
+    <Exec Command="if /I $(ConfigurationName) EQU Release (&#xD;&#xA;    cd $(ProjectDir)&#xD;&#xA;    mkdir bin\PiDeployment\&#xD;&#xA;    copy Docker.sh bin\PiDeployment\Docker.sh&#xD;&#xA;    copy Dockerfile bin\PiDeployment\Dockerfile&#xD;&#xA;    xcopy &quot;bin\Release\netcoreapp2.1&quot; &quot;bin\PiDeployment\netcoreapp2.1\&quot; /y/s/h/e/k/f/c/i&#xD;&#xA;    REM dotnet publish --output bin/PiDeployment/netcoreapp2.1&#xD;&#xA;    REM dotnet publish -r linux-arm --output bin/PiDeployment/netcoreapp2.1&#xD;&#xA;    REM dotnet publish --configuration Release -r linux-arm&#xD;&#xA;    &quot;C:\_\winscp577\publish.bat&quot;&#xD;&#xA;)" />
   </Target>
   
   <ItemGroup>
+    <None Remove="Storage\external_WeatherLocations\WeatherLocations.json" />
     <None Remove="Storage\lib\bootstrap3-typeahead.min.js" />
-    <None Remove="Storage\WateringWeb\Settings\external_WeatherLocations\WeatherLocations.json" />
   </ItemGroup>
   
   <ItemGroup>
+    <EmbeddedResource Include="Storage\external_WeatherLocations\WeatherLocations.json" />
     <EmbeddedResource Include="Storage\lib\bootstrap3-typeahead.min.js" />
-    <EmbeddedResource Include="Storage\WateringWeb\Settings\external_WeatherLocations\WeatherLocations.json" />
   </ItemGroup>
   
   <ItemGroup>
     <ProjectReference Include="..\myOoui\myOoui.csproj" />
+    <ProjectReference Include="..\PiWebDataTypes\PiWebDataTypes.csproj" />
   </ItemGroup>
 
 </Project>

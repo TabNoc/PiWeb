@@ -4,8 +4,8 @@ using System.Linq;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
 using TabNoc.MyOoui.Interfaces.Enums;
 using TabNoc.MyOoui.UiComponents;
-using TabNoc.PiWeb.Storage.WateringWeb.Channels;
-using TabNoc.PiWeb.Storage.WateringWeb.Manual;
+using TabNoc.PiWeb.DataTypes.WateringWeb.Channels;
+using TabNoc.PiWeb.DataTypes.WateringWeb.Manual;
 
 namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
 {

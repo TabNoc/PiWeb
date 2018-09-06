@@ -1,12 +1,14 @@
 ﻿using Ooui;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
 using TabNoc.MyOoui.Interfaces.Enums;
 using TabNoc.MyOoui.UiComponents;
 using TabNoc.MyOoui.UiComponents.FormControl.InputGroups;
-using TabNoc.PiWeb.Storage.WateringWeb.Channels;
-using TabNoc.PiWeb.Storage.WateringWeb.Manual;
+using TabNoc.PiWeb.DataTypes.WateringWeb.Channels;
+using TabNoc.PiWeb.DataTypes.WateringWeb.Manual;
 using Button = TabNoc.MyOoui.HtmlElements.Button;
 
 namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
@@ -90,9 +92,16 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
 					startButton.IsDisabled = true;
 					try
 					{
-						ManualActionExecutionData.CreateChannelAction(channel, TimeSpan.Parse(durationTextInput.Value), masterEnabledTwoStateButtonGroup.FirstButtonActive, 100);
-						ManualActionExecutionData.ExecuteAction();
+						CreateChannelAction(channel, TimeSpan.Parse(durationTextInput.Value), masterEnabledTwoStateButtonGroup.FirstButtonActive, 100);
+
 						startButton.Text = "Gestartet";
+						Task.Run(() =>
+						{
+							startButton.Text = "Starten!";
+							startButton.SetFontAwesomeIcon("play");
+							System.Threading.Thread.Sleep(5000);
+							return startButton.IsDisabled = false;
+						});
 					}
 					catch (Exception)
 					{
@@ -144,6 +153,11 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
 			appendToBatchButton.AddStyling(StylingOption.MarginTop, 2);
 			appendToBatchButton.Click += (sender, args) =>
 			{
+				if (batchNameTextInput.Value == "")
+				{
+					batchNameTextInput.SetValidation(false, true);
+					return;
+				}
 				if (PageStorage<ManualData>.Instance.StorageData.BatchEntries.Any(entry => entry.Name == batchNameTextInput.Value))
 				{
 					batchNameTextInput.SetValidation(false, true);
@@ -151,13 +165,25 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
 				else
 				{
 					batchNameTextInput.SetValidation(true, false);
-					PageStorage<ManualData>.Instance.StorageData.BatchEntries.Add(new BatchEntry(batchNameTextInput.Value, channel.ChannelId, TimeSpan.Parse(durationTextInput.Value), masterEnabledTwoStateButtonGroup.FirstButtonActive, 100, PageStorage<ManualData>.Instance.StorageData.GetUniqueID()));
+					PageStorage<ManualData>.Instance.StorageData.BatchEntries.Add(new BatchEntry(batchNameTextInput.Value, channel.ChannelId, TimeSpan.Parse(durationTextInput.Value), masterEnabledTwoStateButtonGroup.FirstButtonActive, 100));
 					parent.UpdateBatch();
 				}
 			};
 			secondContainer.AppendChild(appendToBatchButton);
 
 			#endregion AddToBatch
+		}
+
+		private static void CreateChannelAction(ChannelData channel, TimeSpan duration, bool activateMasterChannel, int durationOverride = 100)
+		{
+			PageStorage<ManualActionExecutionData>.Instance.StorageData.Name = channel.Name;
+			PageStorage<ManualActionExecutionData>.Instance.StorageData.ExecutionList = new List<ManualActionExecutionData.ManualActionExecution>()
+			{
+				new ManualActionExecutionData.ManualActionExecution(channel.ChannelId, duration, activateMasterChannel, durationOverride)
+			};
+			PageStorage<ManualActionExecutionData>.Instance.Save();
+			PageStorage<ManualActionExecutionData>.Instance.StorageData.Name = "";
+			PageStorage<ManualActionExecutionData>.Instance.StorageData.ExecutionList = null;
 		}
 	}
 }

@@ -95,7 +95,6 @@ namespace TabNoc.MyOoui.UiComponents
 			div.SetAttribute("role", "tabpanel");
 			div.SetAttribute("aria-labelledby", anchor.Id);
 			div.AppendChild(content);
-			_contentDiv.AppendChild(div);
 
 			anchor.SetAttribute("aria-controls", div.Id);
 			anchor.HRef = "#" + div.Id;

@@ -2,14 +2,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TabNoc.MyOoui.Interfaces;
+using System.Threading.Tasks;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
 using TabNoc.MyOoui.Interfaces.Enums;
 using TabNoc.MyOoui.UiComponents;
 using TabNoc.MyOoui.UiComponents.FormControl;
 using TabNoc.MyOoui.UiComponents.FormControl.InputGroups;
 using TabNoc.MyOoui.UiComponents.FormControl.InputGroups.Components;
-using TabNoc.PiWeb.Storage.WateringWeb.Manual;
+using TabNoc.PiWeb.DataTypes.WateringWeb.Manual;
 using Button = TabNoc.MyOoui.HtmlElements.Button;
 
 namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
@@ -23,8 +23,9 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
 		private readonly Dropdown _jobSelectDropdown;
 		private readonly Button _removeFromJobButton;
 
-		public BatchPage(Storage.WateringWeb.Manual.BatchEntry batch, ManualPage parent) : base("div")
+		public BatchPage(BatchEntry batch, ManualPage parent) : base("div")
 		{
+			const int labelSize = 100;
 			_batch = batch;
 			SetBorder(BorderKind.Rounded, StylingColor.Secondary);
 
@@ -41,10 +42,41 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
 			#region JobName
 
 			MultiInputGroup batchNameMultiInputGroup = new MultiInputGroup();
-			batchNameMultiInputGroup.AppendLabel("JobName");
+			batchNameMultiInputGroup.AppendLabel("BatchName", labelSize);
 			StylableTextInput batchNameTextInput = batchNameMultiInputGroup.AppendTextInput("Name?", startText: batch.Name);
 			batchNameMultiInputGroup.AppendValidation("", "Ein Batch-Auftrag mit diesem Namen existiert bereits", false);
-			Button saveJobNameButton = batchNameMultiInputGroup.AppendCustomElement(new Button(StylingColor.Success, asOutline: true, text: "Namen übernehmen", fontAwesomeIcon: "save"), false);
+			batchNameMultiInputGroup.AppendCustomElement(new Button(StylingColor.Success, asOutline: true, text: "Namen übernehmen", fontAwesomeIcon: "save"), false).Click += (sender, args) =>
+			{
+				if (batchNameTextInput.Value == "")
+				{
+					batchNameTextInput.SetValidation(false, true);
+					return;
+				}
+				if (PageStorage<ManualData>.Instance.StorageData.BatchEntries.Any(entry => entry.Name == batchNameTextInput.Value))
+				{
+					if (batch.Name == batchNameTextInput.Value)
+					{
+						return;
+					}
+					else
+					{
+						batchNameTextInput.SetValidation(false, true);
+					}
+				}
+				else
+				{
+					batchNameTextInput.SetValidation(true, false);
+					foreach (BatchEntry entry in PageStorage<ManualData>.Instance.StorageData.JobEntries.SelectMany(
+						entry => entry.BatchEntries.Where(batchEntry =>
+							batchEntry.Name == batch.Name && batchEntry != batch)))
+					{
+						entry.Name = batchNameTextInput.Value;
+					}
+					batch.Name = batchNameTextInput.Value;
+					parent.UpdateBatch();
+				}
+			};
+
 			Button deleteJobButton = batchNameMultiInputGroup.AppendCustomElement(new Button(StylingColor.Danger, asOutline: true, text: "Batch-Auftrag Löschen", fontAwesomeIcon: "trash"), false);
 			deleteJobButton.Click += (sender, args) =>
 			{
@@ -79,33 +111,14 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
 				}
 			};
 
-			saveJobNameButton.Click += (sender, args) =>
-			{
-				if (PageStorage<ManualData>.Instance.StorageData.BatchEntries.Any(entry => entry.Name == batchNameTextInput.Value))
-				{
-					if (batch.Name == batchNameTextInput.Value)
-					{
-						return;
-					}
-					else
-					{
-						batchNameTextInput.SetValidation(false, true);
-					}
-				}
-				else
-				{
-					batchNameTextInput.SetValidation(true, false);
-					foreach (BatchEntry entry in PageStorage<ManualData>.Instance.StorageData.JobEntries.SelectMany(
-						entry => entry.BatchEntries.Where(batchEntry =>
-							batchEntry.Name == batch.Name && batchEntry != batch)))
-					{
-						entry.Name = batchNameTextInput.Value;
-					}
-					batch.Name = batchNameTextInput.Value;
-					parent.UpdateBatch();
-				}
-			};
+			batchNameMultiInputGroup.AddStyling(StylingOption.MarginBottom, 2);
 			grid.AddRow().AppendCollum(batchNameMultiInputGroup, autoSize: true);
+
+			MultiInputGroup batchActionMultiInputGroup = new MultiInputGroup();
+			batchActionMultiInputGroup.AppendLabel("Aktion", labelSize);
+			batchActionMultiInputGroup.AppendLabel(batch.ToString());
+			batchActionMultiInputGroup.AddStyling(StylingOption.MarginBottom, 1);
+			grid.AddRow().AppendCollum(batchActionMultiInputGroup, autoSize: true);
 
 			#endregion JobName
 
@@ -146,9 +159,15 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
 				startButton.IsDisabled = true;
 				try
 				{
-					ManualActionExecutionData.CreateBatchAction(batch, overrideInputGroup.Value);
-					ManualActionExecutionData.ExecuteAction();
+					CreateBatchAction(batch, overrideInputGroup.Value);
 					startButton.Text = "Gestartet";
+					Task.Run(() =>
+					{
+						startButton.Text = "Starten!";
+						startButton.SetFontAwesomeIcon("play");
+						System.Threading.Thread.Sleep(5000);
+						return startButton.IsDisabled = false;
+					});
 				}
 				catch (Exception)
 				{
@@ -214,6 +233,11 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
 			_appendToJobButton.AddStyling(StylingOption.MarginTop, 2);
 			_appendToJobButton.Click += (sender, args) =>
 			{
+				if (batchNameTextInput.Value == "")
+				{
+					jobNameTextInput.SetValidation(false, true);
+					return;
+				}
 				if (_jobSelectDropdown.Button.Text == NewJobString)
 				{
 					if (PageStorage<ManualData>.Instance.StorageData.JobEntries.Any(entry => entry.Name == jobNameTextInput.Value) || jobNameTextInput.Value == "")
@@ -311,6 +335,19 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
 				_appendToJobButton.IsHidden = false;
 				_removeFromJobButton.IsHidden = true;
 			};
+		}
+
+		private static void CreateBatchAction(BatchEntry batch, int durationOverride)
+		{
+			PageStorage<ManualActionExecutionData>.Instance.StorageData.Name = batch.Name;
+			PageStorage<ManualActionExecutionData>.Instance.StorageData.ExecutionList = new List<ManualActionExecutionData.ManualActionExecution>()
+			{
+				new ManualActionExecutionData.ManualActionExecution(batch.ChannelId, batch.Duration, batch.ActivateMasterChannel, durationOverride)
+			};
+			PageStorage<ManualActionExecutionData>.Instance.Save();
+
+			PageStorage<ManualActionExecutionData>.Instance.StorageData.Name = "";
+			PageStorage<ManualActionExecutionData>.Instance.StorageData.ExecutionList = null;
 		}
 	}
 }

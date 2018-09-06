@@ -1,9 +1,9 @@
 ﻿using Ooui;
-using System.IO;
+using System;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
 using TabNoc.MyOoui.Interfaces.Enums;
+using TabNoc.PiWeb.DataTypes.WateringWeb.Channels;
 using TabNoc.PiWeb.Pages.WateringWeb.Channels;
-using TabNoc.PiWeb.Storage.WateringWeb.Channels;
 
 namespace TabNoc.PiWeb.PagePublisher.WateringWeb
 {
@@ -11,12 +11,7 @@ namespace TabNoc.PiWeb.PagePublisher.WateringWeb
 	{
 		public ChannelsPagePublisher(string publishPath) : base(publishPath)
 		{
-			Initialize();
-		}
-
-		protected override void Initialize()
-		{
-			PageStorage<ChannelsData>.Instance.Initialize(LoadDataCallback, SaveDataCallback);
+			PageStorage<ChannelsData>.Instance.Initialize("Channels", new TimeSpan(0, 0, 5));
 		}
 
 		protected override Element CreatePage()
@@ -28,32 +23,8 @@ namespace TabNoc.PiWeb.PagePublisher.WateringWeb
 			return channelsPage;
 		}
 
-		private void SaveDataCallback(string data)
+		protected override void Initialize()
 		{
-			FileInfo fileInfo = new FileInfo("demo_Channels.json");
-			using (StreamWriter streamWriter = fileInfo.CreateText())
-			{
-				streamWriter.Write(data);
-				streamWriter.Flush();
-				streamWriter.Close();
-				streamWriter.Dispose();
-			}
-		}
-
-		private string LoadDataCallback()
-		{
-			if (File.Exists("demo_Channels.json"))
-			{
-				FileInfo fileInfo = new FileInfo("demo_Channels.json");
-				using (StreamReader streamReader = fileInfo.OpenText())
-				{
-					return streamReader.ReadToEnd();
-				}
-			}
-			else
-			{
-				return "";
-			}
 		}
 	}
 }

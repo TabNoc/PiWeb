@@ -14,12 +14,13 @@ namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 		protected Publisher(string publishPath) : base(publishPath)
 		{
 			PublishPath = publishPath;
-			Initialize();
 		}
 
-		protected abstract void Initialize();
+		protected abstract NavigationBar CreateNavigationBar();
 
 		protected abstract Element CreatePage();
+
+		protected abstract void Initialize();
 
 		protected override Element PopulateAppElement()
 		{
@@ -88,7 +89,5 @@ namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 			Console.ResetColor();
 			Console.WriteLine("\r\n\r\n");
 		}
-
-		protected abstract NavigationBar CreateNavigationBar();
 	}
 }

@@ -215,30 +215,57 @@ namespace Ooui
 		bool _disposed;
 
 	    public void Dispose()
-	    {
-		    Dispose(true);
-		    GC.SuppressFinalize(this);
-	    }
+		{
+			try
+			{
+				Dispose(true);
+			    GC.SuppressFinalize(this);
+		    }
+		    catch (Exception e)
+		    {
+			    Console.ForegroundColor = ConsoleColor.Red;
+			    Console.WriteLine(e);
+			    Console.ResetColor();
+		    }
+		}
 
 	    ~Node()
-	    {
-		    Dispose(false);
-	    }
+		{
+			try
+			{
+				Dispose(false);
+			}
+			catch (Exception e)
+			{
+				Console.ForegroundColor = ConsoleColor.Red;
+				Console.WriteLine(e);
+				Console.ResetColor();
+			}
+		}
 
 	    protected virtual void Dispose(bool disposing)
-	    {
-		    if (_disposed)
-			    return;
+		{
+			try
+			{
+				if (_disposed)
+					return;
 
-		    if (disposing)
-		    {
-			    foreach (Node child in Children)
+			    if (disposing)
 			    {
-				    child.Dispose(true);
+				    foreach (Node child in Children)
+				    {
+					    child.Dispose(true);
+				    }
 			    }
-		    }
 
-		    _disposed = true;
+			    _disposed = true;
+		    }
+		    catch (Exception e)
+		    {
+			    Console.ForegroundColor = ConsoleColor.Red;
+				Console.WriteLine(e);
+				Console.ResetColor();
+		    }
 	    }
 
 		#endregion Dispose Pattern

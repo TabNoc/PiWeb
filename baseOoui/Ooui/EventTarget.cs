@@ -102,7 +102,7 @@ namespace Ooui
             PropertyChanged?.Invoke (this, new PropertyChangedEventArgs (propertyName));
         }
 
-	    public const char IdPrefix = 'o';//'\u2999';
+	    public const char IdPrefix = '\u2999';
 
         static long idCounter = 0;
         static string GenerateId ()

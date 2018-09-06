@@ -2,6 +2,7 @@
 using System;
 using TabNoc.MyOoui.Interfaces;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
+using TabNoc.MyOoui.Interfaces.Enums;
 using Button = TabNoc.MyOoui.HtmlElements.Button;
 
 namespace TabNoc.MyOoui.UiComponents.FormControl

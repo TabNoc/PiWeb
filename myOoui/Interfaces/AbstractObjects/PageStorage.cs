@@ -1,5 +1,13 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Net.Http;
+using System.Text;
+using TabNoc.MyOoui.Storage;
+using TabNoc.MyOoui.UiComponents;
+using TabNoc.PiWeb.DataTypes;
 
 namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 {
@@ -8,25 +16,49 @@ namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 		public bool ReadOnly = false;
 		public bool WriteOnly = false;
 		private static PageStorage<T> _instance;
+		private TimeSpan _cacheTimeSpan;
+		private bool _changed = false;
 		private bool _initialized = false;
 		private bool _isDisposed = false;
+		private DateTime _lastLoadDateTime;
 		private Func<string> _loadDataCallback;
 		private string _loadedData;
 		private Action<string> _saveDataCallback;
 		private T _storageData;
+		private bool _useSafeLoading;
 		public static PageStorage<T> Instance => _instance ?? (_instance = new PageStorage<T>());
 
 		public T StorageData
 		{
 			get
 			{
-				if (_storageData == null)
+				try
 				{
-					Load();
+					bool cacheTimeout = DateTime.Now - _lastLoadDateTime > _cacheTimeSpan;
+
+					if (!ReadOnly && (_changed == false && cacheTimeout && _storageData != null))
+					{
+						// überprüfen ob der gecachet wert sich verändert hat. Wenn ja, dann darf dieser nicht verworfen werden
+						if (GetWriteData(_storageData) != _loadedData)
+						{
+							_changed = true;
+						}
+					}
+
+					if (_storageData == null || (cacheTimeout && _changed == false))
+					{
+						_storageData = null;
+						Load();
+						return _storageData;
+					}
+
 					return _storageData;
 				}
-
-				return _storageData;
+				catch (Exception e)
+				{
+					Logging.Error("Beim Abrufen der Daten von " + this.GetType().Name + "<" + typeof(T).Name + "> ist ein Fehler aufgetreten!", e);
+					throw;
+				}
 			}
 		}
 
@@ -46,7 +78,7 @@ namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 			GC.SuppressFinalize(this);
 		}
 
-		public void Initialize(Func<string> loadDataCallback, Action<string> saveDataCallback)
+		public void Initialize(Func<string> loadDataCallback, Action<string> saveDataCallback, TimeSpan cacheTimeSpan)
 		{
 			if (_isDisposed)
 			{
@@ -85,28 +117,99 @@ namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 			}
 
 			_initialized = true;
+			_cacheTimeSpan = cacheTimeSpan;
 		}
 
-		public void Save()
+		public void Initialize(string key, TimeSpan cacheTimeSpan)
 		{
-			if (ReadOnly == true)
-			{
-				throw new InvalidOperationException(" this PageStorage is ReadOnly -> You can't save it.");
-			}
 			if (_isDisposed)
 			{
 				throw new ObjectDisposedException(typeof(T).Name);
 			}
-			if (_saveDataCallback == null)
+			if (_initialized)
 			{
-				throw new NullReferenceException(nameof(Initialize) + " has to be called before Saving the the " + typeof(T).Name);
+				throw new InvalidOperationException($"Ein wiederholtes aufrufen von Initialize ist nicht zulässig!");
 			}
 
-			string writeData = WriteData(_storageData);
-			if (writeData != _loadedData)
+			if (_initialized == false)
 			{
-				_saveDataCallback(writeData);
+				if (WriteOnly != true)
+				{
+					_loadDataCallback = () => LoadDataCaller(key);
+				}
+
+				if (ReadOnly != true)
+				{
+					_saveDataCallback = s => SaveDataCaller(s, key);
+				}
 			}
+
+			_initialized = true;
+			_cacheTimeSpan = cacheTimeSpan;
+		}
+
+		public void Save()
+		{
+			try
+			{
+				if (ReadOnly == true)
+				{
+					throw new InvalidOperationException($"This PageStorage<{typeof(T).Name}> is ReadOnly -> You can't save it.");
+				}
+				if (_isDisposed)
+				{
+					throw new ObjectDisposedException(typeof(T).Name);
+				}
+				if (_saveDataCallback == null)
+				{
+					throw new NullReferenceException($"{nameof(Initialize)} has to be called before Saving the PageStorage<{typeof(T).Name}>");
+				}
+
+				string writeData = GetWriteData(_storageData);
+				if (writeData != _loadedData)
+				{
+					//TODO: Maybe Merge Server data?
+					if (!_useSafeLoading)
+					{
+						_saveDataCallback(writeData);
+					}
+					_changed = false;
+				}
+			}
+			catch (Exception e)
+			{
+				Logging.Error("Beim Speichern der Daten von " + this.GetType().Name + "<" + typeof(T).Name + "> ist ein kritischer Fehler aufgetreten!", e);
+			}
+		}
+
+		public bool TryLoad()
+		{
+			try
+			{
+				if (StorageData.Valid)
+				{
+				}
+				return true;
+			}
+			catch (Exception)
+			{
+				return false;
+			}
+		}
+
+		public void UseSafeLoading()
+		{
+			_useSafeLoading = true;
+		}
+
+		private T FromReadData(string loadData)
+		{
+			return loadData == "" ? null : JsonConvert.DeserializeObject<T>(loadData);
+		}
+
+		private string GetWriteData(T channelsData)
+		{
+			return JsonConvert.SerializeObject(channelsData);
 		}
 
 		private void Load()
@@ -117,11 +220,16 @@ namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 			}
 			if (_loadDataCallback == null && !WriteOnly)
 			{
-				throw new NullReferenceException(nameof(Initialize) + " has to be called before Loading the the " + typeof(T).Name);
+				throw new NullReferenceException($"{nameof(Initialize)} has to be called before Loading the PageStorage<{typeof(T).Name}>");
 			}
 
-			_loadedData = WriteOnly ? "" : _loadDataCallback();
-			_storageData = ReadData(_loadedData) ?? (T)typeof(T).GetMethod("CreateNew").Invoke(null, null);
+			_loadedData = WriteOnly ? "" : (_useSafeLoading ? "" : _loadDataCallback());
+			_storageData = FromReadData(_loadedData) ?? (T)typeof(T).GetMethod("CreateNew").Invoke(null, null);
+
+			// Get the Data from this Machine to compare it later
+			_loadedData = GetWriteData(_storageData);
+
+			_lastLoadDateTime = DateTime.Now;
 
 			if (_storageData.Valid == false)
 			{
@@ -132,14 +240,59 @@ namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 			}
 		}
 
-		private T ReadData(string loadData)
+		private string LoadDataCaller(string key)
 		{
-			return loadData == "" ? null : JsonConvert.DeserializeObject<T>(loadData);
+			if (typeof(T) != typeof(BackendData))
+			{
+				Dictionary<string, BackedProperties> backedPropertieses = PageStorage<BackendData>.Instance.StorageData.BackedPropertieses;
+				if (!backedPropertieses.ContainsKey(key))
+				{
+					throw new ArgumentNullException(nameof(key), "Der Parameter existiert im Dictionary nicht");
+				}
+				if (backedPropertieses[key].RequestDataFromBackend == true)
+				{
+					return new HttpClient().GetAsync(backedPropertieses[key].DataSourcePath).EnsureResultSuccessStatusCode().Result.Content.ReadAsStringAsync().Result;
+				}
+			}
+
+			if (File.Exists($"PageStorage({key}).json"))
+			{
+				FileInfo fileInfo = new FileInfo($"PageStorage({key}).json");
+				using (StreamReader streamReader = fileInfo.OpenText())
+				{
+					return streamReader.ReadToEnd();
+				}
+			}
+			else
+			{
+				return "";
+			}
 		}
 
-		private string WriteData(T channelsData)
+		private void SaveDataCaller(string data, string key)
 		{
-			return JsonConvert.SerializeObject(channelsData);
+			if (typeof(T) != typeof(BackendData))
+			{
+				Dictionary<string, BackedProperties> backedPropertieses = PageStorage<BackendData>.Instance.StorageData.BackedPropertieses;
+				if (backedPropertieses.ContainsKey(key) && backedPropertieses[key].RequestDataFromBackend == true)
+				{
+					HttpResponseMessage message = new HttpClient().PutAsync(backedPropertieses[key].DataSourcePath,
+						new StringContent(data, Encoding.UTF8, "application/json")).EnsureResultSuccessStatusCode().Result;
+					if (HttpStatusCode.NoContent != message.StatusCode)
+					{
+						throw new ApplicationException("Wrong Server Response Statuscode");
+					}
+					return;
+				}
+			}
+			FileInfo fileInfo = new FileInfo($"PageStorage({key}).json");
+			using (StreamWriter streamWriter = fileInfo.CreateText())
+			{
+				streamWriter.Write(data);
+				streamWriter.Flush();
+				streamWriter.Close();
+				streamWriter.Dispose();
+			}
 		}
 	}
 }
