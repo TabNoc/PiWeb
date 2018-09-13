@@ -2,6 +2,7 @@
 using System;
 using TabNoc.PiWeb.DataTypes.WateringWeb.Manual;
 using TabNoc.PiWeb.WateringWebServer.other.Scheduler;
+using TabNoc.PiWeb.WateringWebServer.other.Scheduler.Manual;
 
 namespace TabNoc.PiWeb.WateringWebServer.Controllers
 {

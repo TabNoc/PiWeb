@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Net.Http;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using Newtonsoft.Json;
 using TabNoc.MyOoui;
 using TabNoc.PiWeb.DataTypes.WateringWeb.History;
 using TabNoc.PiWeb.WateringWebServer.Controllers;
@@ -17,7 +17,7 @@ namespace TabNoc.PiWeb.WateringWebServer.other.Hardware
 		{
 			if (WaterRelaisControl.Instance.Activate(channelId, activateWithMasterChannel, operatingMode, duration, out bool activateMasterChannel))
 			{
-				string result = new HttpClient(GetHttpClientHandler()).GetAsync($"https://piw/watering/ctrl/{channelId}/on/?master={(activateMasterChannel ? "on" : "off")}").EnsureResultSuccessStatusCode().Result.Content.ReadAsStringAsync().Result;
+				string result = new HttpClient(GetHttpClientHandler()).GetAsync($"https://{PrivateData.RemoteHostName}/watering/ctrl/{channelId}/on/?master={(activateMasterChannel ? "on" : "off")}").EnsureResultSuccessStatusCode().Result.Content.ReadAsStringAsync().Result;
 				ResultClass deserializeObject = JsonConvert.DeserializeObject<ResultClass>(result);
 				if (deserializeObject.CurrentState == true)
 				{
@@ -34,7 +34,7 @@ namespace TabNoc.PiWeb.WateringWebServer.other.Hardware
 		{
 			if (WaterRelaisControl.Instance.Deactivate(channelId, operatingMode, out bool deactivateMasterChannel))
 			{
-				string result = new HttpClient(GetHttpClientHandler()).GetAsync($"https://piw/watering/ctrl/{channelId}/off/").EnsureResultSuccessStatusCode().Result.Content.ReadAsStringAsync().Result;
+				string result = new HttpClient(GetHttpClientHandler()).GetAsync($"https://{PrivateData.RemoteHostName}/watering/ctrl/{channelId}/off/").EnsureResultSuccessStatusCode().Result.Content.ReadAsStringAsync().Result;
 				ResultClass deserializeObject = JsonConvert.DeserializeObject<ResultClass>(result);
 				if (deserializeObject.CurrentState == false)
 				{
@@ -47,7 +47,7 @@ namespace TabNoc.PiWeb.WateringWebServer.other.Hardware
 			}
 			else if (deactivateMasterChannel)
 			{
-				string result = new HttpClient(GetHttpClientHandler()).GetAsync($"https://piw/watering/ctrl/{0}/off/").EnsureResultSuccessStatusCode().Result.Content.ReadAsStringAsync().Result;
+				string result = new HttpClient(GetHttpClientHandler()).GetAsync($"https://{PrivateData.RemoteHostName}/watering/ctrl/{0}/off/").EnsureResultSuccessStatusCode().Result.Content.ReadAsStringAsync().Result;
 				ResultClass deserializeObject = JsonConvert.DeserializeObject<ResultClass>(result);
 				if (deserializeObject.CurrentState == false)
 				{
@@ -81,6 +81,23 @@ namespace TabNoc.PiWeb.WateringWebServer.other.Hardware
 			public string Result;
 #pragma warning restore 649
 #pragma warning restore 169
+		}
+
+		public static void DeactivateAll(string operatingMode)
+		{
+			if (WaterRelaisControl.Instance.DeactivateAll(operatingMode))
+			{
+				string result = new HttpClient(GetHttpClientHandler()).GetAsync($"https://{PrivateData.RemoteHostName}/watering/ctrl/99/off/").EnsureResultSuccessStatusCode().Result.Content.ReadAsStringAsync().Result;
+				ResultClass deserializeObject = JsonConvert.DeserializeObject<ResultClass>(result);
+				if (deserializeObject.CurrentState == false)
+				{
+					HistoryController.AddLogEntry(new HistoryElement(DateTime.Now, operatingMode, "OK", $"Alle Kanäle wurden deaktiviert.\r\nDie Antwort des Servers lautet: {result}"));
+				}
+				else
+				{
+					HistoryController.AddLogEntry(new HistoryElement(DateTime.Now, operatingMode, "Error", $"Es wurde versucht alle Kanäle zu deaktivieren, dies ist Fehlgeschlagen.\r\nDie Antwort des Servers lautet: {result}"));
+				}
+			}
 		}
 	}
 }

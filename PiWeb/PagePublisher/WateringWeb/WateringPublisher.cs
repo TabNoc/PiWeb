@@ -12,7 +12,7 @@ namespace TabNoc.PiWeb.PagePublisher.WateringWeb
 
 		protected override NavigationBar CreateNavigationBar()
 		{
-			NavigationBar navBar = new NavigationBar("WateringWeb", "/overview", new Anchor("/", "PiWeb"));
+			NavigationBar navBar = new NavigationBar("WateringWeb", "/overview", new Anchor("/", "PiWeb"), true);
 
 			string address = "/overview";
 			navBar.AddElement(PublishPath == address, "Übersicht", address);

@@ -1,14 +1,13 @@
-﻿using System;
+﻿using Hangfire;
+using Npgsql;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Hangfire;
-using Npgsql;
 using TabNoc.PiWeb.DataTypes.WateringWeb.Channels;
-using TabNoc.PiWeb.WateringWebServer.Controllers;
 using TabNoc.PiWeb.WateringWebServer.other.Hardware;
 using TabNoc.PiWeb.WateringWebServer.other.Storage;
 
-namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler
+namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler.Automatic
 {
 	public class AutomaticScheduler
 	{

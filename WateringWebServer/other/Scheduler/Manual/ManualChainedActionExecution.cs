@@ -3,7 +3,7 @@ using System.ComponentModel;
 using TabNoc.PiWeb.DataTypes.WateringWeb.Manual;
 using TabNoc.PiWeb.WateringWebServer.other.Hardware;
 
-namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler
+namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler.Manual
 {
 	public class ManualChainedActionExecution : ChainScheduleManager<ManualChainedActionExecution>.ChainedActionExecution
 	{

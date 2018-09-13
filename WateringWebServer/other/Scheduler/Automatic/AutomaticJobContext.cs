@@ -1,6 +1,6 @@
 ﻿using TabNoc.PiWeb.DataTypes.WateringWeb.Channels;
 
-namespace TabNoc.PiWeb.WateringWebServer.Controllers
+namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler.Automatic
 {
 	public class AutomaticJobContext
 	{

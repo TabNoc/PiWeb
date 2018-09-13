@@ -1,7 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 
-namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler
+namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler.Manual
 {
 	public partial class ChainScheduleManager<T> where T : ChainScheduleManager<T>.ChainedActionExecution
 	{

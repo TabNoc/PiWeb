@@ -3,9 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
+using TabNoc.MyOoui.Interfaces.Enums;
 using TabNoc.MyOoui.UiComponents;
 using TabNoc.PiWeb.DataTypes;
 using TabNoc.PiWeb.DataTypes.WateringWeb.Overview;
+using Button = TabNoc.MyOoui.HtmlElements.Button;
 
 namespace TabNoc.PiWeb.Pages.WateringWeb.Overview
 {
@@ -18,13 +20,19 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Overview
 
 			grid.AddRow().AppendCollum(new Heading(2, "Automatische Aufträge") { ClassName = "text-center" });
 
-			Table<string> table = new Table<string>(CreateAutomaticTableHeading(), CreateAutomaticTableBody(), value => value, 4);
-			grid.AddRow().AppendCollum(table);
+			Table<string> automaticTable = new Table<string>(CreateAutomaticTableHeading(), CreateAutomaticTableBody(), value => value, 4);
+			grid.AddRow().AppendCollum(automaticTable);
 
 			grid.AddRow().AppendCollum(new Heading(2, "Manuelle Aufträge") { ClassName = "text-center" });
 
-			Table<string> table2 = new Table<string>(CreateManualTableHeading(), CreateManualTableBody(), value => value, 5);
-			grid.AddRow().AppendCollum(table2);
+			Table<string> manualTable = new Table<string>(CreateManualTableHeading(), CreateManualTableBody(), value => value, 5);
+			manualTable.SetButtonColumn("Löschen", s =>
+			{
+				Button button = new Button(StylingColor.Danger, true, Button.ButtonSize.Small, fontAwesomeIcon: "trash");
+				button.Click += (sender, args) => ServerConnection.DeleteAsync($"overview/deleteManualEntry?number={s}");
+				return button;
+			});
+			grid.AddRow().AppendCollum(manualTable);
 			AppendChild(wrappingContainer);
 		}
 

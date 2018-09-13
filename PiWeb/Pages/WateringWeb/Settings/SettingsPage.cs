@@ -13,7 +13,6 @@ using TabNoc.MyOoui.UiComponents.FormControl;
 using TabNoc.MyOoui.UiComponents.FormControl.InputGroups;
 using TabNoc.MyOoui.UiComponents.FormControl.InputGroups.Components;
 using TabNoc.PiWeb.DataTypes.WateringWeb.Settings;
-using TabNoc.PiWeb.Pages.WateringWeb.History;
 using Button = TabNoc.MyOoui.HtmlElements.Button;
 using Color = System.Drawing.Color;
 using JsonConvert = Newtonsoft.Json.JsonConvert;
@@ -42,7 +41,7 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 				useSafeLoading = true;
 			}
 			this.AddScriptDependency("/lib/bootstrap3-typeahead.min.js");
-			const int labelSize = 140;
+			const int labelSize = 180;
 
 			_settingsData = settingsData;
 
@@ -73,6 +72,10 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 						!settingsData.StorageData.Enabled), false).FirstButtonStateChange += (sender, args) =>
 				settingsData.StorageData.Enabled = args.NewButtonState;
 			autoEnabledMultiInputGroup.AddStyling(StylingOption.MarginBottom, 2);
+			autoEnabledMultiInputGroup.AppendCustomElement(new Button(StylingColor.Danger, true, Button.ButtonSize.Normal, false, "Alle Kanäle ausschalten", fontAwesomeIcon: "stop"), false).Click += (sender, args) =>
+			{
+				ServerConnection.DeleteAsync("settings/stopall");
+			};
 			grid.AddRow().AppendCollum(autoEnabledMultiInputGroup, autoSize: true);
 
 			#endregion AutoEnabled

@@ -1,9 +1,12 @@
 ﻿using Ooui;
+using System;
+using System.Globalization;
+using System.Timers;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
 
 namespace TabNoc.MyOoui.UiComponents
 {
-	public class NavigationBar : StylableElement
+	public class NavigationBar : StylableElement, IDisposable
 	{
 		/*
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -20,8 +23,9 @@ namespace TabNoc.MyOoui.UiComponents
 		 */
 
 		private readonly List _navigationList;
+		private readonly Timer _showLocalDateTimeTimer;
 
-		public NavigationBar(string brandName, string brandAddress, Anchor lastAnchor) : base("nav")
+		public NavigationBar(string brandName, string brandAddress, Anchor lastAnchor, bool showLocalDateTime) : base("nav")
 		{
 			ClassName = "navbar navbar-expand-sm navbar-light";
 			Style.BackgroundColor = "#e3f2fd";
@@ -40,6 +44,32 @@ namespace TabNoc.MyOoui.UiComponents
 			AppendChild(navigationDiv);
 			navigationDiv.AppendChild(_navigationList);
 
+			if (showLocalDateTime)
+			{
+				Div showLocalDateTimeDiv = new Div() { ClassName = "navbar-nav mr-5" };
+
+				navigationDiv.AppendChild(showLocalDateTimeDiv);
+
+				_showLocalDateTimeTimer = new Timer(400);
+				_showLocalDateTimeTimer.Elapsed += (sender, args) =>
+				{
+					try
+					{
+						showLocalDateTimeDiv.Text = DateTime.Now.ToString(CultureInfo.GetCultureInfo("de-de"));
+						if (_navBarOpenDateTime.AddMinutes(-30) > DateTime.Now)
+						{
+							Console.WriteLine("Die Navigationsleiste ist länger als 30 Minuten offen -> der Refresh wird gestoppt");
+							return;
+						}
+					}
+					catch (Exception e)
+					{
+						Console.WriteLine(e);
+					}
+				};
+				_showLocalDateTimeTimer.Start();
+			}
+
 			lastAnchor.ClassName = "navbar-brand";
 			navigationDiv.AppendChild(lastAnchor);
 		}
@@ -50,5 +80,64 @@ namespace TabNoc.MyOoui.UiComponents
 
 			_navigationList.AppendChild(anchor);
 		}
+
+		#region Dispose Pattern
+
+		private bool _disposed;
+		private readonly DateTime _navBarOpenDateTime = DateTime.Now;
+
+		~NavigationBar()
+		{
+			try
+			{
+				Dispose(false);
+			}
+			catch (Exception e)
+			{
+				Console.ForegroundColor = ConsoleColor.Red;
+				Console.WriteLine(e);
+				Console.ResetColor();
+			}
+		}
+
+		public new void Dispose()
+		{
+			try
+			{
+				Dispose(true);
+				GC.SuppressFinalize(this);
+			}
+			catch (Exception e)
+			{
+				Console.ForegroundColor = ConsoleColor.Red;
+				Console.WriteLine(e);
+				Console.ResetColor();
+			}
+		}
+
+		protected override void Dispose(bool disposing)
+		{
+			try
+			{
+				if (!_disposed)
+				{
+					_showLocalDateTimeTimer.Stop();
+					_showLocalDateTimeTimer.Dispose();
+					Console.WriteLine("Disposed Navbar");
+
+					_disposed = true;
+				}
+
+				base.Dispose(disposing);
+			}
+			catch (Exception e)
+			{
+				Console.ForegroundColor = ConsoleColor.Red;
+				Console.WriteLine(e);
+				Console.ResetColor();
+			}
+		}
+
+		#endregion Dispose Pattern
 	}
 }

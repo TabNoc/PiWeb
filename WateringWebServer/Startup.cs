@@ -8,15 +8,17 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using TabNoc.PiWeb.WateringWebServer.other;
+using System.Threading.Tasks;
 using TabNoc.PiWeb.WateringWebServer.other.Binder;
 
 namespace TabNoc.PiWeb.WateringWebServer
 {
 	public class Startup
 	{
+		private readonly List<DateTime> _test = new List<DateTime>();
 		private bool _isDevelopment;
 
 		public IConfiguration Configuration
@@ -29,9 +31,41 @@ namespace TabNoc.PiWeb.WateringWebServer
 			Configuration = configuration;
 		}
 
+		public void Cleanup()
+		{
+			Task.Run(() =>
+			{
+				DateTime dateTime = DateTime.Now;
+				Console.Write(dateTime.ToString(CultureInfo.InvariantCulture) + "Cleanup caller");
+
+				lock (_test)
+				{
+					_test.Add(dateTime);
+				}
+
+				System.Threading.Thread.Sleep(2000);
+				lock (_test)
+				{
+					if (_test.Count > 1)
+					{
+						Console.WriteLine(new string('*', 30));
+						Console.WriteLine(new string('*', 30));
+						Console.WriteLine("Startup.Cleanup found issue!");
+						Console.WriteLine(new string('*', 30));
+						Console.WriteLine(new string('*', 30));
+					}
+
+					_test.Remove(dateTime);
+				}
+			});
+		}
+
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
 		public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
 		{
+			Console.WriteLine(new string('#', 30));
+			Console.WriteLine("Startup.Configure");
+			Console.WriteLine(new string('#', 30));
 			_isDevelopment = env.IsDevelopment();
 			if (_isDevelopment)
 			{
@@ -52,19 +86,32 @@ namespace TabNoc.PiWeb.WateringWebServer
 				}
 				return false;
 			});
-			app.UseHangfireServer(new BackgroundJobServerOptions { SchedulePollingInterval = TimeSpan.FromMilliseconds(2000) });
-			app.UseHangfireDashboard(options: new DashboardOptions() { AppPath = "http://piw:8080/", Authorization = new IDashboardAuthorizationFilter[1] { new MyAuthorizationFilter() } });
+			app.UseHangfireServer(new BackgroundJobServerOptions()
+			//{
+			//	SchedulePollingInterval = TimeSpan.FromMilliseconds(6000)
+			//}
+			);
+			app.UseHangfireDashboard(options: new DashboardOptions() { AppPath = $"http://{PrivateData.RemoteHostName}:8080/", Authorization = new IDashboardAuthorizationFilter[] { new MyAuthorizationFilter() } });
 
 			//RecurringJob.AddOrUpdate(() => GC.Collect(), Cron.Minutely);
 			RecurringJob.RemoveIfExists("GC.Collect");
 			//RecurringJob.AddOrUpdate("pg_dump", () => PG_Dump(), Cron.Yearly);
 			//BackgroundJob.Enqueue(() => PG_Dump());
 			RecurringJob.RemoveIfExists("pg_dump");
+
+			RecurringJob.AddOrUpdate("Cleanup", () => Cleanup(), Cron.Hourly);
+
+			Console.WriteLine(new string('v', 30));
+			Console.WriteLine("Startup.Configure done");
+			Console.WriteLine(new string('v', 30));
 		}
 
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
+			Console.WriteLine(new string('#', 30));
+			Console.WriteLine("Startup.ConfigureServices");
+			Console.WriteLine(new string('#', 30));
 			services
 				.AddMvc(options =>
 				{
@@ -78,8 +125,12 @@ namespace TabNoc.PiWeb.WateringWebServer
 
 			services.AddHangfire(config =>
 			{
-				config.UsePostgreSqlStorage(PrivateData.ConnectionStringBuilder.ToString());
+				config.UsePostgreSqlStorage(PrivateData.ConnectionStringBuilder.ToString(), new PostgreSqlStorageOptions() { ConnectionsCount = 2 });
 			});
+
+			Console.WriteLine(new string('v', 30));
+			Console.WriteLine("Startup.ConfigureServices done");
+			Console.WriteLine(new string('v', 30));
 		}
 
 		public void PG_Dump()

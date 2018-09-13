@@ -98,5 +98,10 @@ namespace TabNoc.PiWeb.WateringWebServer.other.Hardware
 		}
 
 		// ReSharper restore FieldCanBeMadeReadOnly.Local
+
+		public bool DeactivateAll(string operatingMode)
+		{
+			return true;
+		}
 	}
 }

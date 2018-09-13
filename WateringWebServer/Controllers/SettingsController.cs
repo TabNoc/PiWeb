@@ -4,6 +4,7 @@ using NpgsqlTypes;
 using System.Collections.Generic;
 using TabNoc.PiWeb.DataTypes.WateringWeb.Settings;
 using TabNoc.PiWeb.WateringWebServer.other;
+using TabNoc.PiWeb.WateringWebServer.other.Hardware;
 
 namespace TabNoc.PiWeb.WateringWebServer.Controllers
 {
@@ -56,6 +57,13 @@ namespace TabNoc.PiWeb.WateringWebServer.Controllers
 		[HttpGet("enabled")]
 		public ActionResult<bool> GetEnabled()
 		{
+			return Ok(true);
+		}
+
+		[HttpDelete("stopall")]
+		public ActionResult StopAllChannels()
+		{
+			RelaisControl.DeactivateAll("Manual");
 			return Ok(true);
 		}
 

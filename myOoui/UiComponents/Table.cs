@@ -7,19 +7,26 @@ using TabNoc.MyOoui.HtmlElements;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
 using TabNoc.MyOoui.Interfaces.delegates;
 using TabNoc.MyOoui.Interfaces.Enums;
+using Button = TabNoc.MyOoui.HtmlElements.Button;
 
 namespace TabNoc.MyOoui.UiComponents
 {
 	public class Table<T> : StylableElement, IDisposable
 	{
+		#region Fields
+
 		private const int PaginationPageAmount = 10;
 		private readonly List<(T, List<string>)> _cachedSearchEntries = new List<(T, List<string>)>();
 		private readonly HashSet<T> _cachedSearchEntriesHashSet = new HashSet<T>();
 		private readonly List<(T, List<string>)> _entries = new List<(T, List<string>)>();
 		private readonly HashSet<T> _entriesHashSet = new HashSet<T>();
-		private readonly Func<Task<int>> _fetchAmount;
 		private readonly FetchEntriesDelegate<T> _fetchEntries;
+
+		/// <summary>
+		/// Die Liste an HeaderNamen    verwendung in:<see cref="CreateHeaders"/>
+		/// </summary>
 		private readonly List<string> _header;
+
 		private readonly TableRow _headTableRow;
 		private readonly Dictionary<T, string> _primaryCellToStringDictionary = new Dictionary<T, string>();
 		private readonly PrimaryKeyConverterDelegate<T> _primaryKeyConverter;
@@ -38,6 +45,11 @@ namespace TabNoc.MyOoui.UiComponents
 		private Pagination _pagination;
 		private int _totalTableAmount;
 		private bool _updateMode;
+		private readonly DateTime _tableOpenDateTime;
+
+		#endregion Fields
+
+		#region DataFields
 
 		#region FilterFields
 
@@ -83,8 +95,13 @@ namespace TabNoc.MyOoui.UiComponents
 
 		#endregion Cell Color Fields
 
+		#endregion DataFields
+
+		#region Constructors
+
 		public Table(List<string> header, List<(T, List<string>)> entries, PrimaryKeyConverterDelegate<T> primaryKeyConverter, int visibleTablePageItems = 10, bool inUpdateMode = false) : base("table")
 		{
+			_tableOpenDateTime = DateTime.Now;
 			_header = header;
 			_entries = entries;
 			_primaryKeyConverter = primaryKeyConverter;
@@ -98,13 +115,7 @@ namespace TabNoc.MyOoui.UiComponents
 
 			_headTableRow = new TableRow();
 			head.AppendChild(_headTableRow);
-
-			foreach (string headerEnty in header)
-			{
-				TableHeadEntry tableHeadEntry = new TableHeadEntry("col", headerEnty, TableHeadEntry.CaretStyle.UpDown);
-				tableHeadEntry.Click += TableHeadEntryOnClick;
-				_headTableRow.AppendChild(tableHeadEntry);
-			}
+			CreateHeaders();
 
 			#endregion Table Head Row
 
@@ -113,7 +124,7 @@ namespace TabNoc.MyOoui.UiComponents
 			_searchTableRow = new TableRow();
 			head.AppendChild(_searchTableRow);
 
-			foreach (string _ in header)
+			foreach (string _ in _header)
 			{
 				const bool centeredText = false;
 				const string textInputGhostMessage = "Search";
@@ -158,10 +169,10 @@ namespace TabNoc.MyOoui.UiComponents
 
 		public Table(List<string> header, FetchEntriesDelegate<T> fetchEntries, SearchFetchEntriesDelegate<T> searchFetchEntries, Func<Task<int>> fetchAmount, PrimaryKeyConverterDelegate<T> primaryKeyConverter, bool inUpdateMode = false, int visibleTablePageItems = 10) : base("table")
 		{
+			_tableOpenDateTime = DateTime.Now;
 			_header = header;
 			_fetchEntries = fetchEntries;
 			_searchFetchEntries = searchFetchEntries;
-			_fetchAmount = fetchAmount;
 			_primaryKeyConverter = primaryKeyConverter;
 			_visibleTablePageItems = visibleTablePageItems;
 			ClassName = "table table-hover";
@@ -173,13 +184,7 @@ namespace TabNoc.MyOoui.UiComponents
 
 			_headTableRow = new TableRow();
 			head.AppendChild(_headTableRow);
-
-			foreach (string headerEnty in header)
-			{
-				TableHeadEntry tableHeadEntry = new TableHeadEntry("col", headerEnty, TableHeadEntry.CaretStyle.UpDown);
-				tableHeadEntry.Click += TableHeadEntryOnClick;
-				_headTableRow.AppendChild(tableHeadEntry);
-			}
+			CreateHeaders();
 
 			#endregion Table Head Row
 
@@ -188,7 +193,7 @@ namespace TabNoc.MyOoui.UiComponents
 			_searchTableRow = new TableRow();
 			head.AppendChild(_searchTableRow);
 
-			for (int headerIndex = 0; headerIndex < header.Count; headerIndex++)
+			for (int headerIndex = 0; headerIndex < _header.Count; headerIndex++)
 			{
 				const bool centeredText = false;
 				const string textInputGhostMessage = "Search";
@@ -245,7 +250,7 @@ namespace TabNoc.MyOoui.UiComponents
 			AppendChild(tableFoot);
 
 			Task<List<(T, List<string>)>> entriesTask = _fetchEntries(_lastNormalFetchedPrimaryKey, PaginationPageAmount * _visibleTablePageItems);
-			_fetchAmount().ContinueWith(task =>
+			fetchAmount().ContinueWith(task =>
 			{
 				try
 				{
@@ -275,9 +280,19 @@ namespace TabNoc.MyOoui.UiComponents
 				{
 					RefreshBeginningTableContentAsync();
 					System.Threading.Thread.Sleep(10000);
+					if (_tableOpenDateTime.AddMinutes(-30) > DateTime.Now)
+					{
+						Console.WriteLine("Die Tabelle ist länger als 30 Minuten offen -> der Refresh wird gestoppt");
+						return;
+					}
 				}
+				Console.WriteLine("Table was Disposed -> finish refresh");
 			});
 		}
+
+		#endregion Constructors
+
+		#region Public Methods
 
 		public void EndUpdate()
 		{
@@ -386,6 +401,10 @@ namespace TabNoc.MyOoui.UiComponents
 			_updateMode = true;
 		}
 
+		#endregion Public Methods
+
+		#region Private Methods
+
 		private bool AddEntriesToCache(Task<List<(T, List<string>)>> task, bool wasNormalFetch = false, bool wasRefreshFetch = false)
 		{
 			bool changed = false;
@@ -440,33 +459,23 @@ namespace TabNoc.MyOoui.UiComponents
 			return changed;
 		}
 
-		private void AppendTableRow(List<string> entryList, T tableIndex)
+		private void CreateHeaders()
 		{
-			TableRow tableRow = new TableRow();
-			_tableBody.AppendChild(tableRow);
-
-			CellColoring headCellColoring = _cellColorings.LastOrDefault(coloring => coloring.TableHeadIndex == 0 && coloring.TextValue == GetValueFromPrimaryCell(tableIndex));
-			if (headCellColoring != null)
+			while (_headTableRow.FirstChild != null)
 			{
-				tableRow.AppendChild(new TableHeadEntry("row", GetValueFromPrimaryCell(tableIndex), color: headCellColoring.Color));
+				_headTableRow.RemoveChild(_headTableRow.FirstChild);
 			}
-			else
+			foreach (string headerEnty in _header)
 			{
-				tableRow.AppendChild(new TableHeadEntry("row", GetValueFromPrimaryCell(tableIndex)));
+				TableHeadEntry tableHeadEntry = new TableHeadEntry("col", headerEnty, TableHeadEntry.CaretStyle.UpDown);
+				tableHeadEntry.Click += TableHeadEntryOnClick;
+				_headTableRow.AppendChild(tableHeadEntry);
 			}
 
-			for (int index = 0; index < entryList.Count; index++)
+			if (HasButtonColumn)
 			{
-				string item = entryList[index];
-				CellColoring entryCellColoring = _cellColorings.LastOrDefault(coloring => coloring.TableHeadIndex - 1 == index && coloring.TextValue == item);
-				if (entryCellColoring != null)
-				{
-					tableRow.AppendChild(new TableDataEntry(item, color: entryCellColoring.Color));
-				}
-				else
-				{
-					tableRow.AppendChild(new TableDataEntry(item));
-				}
+				TableHeadEntry tableHeadEntry = new TableHeadEntry("col", _buttonColumnHeaderName);
+				_headTableRow.AppendChild(tableHeadEntry);
 			}
 		}
 
@@ -571,7 +580,7 @@ namespace TabNoc.MyOoui.UiComponents
 			}
 			foreach ((T tableIndex, List<string> entryList) in _searchedEntries.Skip((_activeTablePage - 1) * _visibleTablePageItems).Take(_visibleTablePageItems))
 			{
-				AppendTableRow(entryList, tableIndex);
+				WriteTableRow(entryList, tableIndex);
 			}
 		}
 
@@ -700,6 +709,75 @@ namespace TabNoc.MyOoui.UiComponents
 			ReCalculateTableContent();
 		}
 
+		private void WriteTableRow(List<string> entryList, T tableIndex)
+		{
+			TableRow tableRow = new TableRow();
+			_tableBody.AppendChild(tableRow);
+
+			CellColoring headCellColoring = _cellColorings.LastOrDefault(coloring => coloring.TableHeadIndex == 0 && coloring.TextValue == GetValueFromPrimaryCell(tableIndex));
+			if (headCellColoring != null)
+			{
+				tableRow.AppendChild(new TableHeadEntry("row", GetValueFromPrimaryCell(tableIndex), color: headCellColoring.Color));
+			}
+			else
+			{
+				tableRow.AppendChild(new TableHeadEntry("row", GetValueFromPrimaryCell(tableIndex)));
+			}
+
+			for (int index = 0; index < entryList.Count; index++)
+			{
+				string item = entryList[index];
+				CellColoring entryCellColoring = _cellColorings.LastOrDefault(coloring => coloring.TableHeadIndex - 1 == index && coloring.TextValue == item);
+				if (entryCellColoring != null)
+				{
+					tableRow.AppendChild(new TableDataEntry(item, color: entryCellColoring.Color));
+				}
+				else
+				{
+					tableRow.AppendChild(new TableDataEntry(item));
+				}
+			}
+
+			if (HasButtonColumn)
+			{
+				tableRow.AppendChild(new TableDataEntry(GetButtonColumnButton(tableIndex)));
+			}
+		}
+
+		#endregion Private Methods
+
+		#region ButtonColumn
+
+		private readonly Dictionary<T, Button> _buttonColumnEntries = new Dictionary<T, Button>();
+		private string _buttonColumnHeaderName;
+		private Func<T, Button> _generateButtonColumnFunc;
+		private bool HasButtonColumn => _generateButtonColumnFunc != null;
+
+		public void SetButtonColumn(string headerName, Func<T, Button> generateButtonFunc)
+		{
+			if (_generateButtonColumnFunc != null)
+			{
+				throw new InvalidOperationException("Es wurde bereits SetButtonColumn für diese Tabelle aufgerufen!");
+			}
+
+			_generateButtonColumnFunc = generateButtonFunc;
+			_buttonColumnHeaderName = headerName;
+			CreateHeaders();
+			ReCalculateTableContent();
+		}
+
+		private Button GetButtonColumnButton(T row)
+		{
+			if (!_buttonColumnEntries.ContainsKey(row))
+			{
+				_buttonColumnEntries.Add(row, _generateButtonColumnFunc(row));
+			}
+
+			return _buttonColumnEntries[row];
+		}
+
+		#endregion ButtonColumn
+
 		#region Dispose Pattern
 
 		private bool _disposed;
@@ -724,6 +802,7 @@ namespace TabNoc.MyOoui.UiComponents
 			{
 				Dispose(true);
 				GC.SuppressFinalize(this);
+				base.Dispose();
 			}
 			catch (Exception e)
 			{
@@ -731,7 +810,6 @@ namespace TabNoc.MyOoui.UiComponents
 				Console.WriteLine(e);
 				Console.ResetColor();
 			}
-			base.Dispose();
 		}
 
 		protected override void Dispose(bool disposing)
@@ -742,6 +820,7 @@ namespace TabNoc.MyOoui.UiComponents
 					return;
 
 				_disposed = true;
+				base.Dispose(disposing);
 			}
 			catch (Exception e)
 			{
@@ -749,7 +828,6 @@ namespace TabNoc.MyOoui.UiComponents
 				Console.WriteLine(e);
 				Console.ResetColor();
 			}
-			base.Dispose(disposing);
 		}
 
 		#endregion Dispose Pattern
@@ -789,6 +867,28 @@ namespace TabNoc.MyOoui.UiComponents
 				if (content != null)
 				{
 					SearchTextInput = content;
+					AppendChild(content);
+				}
+				if (colspan != 1)
+				{
+					SetAttribute("colspan", colspan);
+				}
+
+				if (color != StylingColor.Light)
+				{
+					ClassName = "table-" + Enum.GetName(typeof(StylingColor), color).ToLower();
+				}
+
+				AddStyling(StylingOption.PaddingTop, 1);
+				AddStyling(StylingOption.PaddingBottom, 1);
+				AddStyling(StylingOption.PaddingLeft, 1);
+				AddStyling(StylingOption.PaddingRight, 1);
+			}
+
+			public TableDataEntry(Button content, int colspan = 1, StylingColor color = StylingColor.Light) : base("td")
+			{
+				if (content != null)
+				{
 					AppendChild(content);
 				}
 				if (colspan != 1)

@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using TabNoc.PiWeb.DataTypes.WateringWeb.Channels;
 using TabNoc.PiWeb.DataTypes.WateringWeb.Overview;
-using TabNoc.PiWeb.DataTypes.WateringWeb.Settings;
-using TabNoc.PiWeb.WateringWebServer.other;
-using TabNoc.PiWeb.WateringWebServer.other.Scheduler;
+using TabNoc.PiWeb.WateringWebServer.other.Scheduler.Manual;
 using TabNoc.PiWeb.WateringWebServer.other.Storage;
 
 namespace TabNoc.PiWeb.WateringWebServer.Controllers
@@ -13,6 +11,14 @@ namespace TabNoc.PiWeb.WateringWebServer.Controllers
 	[ApiController]
 	public class OverviewController : ControllerBase
 	{
+		[HttpDelete("deleteManualEntry")]
+		public ActionResult DeleteManualEntry(int number)
+		{
+			ChainScheduleManager<ManualChainedActionExecution>.DeleteEntry(DataBaseObjectStorage.LoadFromDataBase(() => new ChainScheduleManager<ManualChainedActionExecution>()).Jobs[number]);
+
+			return Ok();
+		}
+
 		[HttpGet]
 		public ActionResult<OverviewData> Get()
 		{
@@ -25,33 +31,10 @@ namespace TabNoc.PiWeb.WateringWebServer.Controllers
 			return Ok(data);
 		}
 
-		private List<ManualOverviewEntry> GetManualEnties()
+		[HttpGet("enabled")]
+		public ActionResult<bool> GetEnabled()
 		{
-			List<ManualOverviewEntry> returnval = new List<ManualOverviewEntry>();
-			int count = 0;
-
-			//TODO: Group by Name, create Duration if it doesn't exists set startetime to entime from last execution
-			ChainScheduleManager<ManualChainedActionExecution> loadedData = DataBaseObjectStorage.LoadFromDataBase(() => new ChainScheduleManager<ManualChainedActionExecution>());
-			foreach (ChainScheduleManager<ManualChainedActionExecution>.ChainedExecutionData chainedExecutionData in loadedData.Jobs)
-			{
-				returnval.Add(new ManualOverviewEntry()
-				{
-					StartTime = chainedExecutionData.StartTime,
-					ActionName = chainedExecutionData.ElementEventSource,
-					ActivationPriority = count++,
-					ChannelName = GetChannelName(chainedExecutionData.ChainedActionExecutionData.ManualActionExecution.ChannelId),
-					EndTime = chainedExecutionData.StartTime + chainedExecutionData.Duration,
-					MasterEnabled = chainedExecutionData.ChainedActionExecutionData.ManualActionExecution.ActivateMasterChannel
-				});
-			}
-
-			return returnval;
-		}
-
-		private string GetChannelName(int channelId)
-		{
-			//TODO: implement ChannelName
-			return channelId.ToString();
+			return Ok(true);
 		}
 
 		private List<AutomaticOverviewEntry> GetAutomaticEntries()
@@ -87,10 +70,33 @@ namespace TabNoc.PiWeb.WateringWebServer.Controllers
 			return returnval;
 		}
 
-		[HttpGet("enabled")]
-		public ActionResult<bool> GetEnabled()
+		private string GetChannelName(int channelId)
 		{
-			return Ok(true);
+			//TODO: implement ChannelName
+			return channelId.ToString();
+		}
+
+		private List<ManualOverviewEntry> GetManualEnties()
+		{
+			List<ManualOverviewEntry> returnval = new List<ManualOverviewEntry>();
+			int count = 0;
+
+			//TODO: Group by Name, create Duration if it doesn't exists set startetime to entime from last execution
+			ChainScheduleManager<ManualChainedActionExecution> loadedData = DataBaseObjectStorage.LoadFromDataBase(() => new ChainScheduleManager<ManualChainedActionExecution>());
+			foreach (ChainScheduleManager<ManualChainedActionExecution>.ChainedExecutionData chainedExecutionData in loadedData.Jobs)
+			{
+				returnval.Add(new ManualOverviewEntry()
+				{
+					StartTime = chainedExecutionData.StartTime,
+					ActionName = chainedExecutionData.ElementEventSource,
+					ActivationPriority = count++,
+					ChannelName = GetChannelName(chainedExecutionData.ChainedActionExecutionData.ManualActionExecution.ChannelId),
+					EndTime = chainedExecutionData.StartTime + chainedExecutionData.Duration,
+					MasterEnabled = chainedExecutionData.ChainedActionExecutionData.ManualActionExecution.ActivateMasterChannel
+				});
+			}
+
+			return returnval;
 		}
 	}
 }

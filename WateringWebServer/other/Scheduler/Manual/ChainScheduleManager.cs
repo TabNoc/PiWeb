@@ -1,15 +1,15 @@
 ﻿using Hangfire;
+using Newtonsoft.Json;
 using Npgsql;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 using TabNoc.PiWeb.DataTypes.WateringWeb.History;
 using TabNoc.PiWeb.WateringWebServer.Controllers;
 using TabNoc.PiWeb.WateringWebServer.other.Storage;
 
-namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler
+namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler.Manual
 {
 	public partial class ChainScheduleManager<T> where T : ChainScheduleManager<T>.ChainedActionExecution
 	{
@@ -63,6 +63,12 @@ namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler
 				currentChainedExecutionData.ChainedActionExecutionData.DeactivateAction();
 				dataInstance.Jobs.RemoveAll(data => data.Guid == currentChainedExecutionData.ChainedActionExecutionData.Guid);
 			}
+		}
+
+		public static void DeleteEntry(ChainScheduleManager<ManualChainedActionExecution>.ChainedExecutionData loadedDataJob)
+		{
+			//TODO: Implement Delete Manual Chain Schedul Manager Entry
+			throw new NotImplementedException();
 		}
 
 		private static void ActivateJob(string guid)

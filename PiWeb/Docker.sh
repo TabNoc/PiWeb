@@ -140,7 +140,7 @@ echo
 if [ "$selectedServer" = "true" ]; then
 	echo Der alte Container fuer den Namen WebPiServer wird zuerst noch geloescht
 	sudo docker rm WebPiServer
-	sudo docker run -it --init --restart unless-stopped -d -p 5000:5000 --net PiWeb --hostname pampers --name WebPiServer $dockerServerTagName
+	sudo docker run -it --init --restart unless-stopped -d -p 5000:5000 --net PiWeb --add-host=database:172.18.0.1 --name WebPiServer $dockerServerTagName
 	echo Anwendung wurde mit IP \"$(sudo docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' WebPiServer)\" gestartet
 	sudo docker logs WebPiServer -f
 fi
