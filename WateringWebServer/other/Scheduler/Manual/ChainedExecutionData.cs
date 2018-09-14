@@ -13,6 +13,11 @@ namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler.Manual
 			public string PreviousGuid;
 
 			/// <summary>
+			/// Represents the Job to deactivate an enqued Job. Only set, when the Job ist already enqueed
+			/// </summary>
+			public string DeactivationJob;
+
+			/// <summary>
 			/// Time when the Job has started
 			/// </summary>
 			public TimeSpan StartTime;

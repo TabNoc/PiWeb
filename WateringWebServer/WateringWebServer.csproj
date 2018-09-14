@@ -5,6 +5,14 @@
 		<RootNamespace>TabNoc.PiWeb.WateringWebServer</RootNamespace>
 	</PropertyGroup>
 
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <DefineConstants>DEBUG;TRACE</DefineConstants>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <DefineConstants>TRACE;RELEASE</DefineConstants>
+	</PropertyGroup>
+
 	<ItemGroup>
 	  <Compile Include="..\myOoui\HttpExtensions.cs" Link="other\HttpExtensions.cs" />
 	</ItemGroup>

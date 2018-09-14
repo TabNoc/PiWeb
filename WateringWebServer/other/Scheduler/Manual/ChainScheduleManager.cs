@@ -19,6 +19,10 @@ namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler.Manual
 
 		public static void AddEntry(T manualActionExecution, string elementEventSource)
 		{
+			if (manualActionExecution == null)
+				throw new ArgumentNullException(nameof(manualActionExecution));
+			if (elementEventSource == null)
+				throw new ArgumentNullException(nameof(elementEventSource));
 			using (DatabaseObjectStorageEntryUsable<ChainScheduleManager<T>> dataInstanceWrapper = GetInstance())
 			{
 				ChainScheduleManager<T> dataInstance = dataInstanceWrapper.Data;
@@ -44,6 +48,8 @@ namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler.Manual
 
 		public static void DeactivateJob(string guid)
 		{
+			if (guid == null)
+				throw new ArgumentNullException(nameof(guid));
 			ChainedExecutionData currentChainedExecutionData;
 
 			using (DatabaseObjectStorageEntryUsable<ChainScheduleManager<T>> dataInstanceWrapper = GetInstance())
@@ -65,19 +71,63 @@ namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler.Manual
 			}
 		}
 
-		public static void DeleteEntry(ChainScheduleManager<ManualChainedActionExecution>.ChainedExecutionData loadedDataJob)
+		public static void DeleteEntry(ChainedExecutionData loadedDataJob)
 		{
-			//TODO: Implement Delete Manual Chain Schedul Manager Entry
-			throw new NotImplementedException();
+			if (loadedDataJob == null)
+				throw new ArgumentNullException(nameof(loadedDataJob));
+			using (DatabaseObjectStorageEntryUsable<ChainScheduleManager<T>> dataInstanceWrapper = GetInstance())
+			{
+				ChainScheduleManager<T> dataInstance = dataInstanceWrapper.Data;
+				if (loadedDataJob.Guid == dataInstance.CurrentJob)
+				{
+					RemoveCurrentEntry(loadedDataJob, dataInstance);
+				}
+				else
+				{
+					RemoveFutureEntry(loadedDataJob, dataInstance);
+				}
+			}
+		}
+
+		private static void RemoveCurrentEntry(ChainedExecutionData loadedDataJob, ChainScheduleManager<T> dataInstance)
+		{
+			if (loadedDataJob == null)
+				throw new ArgumentNullException(nameof(loadedDataJob));
+			if (dataInstance == null)
+				throw new ArgumentNullException(nameof(dataInstance));
+			if (loadedDataJob.Guid != dataInstance.CurrentJob)
+				throw new InvalidOperationException("RemoveFutureEntry can not remove a future Entry");
+			BackgroundJob.Delete(loadedDataJob.DeactivationJob);
+			DeactivateJob(loadedDataJob.Guid);
+		}
+
+		private static void RemoveFutureEntry(ChainedExecutionData loadedDataJob, ChainScheduleManager<T> dataInstance)
+		{
+			if (loadedDataJob == null)
+				throw new ArgumentNullException(nameof(loadedDataJob));
+			if (dataInstance == null)
+				throw new ArgumentNullException(nameof(dataInstance));
+			if (loadedDataJob.Guid == dataInstance.CurrentJob)
+				throw new InvalidOperationException("RemoveFutureEntry can not remove the current Entry");
+
+			// Changes Execution, to point to each other
+			ChainedExecutionData nextExecution = dataInstance.Jobs.First(data => data.Guid == loadedDataJob.NextGuid);
+			ChainedExecutionData previousExecution = dataInstance.Jobs.First(data => data.Guid == loadedDataJob.PreviousGuid);
+			nextExecution.NextGuid = previousExecution.Guid;
+			previousExecution.PreviousGuid = nextExecution.Guid;
+
+			// Removes Execution
+			dataInstance.Jobs.Remove(loadedDataJob);
 		}
 
 		private static void ActivateJob(string guid)
 		{
-			ChainedExecutionData currentChainedExecutionData;
+			if (guid == null)
+				throw new ArgumentNullException(nameof(guid));
 			using (DatabaseObjectStorageEntryUsable<ChainScheduleManager<T>> dataInstanceWrapper = GetInstance())
 			{
 				ChainScheduleManager<T> dataInstance = dataInstanceWrapper.Data;
-				currentChainedExecutionData = dataInstance.Jobs.FirstOrDefault(data => data.Guid == guid);
+				ChainedExecutionData currentChainedExecutionData = dataInstance.Jobs.FirstOrDefault(data => data.Guid == guid);
 				if (currentChainedExecutionData == null)
 				{
 					HistoryController.AddLogEntry(new HistoryElement(DateTime.Now, "Manual", "Error", $"Es wurde kein Job mit der GUID: {guid} zum aktivieren gefunden!\r\nDieser Eintrag wird nun übersprungen\r\nEs sind noch {dataInstance.Jobs.Count} Aufträge in der Queue.\r\nAktueller Auftrag ist: {dataInstance.CurrentJob}"));
@@ -91,13 +141,17 @@ namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler.Manual
 				currentChainedExecutionData.StartTime = DateTime.Now.TimeOfDay;
 				currentChainedExecutionData.ChainedActionExecutionData.ActivateAction(duration);
 
-				BackgroundJob.Schedule(() => DeactivateJob(currentChainedExecutionData.Guid), duration);
+				currentChainedExecutionData.DeactivationJob = BackgroundJob.Schedule(() => DeactivateJob(currentChainedExecutionData.Guid), duration);
 				currentChainedExecutionData.Duration = duration;
 			}
 		}
 
 		private static void CallNextJob(ChainedExecutionData currentChainedExecutionData, DatabaseObjectStorageEntryUsable<ChainScheduleManager<T>> dataInstanceWrapper)
 		{
+			if (currentChainedExecutionData == null)
+				throw new ArgumentNullException(nameof(currentChainedExecutionData));
+			if (dataInstanceWrapper == null)
+				throw new ArgumentNullException(nameof(dataInstanceWrapper));
 			ChainScheduleManager<T> dataInstance = dataInstanceWrapper.Data;
 			ChainedExecutionData nextChainedExecutionData = dataInstance.Jobs.FirstOrDefault(data => data.Guid == currentChainedExecutionData.NextGuid);
 			if (nextChainedExecutionData != null)
