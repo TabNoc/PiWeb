@@ -13,12 +13,19 @@ namespace TabNoc.PiWeb.Pages
 			Heading heading = new Heading(1, "Willkommen auf PiWeb.");
 			Heading heading2 = new Heading(4, "Aktuell gibt es folgende Projekte:");
 			List uList = new List();
-			Anchor anchor = new Anchor("/overview", "WateringWeb");
-			uList.AppendChild(anchor);
+			ListItem listItem = new ListItem();
+			listItem.AppendChild(new Anchor("/overview", "WateringWeb"));
+			uList.AppendChild(listItem);
+
+			listItem = new ListItem();
+			listItem.AppendChild(new Anchor("/test", "Test"));
+			uList.AppendChild(listItem);
 
 			AppendChild(heading);
 			AppendChild(heading2);
 			AppendChild(uList);
+
+			AppendChild(new TabNoc.MyOoui.UiComponents.Chart(400, 400));
 		}
 	}
 }
