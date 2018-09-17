@@ -85,9 +85,11 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.History
 
 		private Task<int> FetchAmount()
 		{
-			if (PageStorage<BackendData>.Instance.StorageData.BackedPropertieses["History"].RequestDataFromBackend)
+			string url = PageStorage<BackendData>.Instance.StorageData.GetUrl("History");
+
+			if (url != "")
 			{
-				return new HttpClient().GetAsync($"{PageStorage<BackendData>.Instance.StorageData.BackedPropertieses["History"].DataSourcePath}/amount").ContinueWith(task => JsonConvert.DeserializeObject<int>(task.EnsureResultSuccessStatusCode().Result.Content.ReadAsStringAsync().Result));
+				return new HttpClient().GetAsync($"{url}/amount").ContinueWith(task => JsonConvert.DeserializeObject<int>(task.EnsureResultSuccessStatusCode().Result.Content.ReadAsStringAsync().Result));
 			}
 			else
 			{
@@ -97,10 +99,12 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.History
 
 		private Task<List<(DateTime, List<string>)>> FetchEntries(DateTime primaryKey, int takeAmount)
 		{
-			if (PageStorage<BackendData>.Instance.StorageData.BackedPropertieses["History"].RequestDataFromBackend)
+			string url = PageStorage<BackendData>.Instance.StorageData.GetUrl("History");
+
+			if (url != "")
 			{
 				return new HttpClient()
-					.GetAsync(HttpExtensions.GetQueryString(PageStorage<BackendData>.Instance.StorageData.BackedPropertieses["History"].DataSourcePath, "range", ("primaryKey", primaryKey), ("takeAmount", takeAmount)))
+					.GetAsync(HttpExtensions.GetQueryString(url, "range", ("primaryKey", primaryKey), ("takeAmount", takeAmount)))
 					.ContinueWith(task => JsonConvert
 						.DeserializeObject<List<HistoryElement>>(task.EnsureResultSuccessStatusCode().Result.Content.ReadAsStringAsync().Result)
 						.Select(historyElement => (TimeStamp: historyElement.TimeStamp,
@@ -142,10 +146,11 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.History
 
 		private Task<List<(DateTime, List<string>)>> FetchSearchEntries(string searchstring, int collumn, int amount)
 		{
-			if (PageStorage<BackendData>.Instance.StorageData.BackedPropertieses["History"].RequestDataFromBackend)
+			string url = PageStorage<BackendData>.Instance.StorageData.GetUrl("History");
+
+			if (url != "")
 			{
-				return new HttpClient().GetAsync(
-						$"{PageStorage<BackendData>.Instance.StorageData.BackedPropertieses["History"].DataSourcePath}/search?searchstring={searchstring.Replace(".", "%").Replace(":", "%")}&collumn={collumn}&amount={amount}")
+				return new HttpClient().GetAsync($"{url}/search?searchstring={searchstring.Replace(".", "%").Replace(":", "%")}&collumn={collumn}&amount={amount}")
 					.ContinueWith(task => JsonConvert
 						.DeserializeObject<List<HistoryElement>>(task.EnsureResultSuccessStatusCode().Result.Content.ReadAsStringAsync().Result)
 						.Select(historyElement => ((TimeStamp: historyElement.TimeStamp,

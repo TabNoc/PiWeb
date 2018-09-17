@@ -1,12 +1,10 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using TabNoc.MyOoui.Storage;
-using TabNoc.MyOoui.UiComponents;
 using TabNoc.PiWeb.DataTypes;
 
 namespace TabNoc.MyOoui.Interfaces.AbstractObjects
@@ -244,14 +242,15 @@ namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 		{
 			if (typeof(T) != typeof(BackendData))
 			{
-				Dictionary<string, BackedProperties> backedPropertieses = PageStorage<BackendData>.Instance.StorageData.BackedPropertieses;
-				if (!backedPropertieses.ContainsKey(key))
+				string url = PageStorage<BackendData>.Instance.StorageData.GetUrl(key);
+				// wird nicht aufgerufen, da als fallback die Datei gelesen wird, was nicht so prickelnd ist
+				//if (url == "")
+				//{
+				//	throw new ArgumentException($"Die API \"{key}\" wurde nicht registriert", nameof(key));
+				//}
+				if (url != "")
 				{
-					throw new ArgumentNullException(nameof(key), "Der Parameter existiert im Dictionary nicht");
-				}
-				if (backedPropertieses[key].RequestDataFromBackend == true)
-				{
-					return new HttpClient().GetAsync(backedPropertieses[key].DataSourcePath).EnsureResultSuccessStatusCode().Result.Content.ReadAsStringAsync().Result;
+					return new HttpClient().GetAsync(url).EnsureResultSuccessStatusCode().Result.Content.ReadAsStringAsync().Result;
 				}
 			}
 
@@ -273,18 +272,24 @@ namespace TabNoc.MyOoui.Interfaces.AbstractObjects
 		{
 			if (typeof(T) != typeof(BackendData))
 			{
-				Dictionary<string, BackedProperties> backedPropertieses = PageStorage<BackendData>.Instance.StorageData.BackedPropertieses;
-				if (backedPropertieses.ContainsKey(key) && backedPropertieses[key].RequestDataFromBackend == true)
+				string url = PageStorage<BackendData>.Instance.StorageData.GetUrl(key);
+				// wird nicht aufgerufen, da als fallback die Datei beschrieben wird, was nicht so prickelnd ist
+				//if (url == "")
+				//{
+				//	throw new ArgumentException($"Die API \"{key}\" wurde nicht registriert", nameof(key));
+				//}
+				if (url != "")
 				{
-					HttpResponseMessage message = new HttpClient().PutAsync(backedPropertieses[key].DataSourcePath,
-						new StringContent(data, Encoding.UTF8, "application/json")).EnsureResultSuccessStatusCode().Result;
+					HttpResponseMessage message = new HttpClient().PutAsync(url, new StringContent(data, Encoding.UTF8, "application/json")).EnsureResultSuccessStatusCode().Result;
 					if (HttpStatusCode.NoContent != message.StatusCode)
 					{
 						throw new ApplicationException("Wrong Server Response Statuscode");
 					}
+
 					return;
 				}
 			}
+
 			FileInfo fileInfo = new FileInfo($"PageStorage({key}).json");
 			using (StreamWriter streamWriter = fileInfo.CreateText())
 			{
