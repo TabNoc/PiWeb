@@ -1,9 +1,9 @@
 ﻿using Ooui;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Text;
+using TabNoc.MyOoui;
 using TabNoc.MyOoui.Interfaces.AbstractObjects;
 using TabNoc.MyOoui.Storage;
 using TabNoc.PiWeb.DataTypes.WateringWeb.Manual;
@@ -32,12 +32,10 @@ namespace TabNoc.PiWeb.PagePublisher.WateringWeb
 		private void SaveManualActionExecutionDataCallback(string data)
 		{
 			const string key = "ManualActionExecution";
-			Dictionary<string, BackedProperties> backedPropertieses = PageStorage<BackendData>.Instance.StorageData.BackedPropertieses;
-			if (backedPropertieses.ContainsKey(key) && backedPropertieses[key].RequestDataFromBackend == true)
+			string url = PageStorage<BackendData>.Instance.StorageData.GetUrl(key);
+			if (url == "")
 			{
-				HttpClient httpClient = new HttpClient();
-				StringContent httpContent = new StringContent(data, Encoding.UTF8, "application/json");
-				HttpResponseMessage message = httpClient.PostAsync(backedPropertieses[key].DataSourcePath, httpContent).Result;
+				new HttpClient().PostAsync(url, new StringContent(data, Encoding.UTF8, "application/json")).EnsureResultSuccessStatusCode();
 			}
 			else
 			{
