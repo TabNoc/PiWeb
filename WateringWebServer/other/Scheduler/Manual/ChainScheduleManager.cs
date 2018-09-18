@@ -46,13 +46,13 @@ namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler.Manual
 			}
 		}
 
-		public static void DeactivateJob(string guid)
+		public static void DeactivateJob(string guid, DatabaseObjectStorageEntryUsable<ChainScheduleManager<T>> dataInstanceWrapper = null)
 		{
 			if (guid == null)
 				throw new ArgumentNullException(nameof(guid));
 			ChainedExecutionData currentChainedExecutionData;
 
-			using (DatabaseObjectStorageEntryUsable<ChainScheduleManager<T>> dataInstanceWrapper = GetInstance())
+			using (dataInstanceWrapper = dataInstanceWrapper ?? GetInstance())
 			{
 				ChainScheduleManager<T> dataInstance = dataInstanceWrapper.Data;
 				currentChainedExecutionData = dataInstance.Jobs.FirstOrDefault(data => data.Guid == guid);
@@ -80,44 +80,13 @@ namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler.Manual
 				ChainScheduleManager<T> dataInstance = dataInstanceWrapper.Data;
 				if (loadedDataJob.Guid == dataInstance.CurrentJob)
 				{
-					RemoveCurrentEntry(loadedDataJob, dataInstance);
+					RemoveCurrentEntry(loadedDataJob, dataInstance, dataInstanceWrapper);
 				}
 				else
 				{
 					RemoveFutureEntry(loadedDataJob, dataInstance);
 				}
 			}
-		}
-
-		private static void RemoveCurrentEntry(ChainedExecutionData loadedDataJob, ChainScheduleManager<T> dataInstance)
-		{
-			if (loadedDataJob == null)
-				throw new ArgumentNullException(nameof(loadedDataJob));
-			if (dataInstance == null)
-				throw new ArgumentNullException(nameof(dataInstance));
-			if (loadedDataJob.Guid != dataInstance.CurrentJob)
-				throw new InvalidOperationException("RemoveFutureEntry can not remove a future Entry");
-			BackgroundJob.Delete(loadedDataJob.DeactivationJob);
-			DeactivateJob(loadedDataJob.Guid);
-		}
-
-		private static void RemoveFutureEntry(ChainedExecutionData loadedDataJob, ChainScheduleManager<T> dataInstance)
-		{
-			if (loadedDataJob == null)
-				throw new ArgumentNullException(nameof(loadedDataJob));
-			if (dataInstance == null)
-				throw new ArgumentNullException(nameof(dataInstance));
-			if (loadedDataJob.Guid == dataInstance.CurrentJob)
-				throw new InvalidOperationException("RemoveFutureEntry can not remove the current Entry");
-
-			// Changes Execution, to point to each other
-			ChainedExecutionData nextExecution = dataInstance.Jobs.First(data => data.Guid == loadedDataJob.NextGuid);
-			ChainedExecutionData previousExecution = dataInstance.Jobs.First(data => data.Guid == loadedDataJob.PreviousGuid);
-			nextExecution.NextGuid = previousExecution.Guid;
-			previousExecution.PreviousGuid = nextExecution.Guid;
-
-			// Removes Execution
-			dataInstance.Jobs.Remove(loadedDataJob);
 		}
 
 		private static void ActivateJob(string guid)
@@ -141,7 +110,7 @@ namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler.Manual
 				currentChainedExecutionData.StartTime = DateTime.Now.TimeOfDay;
 				currentChainedExecutionData.ChainedActionExecutionData.ActivateAction(duration);
 
-				currentChainedExecutionData.DeactivationJob = BackgroundJob.Schedule(() => DeactivateJob(currentChainedExecutionData.Guid), duration);
+				currentChainedExecutionData.DeactivationJob = BackgroundJob.Schedule(() => DeactivateJob(currentChainedExecutionData.Guid, null), duration);
 				currentChainedExecutionData.Duration = duration;
 			}
 		}
@@ -183,5 +152,36 @@ namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler.Manual
 		private static DatabaseObjectStorageEntryUsable<ChainScheduleManager<T>> GetInstance() =>
 			DatabaseObjectStorageEntryUsable<ChainScheduleManager<T>>.GetDataLocked(() =>
 				new ChainScheduleManager<T>());
+
+		private static void RemoveCurrentEntry(ChainedExecutionData loadedDataJob, ChainScheduleManager<T> dataInstance, DatabaseObjectStorageEntryUsable<ChainScheduleManager<T>> dataInstanceWrapper)
+		{
+			if (loadedDataJob == null)
+				throw new ArgumentNullException(nameof(loadedDataJob));
+			if (dataInstance == null)
+				throw new ArgumentNullException(nameof(dataInstance));
+			if (loadedDataJob.Guid != dataInstance.CurrentJob)
+				throw new InvalidOperationException("RemoveFutureEntry can not remove a future Entry");
+			BackgroundJob.Delete(loadedDataJob.DeactivationJob);
+			DeactivateJob(loadedDataJob.Guid, dataInstanceWrapper);
+		}
+
+		private static void RemoveFutureEntry(ChainedExecutionData loadedDataJob, ChainScheduleManager<T> dataInstance)
+		{
+			if (loadedDataJob == null)
+				throw new ArgumentNullException(nameof(loadedDataJob));
+			if (dataInstance == null)
+				throw new ArgumentNullException(nameof(dataInstance));
+			if (loadedDataJob.Guid == dataInstance.CurrentJob)
+				throw new InvalidOperationException("RemoveFutureEntry can not remove the current Entry");
+
+			// Changes Execution, to point to each other
+			ChainedExecutionData nextExecution = dataInstance.Jobs.First(data => data.Guid == loadedDataJob.NextGuid);
+			ChainedExecutionData previousExecution = dataInstance.Jobs.First(data => data.Guid == loadedDataJob.PreviousGuid);
+			nextExecution.PreviousGuid = previousExecution.Guid;
+			previousExecution.NextGuid = nextExecution.Guid;
+
+			// Removes Execution
+			dataInstance.Jobs.RemoveAll(data => data.Guid == loadedDataJob.Guid);
+		}
 	}
 }

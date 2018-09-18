@@ -20,7 +20,7 @@ namespace TabNoc.PiWeb.WateringWebServer
 			Console.WriteLine("Program.Main");
 			Console.WriteLine(new string('#', 30));
 
-			RelaisControl.DeactivateAll("Startup");
+			WaterRelaisControl.DeactivateAll("Startup");
 
 			CreateWebHostBuilder(args)
 				.UseKestrel()

@@ -74,7 +74,7 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 			autoEnabledMultiInputGroup.AddStyling(StylingOption.MarginBottom, 2);
 			autoEnabledMultiInputGroup.AppendCustomElement(new Button(StylingColor.Danger, true, Button.ButtonSize.Normal, false, "Alle Kanäle ausschalten", fontAwesomeIcon: "stop"), false).Click += (sender, args) =>
 			{
-				ServerConnection.DeleteAsync("settings/stopall");
+				ServerConnection.DeleteAsync("settings", "stopall");
 			};
 			grid.AddRow().AppendCollum(autoEnabledMultiInputGroup, autoSize: true);
 
@@ -311,60 +311,6 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 			base.Dispose(disposing);
 		}
 
-		private MultiInputGroup CreateSingleBackendCollum(string name, BackendProperty backendProperty)
-		{
-			MultiInputGroup backendMultiInputGroup = new MultiInputGroup();
-			backendMultiInputGroup.AppendLabel(name, 115 + 80);
-			TwoStateButtonGroup backendEnabled = backendMultiInputGroup.AppendCustomElement(new TwoStateButtonGroup("Vom Server", "Als Debug", backendProperty.RequestDataFromBackend, !backendProperty.RequestDataFromBackend), false);
-			StylableTextInput backendPath = backendMultiInputGroup.AppendTextInput("Pfad zur WebAPI", startText: backendProperty.DataSourcePath);
-			_backendPathTextInputDictionary.Add(name, backendPath);
-			backendMultiInputGroup.AppendValidation("Einstellungen OK", "Einstellungen sind nicht OK", false);
-			Button backendSaveSettings = backendMultiInputGroup.AppendCustomElement(new Button(StylingColor.Success, true, text: "Speichern", fontAwesomeIcon: "save"), false);
-
-			backendSaveSettings.Click += (sender, args) =>
-			{
-				backendPath.SetValidation(false, false);
-				if (backendEnabled.FirstButtonActive && Uri.IsWellFormedUriString(backendPath.Value, UriKind.Absolute))
-				{
-					try
-					{
-						if (JsonConvert.DeserializeObject<bool>(new HttpClient().GetAsync(backendPath.Value + "/enabled").EnsureResultSuccessStatusCode().Result.Content.ReadAsStringAsync().Result) == false)
-						{
-							//TODO: ich brauche eine Messagebox
-							backendPath.Value = "Der Server hat diese API verweigert! Pfad:" + backendPath.Value;
-							throw new Exception(backendPath.Value);
-						}
-						backendPath.SetValidation(true, false);
-						backendProperty.RequestDataFromBackend = backendEnabled.FirstButtonActive;
-						backendProperty.DataSourcePath = backendPath.Value;
-					}
-					catch (Exception e)
-					{
-						backendPath.Value = "Der Verbindungsversuch ist fehlgeschlagen! Pfad:" + backendPath.Value;
-						Console.ForegroundColor = ConsoleColor.Yellow;
-						Console.WriteLine("Beim Versuch die neuen BackendEinstellungen zu Testen ist ein Fehler aufgetreten.");
-						Console.ResetColor();
-
-						Logging.WriteLog("System", "Warn", $"Beim Versuch die Backendeinstellungen für {name} des Servers zu validieren ist es zu folgendem Fehler gekommen:\r\n{e.Message}");
-
-						backendPath.SetValidation(false, true);
-						//TODO: ich brauche eine Messagebox
-					}
-				}
-				else if (backendEnabled.SecondButtonActive)
-				{
-					backendPath.SetValidation(true, false);
-					backendProperty.RequestDataFromBackend = backendEnabled.FirstButtonActive;
-				}
-				else
-				{
-					backendPath.SetValidation(false, true);
-				}
-			};
-			backendMultiInputGroup.AddStyling(StylingOption.MarginBottom, 2);
-			return backendMultiInputGroup;
-		}
-
 		private MultiInputGroup CreateMultiBackendCollum(BackendData backendData, out StylableTextInput backendPath)
 		{
 			MultiInputGroup backendMultiInputGroup = new MultiInputGroup();
@@ -419,6 +365,60 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 				else
 				{
 					path.SetValidation(false, true);
+				}
+			};
+			backendMultiInputGroup.AddStyling(StylingOption.MarginBottom, 2);
+			return backendMultiInputGroup;
+		}
+
+		private MultiInputGroup CreateSingleBackendCollum(string name, BackendProperty backendProperty)
+		{
+			MultiInputGroup backendMultiInputGroup = new MultiInputGroup();
+			backendMultiInputGroup.AppendLabel(name, 115 + 80);
+			TwoStateButtonGroup backendEnabled = backendMultiInputGroup.AppendCustomElement(new TwoStateButtonGroup("Vom Server", "Als Debug", backendProperty.RequestDataFromBackend, !backendProperty.RequestDataFromBackend), false);
+			StylableTextInput backendPath = backendMultiInputGroup.AppendTextInput("Pfad zur WebAPI", startText: backendProperty.DataSourcePath);
+			_backendPathTextInputDictionary.Add(name, backendPath);
+			backendMultiInputGroup.AppendValidation("Einstellungen OK", "Einstellungen sind nicht OK", false);
+			Button backendSaveSettings = backendMultiInputGroup.AppendCustomElement(new Button(StylingColor.Success, true, text: "Speichern", fontAwesomeIcon: "save"), false);
+
+			backendSaveSettings.Click += (sender, args) =>
+			{
+				backendPath.SetValidation(false, false);
+				if (backendEnabled.FirstButtonActive && Uri.IsWellFormedUriString(backendPath.Value, UriKind.Absolute))
+				{
+					try
+					{
+						if (JsonConvert.DeserializeObject<bool>(new HttpClient().GetAsync(backendPath.Value + "/enabled").EnsureResultSuccessStatusCode().Result.Content.ReadAsStringAsync().Result) == false)
+						{
+							//TODO: ich brauche eine Messagebox
+							backendPath.Value = "Der Server hat diese API verweigert! Pfad:" + backendPath.Value;
+							throw new Exception(backendPath.Value);
+						}
+						backendPath.SetValidation(true, false);
+						backendProperty.RequestDataFromBackend = backendEnabled.FirstButtonActive;
+						backendProperty.DataSourcePath = backendPath.Value;
+					}
+					catch (Exception e)
+					{
+						backendPath.Value = "Der Verbindungsversuch ist fehlgeschlagen! Pfad:" + backendPath.Value;
+						Console.ForegroundColor = ConsoleColor.Yellow;
+						Console.WriteLine("Beim Versuch die neuen BackendEinstellungen zu Testen ist ein Fehler aufgetreten.");
+						Console.ResetColor();
+
+						Logging.WriteLog("System", "Warn", $"Beim Versuch die Backendeinstellungen für {name} des Servers zu validieren ist es zu folgendem Fehler gekommen:\r\n{e.Message}");
+
+						backendPath.SetValidation(false, true);
+						//TODO: ich brauche eine Messagebox
+					}
+				}
+				else if (backendEnabled.SecondButtonActive)
+				{
+					backendPath.SetValidation(true, false);
+					backendProperty.RequestDataFromBackend = backendEnabled.FirstButtonActive;
+				}
+				else
+				{
+					backendPath.SetValidation(false, true);
 				}
 			};
 			backendMultiInputGroup.AddStyling(StylingOption.MarginBottom, 2);

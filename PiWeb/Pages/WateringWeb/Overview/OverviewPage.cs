@@ -29,7 +29,7 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Overview
 			manualTable.SetButtonColumn("Löschen", s =>
 			{
 				Button button = new Button(StylingColor.Danger, true, Button.ButtonSize.Small, fontAwesomeIcon: "trash");
-				button.Click += (sender, args) => ServerConnection.DeleteAsync($"overview/deleteManualEntry?number={s}");
+				button.Click += (sender, args) => ServerConnection.DeleteAsync($"overview", $"deleteManualEntry?number={s}");
 				return button;
 			});
 			grid.AddRow().AppendCollum(manualTable);

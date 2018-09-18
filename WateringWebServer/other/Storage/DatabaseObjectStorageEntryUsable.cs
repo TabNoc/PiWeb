@@ -1,5 +1,5 @@
-﻿using System;
-using Npgsql;
+﻿using Npgsql;
+using System;
 
 namespace TabNoc.PiWeb.WateringWebServer.other.Storage
 {
@@ -32,16 +32,65 @@ namespace TabNoc.PiWeb.WateringWebServer.other.Storage
 			return new DatabaseObjectStorageEntryUsable<T>(DataBaseObjectStorage.LoadFromDataBaseLocked(computeDefaultValue));
 		}
 
-		public void Dispose()
+		#region Dispose Pattern
+
+		private bool _disposed;
+
+		~DatabaseObjectStorageEntryUsable()
 		{
-			if (_useLocked == true)
+			try
 			{
-				DataBaseObjectStorage.SaveToLockedDataBase(Data, _connectionItems);
+				Dispose(false);
 			}
-			else
+			catch (Exception e)
 			{
-				DataBaseObjectStorage.SaveToDataBase(Data);
+				Console.ForegroundColor = ConsoleColor.Red;
+				Console.WriteLine(e);
+				Console.ResetColor();
 			}
 		}
+
+		public void Dispose()
+		{
+			try
+			{
+				Dispose(true);
+				GC.SuppressFinalize(this);
+			}
+			catch (Exception e)
+			{
+				Console.ForegroundColor = ConsoleColor.Red;
+				Console.WriteLine(e);
+				Console.ResetColor();
+			}
+		}
+
+		private void Dispose(bool disposing)
+		{
+			try
+			{
+				if (!_disposed)
+				{
+					if (_useLocked == true)
+					{
+						DataBaseObjectStorage.SaveToLockedDataBase(Data, _connectionItems);
+					}
+					else
+					{
+						DataBaseObjectStorage.SaveToDataBase(Data);
+					}
+
+					_disposed = true;
+				}
+			}
+			catch (Exception e)
+			{
+				Console.ForegroundColor = ConsoleColor.Red;
+				Console.WriteLine(e);
+				Console.ResetColor();
+			}
+		}
+
+		#endregion Dispose Pattern
 	}
 }

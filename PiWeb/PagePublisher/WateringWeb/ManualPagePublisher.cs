@@ -33,7 +33,7 @@ namespace TabNoc.PiWeb.PagePublisher.WateringWeb
 		{
 			const string key = "ManualActionExecution";
 			string url = PageStorage<BackendData>.Instance.StorageData.GetUrl(key);
-			if (url == "")
+			if (url != "")
 			{
 				new HttpClient().PostAsync(url, new StringContent(data, Encoding.UTF8, "application/json")).EnsureResultSuccessStatusCode();
 			}
