@@ -86,6 +86,7 @@ namespace TabNoc.PiWeb.WateringWebServer
 				}
 				return false;
 			});
+#if !DebugWithoutHangfire
 			app.UseHangfireServer(new BackgroundJobServerOptions()
 			//{
 			//	SchedulePollingInterval = TimeSpan.FromMilliseconds(6000)
@@ -100,6 +101,7 @@ namespace TabNoc.PiWeb.WateringWebServer
 			RecurringJob.RemoveIfExists("pg_dump");
 
 			RecurringJob.AddOrUpdate("Cleanup", () => Cleanup(), Cron.Hourly);
+#endif
 
 			Console.WriteLine(new string('v', 30));
 			Console.WriteLine("Startup.Configure done");
@@ -122,11 +124,12 @@ namespace TabNoc.PiWeb.WateringWebServer
 				})
 				//.AddMvc()
 				.SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-
+#if !DebugWithoutHangfire
 			services.AddHangfire(config =>
 			{
 				config.UsePostgreSqlStorage(PrivateData.ConnectionStringBuilder.ToString(), new PostgreSqlStorageOptions() { ConnectionsCount = 2 });
 			});
+#endif
 
 			Console.WriteLine(new string('v', 30));
 			Console.WriteLine("Startup.ConfigureServices done");

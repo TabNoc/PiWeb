@@ -227,19 +227,49 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 
 			grid.AddRow().AppendCollum(new Heading(3, "Backend Server Schnittstelle einstellen") { ClassName = "text-center mb-4" });
 			Row backendServerRow = grid.AddRow();
+			Row backendServerConfigurationSingeApiRow = grid.AddRow();
+			Row backendServerConfigurationMultiApiRow = grid.AddRow();
 			backendServerRow.AddNewLine();
 
-			foreach ((string name, BackedProperties backedProperties) in PageStorage<BackendData>.Instance.StorageData.BackedPropertieses)
+			BackendData backendInstanceStorageData = PageStorage<BackendData>.Instance.StorageData;
+
+			MultiInputGroup backendConfigurationSourceSwitchingMultiInputGroup = backendServerRow.AppendCollum(new MultiInputGroup());
+			backendConfigurationSourceSwitchingMultiInputGroup.AppendLabel("Quelle Auswählen", labelSize);
+			TwoStateButtonGroup backendConfigurationSourceSwitchingTwoStateButton = backendConfigurationSourceSwitchingMultiInputGroup.AppendCustomElement(new TwoStateButtonGroup("Sammelkonfiguration", "einzele Konfiguration", !backendInstanceStorageData.SingleApiConfiguration, backendInstanceStorageData.SingleApiConfiguration), false);
+
+			void OnBackendConfigurationSourceSwitchingTwoStateButtonOnFirstButtonStateChange(object sender, ButtonChangeEventHandlerArgs args)
 			{
-				backendServerRow.AddNewLine();
-				backendServerRow.AppendCollum(CreateBackendCollum(name, backedProperties), autoSize: true);
+				if (args.NewButtonState == true)
+				{
+					backendServerConfigurationSingeApiRow.Style.Display = "none";
+					backendServerConfigurationMultiApiRow.Style.Display = null;
+				}
+				else
+				{
+					backendServerConfigurationSingeApiRow.Style.Display = null;
+					backendServerConfigurationMultiApiRow.Style.Display = "none";
+				}
+
+				backendInstanceStorageData.SingleApiConfiguration = !args.NewButtonState;
 			}
 
-			backendServerRow.AddNewLine();
-			backendServerRow.AddNewLine();
-			backendServerRow.AppendCollum(new Button(StylingColor.Light, false, Button.ButtonSize.Normal, false, "Standardkonfiguration eintragen")).Click += (sender, args) =>
+			backendConfigurationSourceSwitchingTwoStateButton.FirstButtonStateChange += OnBackendConfigurationSourceSwitchingTwoStateButtonOnFirstButtonStateChange;
+			OnBackendConfigurationSourceSwitchingTwoStateButtonOnFirstButtonStateChange(null, new ButtonChangeEventHandlerArgs(false, !backendInstanceStorageData.SingleApiConfiguration));
+			backendConfigurationSourceSwitchingMultiInputGroup.AddStyling(StylingOption.MarginBottom, 5);
+
+			#region backendServerConfigurationSingeApiRow
+
+			foreach ((string name, BackendProperty backedProperties) in backendInstanceStorageData.BackendProperties)
 			{
-				foreach ((string name, BackedProperties backedProperties) in PageStorage<BackendData>.Instance.StorageData.BackedPropertieses)
+				backendServerConfigurationSingeApiRow.AddNewLine();
+				backendServerConfigurationSingeApiRow.AppendCollum(CreateSingleBackendCollum(name, backedProperties), autoSize: true);
+			}
+
+			backendServerConfigurationSingeApiRow.AddNewLine();
+			backendServerConfigurationSingeApiRow.AddNewLine();
+			backendServerConfigurationSingeApiRow.AppendCollum(new Button(StylingColor.Light, false, Button.ButtonSize.Normal, false, "Standardkonfiguration eintragen")).Click += (sender, args) =>
+			{
+				foreach ((string name, BackendProperty _) in backendInstanceStorageData.BackendProperties)
 				{
 					if (_backendPathTextInputDictionary[name].Value == "")
 					{
@@ -247,6 +277,22 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 					}
 				}
 			};
+
+			#endregion backendServerConfigurationSingeApiRow
+
+			#region backendServerConfigurationMultiApiRow
+
+			backendServerConfigurationMultiApiRow.AppendCollum(CreateMultiBackendCollum(backendInstanceStorageData, out StylableTextInput backendServerConfigurationMultiApiTextInput), autoSize: true);
+			backendServerConfigurationMultiApiRow.AddNewLine();
+			backendServerConfigurationMultiApiRow.AppendCollum(new Button(StylingColor.Light, false, Button.ButtonSize.Normal, false, "Standardkonfiguration eintragen")).Click += (sender, args) =>
+			{
+				if (backendServerConfigurationMultiApiTextInput.Value == "")
+				{
+					backendServerConfigurationMultiApiTextInput.Value = $"http://{Dns.GetHostAddresses("WebPiServer.PiWeb")[0].ToString()}:5000/api";
+				}
+			};
+
+			#endregion backendServerConfigurationMultiApiRow
 
 			#endregion Backend Server Path
 		}
@@ -265,12 +311,12 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 			base.Dispose(disposing);
 		}
 
-		private MultiInputGroup CreateBackendCollum(string name, BackedProperties backedProperties)
+		private MultiInputGroup CreateSingleBackendCollum(string name, BackendProperty backendProperty)
 		{
 			MultiInputGroup backendMultiInputGroup = new MultiInputGroup();
 			backendMultiInputGroup.AppendLabel(name, 115 + 80);
-			TwoStateButtonGroup backendEnabled = backendMultiInputGroup.AppendCustomElement(new TwoStateButtonGroup("Vom Server", "Als Debug", backedProperties.RequestDataFromBackend, !backedProperties.RequestDataFromBackend), false);
-			StylableTextInput backendPath = backendMultiInputGroup.AppendTextInput("Pfad zur WebAPI", startText: backedProperties.DataSourcePath);
+			TwoStateButtonGroup backendEnabled = backendMultiInputGroup.AppendCustomElement(new TwoStateButtonGroup("Vom Server", "Als Debug", backendProperty.RequestDataFromBackend, !backendProperty.RequestDataFromBackend), false);
+			StylableTextInput backendPath = backendMultiInputGroup.AppendTextInput("Pfad zur WebAPI", startText: backendProperty.DataSourcePath);
 			_backendPathTextInputDictionary.Add(name, backendPath);
 			backendMultiInputGroup.AppendValidation("Einstellungen OK", "Einstellungen sind nicht OK", false);
 			Button backendSaveSettings = backendMultiInputGroup.AppendCustomElement(new Button(StylingColor.Success, true, text: "Speichern", fontAwesomeIcon: "save"), false);
@@ -289,8 +335,8 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 							throw new Exception(backendPath.Value);
 						}
 						backendPath.SetValidation(true, false);
-						backedProperties.RequestDataFromBackend = backendEnabled.FirstButtonActive;
-						backedProperties.DataSourcePath = backendPath.Value;
+						backendProperty.RequestDataFromBackend = backendEnabled.FirstButtonActive;
+						backendProperty.DataSourcePath = backendPath.Value;
 					}
 					catch (Exception e)
 					{
@@ -308,11 +354,71 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Settings
 				else if (backendEnabled.SecondButtonActive)
 				{
 					backendPath.SetValidation(true, false);
-					backedProperties.RequestDataFromBackend = backendEnabled.FirstButtonActive;
+					backendProperty.RequestDataFromBackend = backendEnabled.FirstButtonActive;
 				}
 				else
 				{
 					backendPath.SetValidation(false, true);
+				}
+			};
+			backendMultiInputGroup.AddStyling(StylingOption.MarginBottom, 2);
+			return backendMultiInputGroup;
+		}
+
+		private MultiInputGroup CreateMultiBackendCollum(BackendData backendData, out StylableTextInput backendPath)
+		{
+			MultiInputGroup backendMultiInputGroup = new MultiInputGroup();
+			backendMultiInputGroup.AppendLabel("Server Api Pfad", 115 + 80);
+			TwoStateButtonGroup backendEnabled = backendMultiInputGroup.AppendCustomElement(new TwoStateButtonGroup("Vom Server", "Als Debug", backendData.MultiApiRequestDataFromBackend, !backendData.MultiApiRequestDataFromBackend), false);
+			backendPath = backendMultiInputGroup.AppendTextInput("Pfad zur WebAPI", startText: backendData.MultiApiDataSourcePath);
+
+			backendMultiInputGroup.AppendValidation("Einstellungen OK", "Einstellungen sind nicht OK", false);
+			Button backendSaveSettings = backendMultiInputGroup.AppendCustomElement(new Button(StylingColor.Success, true, text: "Speichern", fontAwesomeIcon: "save"), false);
+
+			StylableTextInput path = backendPath;
+			backendSaveSettings.Click += (sender, args) =>
+			{
+				path.SetValidation(false, false);
+
+				if (backendEnabled.FirstButtonActive && Uri.IsWellFormedUriString(path.Value, UriKind.Absolute))
+				{
+					foreach ((string name, BackendProperty _) in backendData.BackendProperties)
+					{
+						try
+						{
+							if (JsonConvert.DeserializeObject<bool>(new HttpClient().GetAsync(path.Value + "/" + name + "/enabled").EnsureResultSuccessStatusCode().Result.Content.ReadAsStringAsync().Result) == false)
+							{
+								//TODO: ich brauche eine Messagebox
+								path.Value = "Der Server hat diese API verweigert! Pfad:" + path.Value;
+								throw new Exception(path.Value);
+							}
+						}
+						catch (Exception e)
+						{
+							path.Value = "Der Verbindungsversuch ist fehlgeschlagen! Pfad:" + path.Value;
+							Console.ForegroundColor = ConsoleColor.Yellow;
+							Console.WriteLine("Beim Versuch die neuen BackendEinstellungen zu Testen ist ein Fehler aufgetreten.");
+							Console.ResetColor();
+
+							Logging.WriteLog("System", "Warn", $"Beim Versuch die Backendeinstellungen für {name} des Servers zu validieren ist es zu folgendem Fehler gekommen:\r\n{e.Message}");
+
+							path.SetValidation(false, true);
+							//TODO: ich brauche eine Messagebox
+							return;
+						}
+					}
+					path.SetValidation(true, false);
+					backendData.MultiApiRequestDataFromBackend = backendEnabled.FirstButtonActive;
+					backendData.MultiApiDataSourcePath = path.Value;
+				}
+				else if (backendEnabled.SecondButtonActive)
+				{
+					path.SetValidation(true, false);
+					backendData.MultiApiRequestDataFromBackend = backendEnabled.FirstButtonActive;
+				}
+				else
+				{
+					path.SetValidation(false, true);
 				}
 			};
 			backendMultiInputGroup.AddStyling(StylingOption.MarginBottom, 2);

@@ -7,9 +7,12 @@ namespace TabNoc.MyOoui.Storage
 {
 	public class BackendData : PageData
 	{
-		public Dictionary<string, BackedProperties> BackedPropertieses;
+		public Dictionary<string, BackendProperty> BackendProperties;
 
-		private static Dictionary<string, BackedProperties> _setupBackedPropertieses;
+		private static Dictionary<string, BackendProperty> _setupBackedPropertieses;
+		public bool SingleApiConfiguration;
+		public bool MultiApiRequestDataFromBackend;
+		public string MultiApiDataSourcePath;
 
 		public new static BackendData CreateNew()
 		{
@@ -19,12 +22,15 @@ namespace TabNoc.MyOoui.Storage
 			}
 			return new BackendData()
 			{
-				BackedPropertieses = new Dictionary<string, BackedProperties>(_setupBackedPropertieses),
-				Valid = true
+				BackendProperties = new Dictionary<string, BackendProperty>(_setupBackedPropertieses),
+				Valid = true,
+				SingleApiConfiguration = true,
+				MultiApiRequestDataFromBackend = false,
+				MultiApiDataSourcePath = ""
 			};
 		}
 
-		public static void Setup(Dictionary<string, BackedProperties> backedPropertieses)
+		public static void Setup(Dictionary<string, BackendProperty> backedPropertieses)
 		{
 			if (_setupBackedPropertieses != null)
 			{
@@ -32,6 +38,34 @@ namespace TabNoc.MyOoui.Storage
 			}
 			_setupBackedPropertieses = backedPropertieses;
 			PageStorage<BackendData>.Instance.Initialize("Backend", TimeSpan.MaxValue);
+		}
+
+		public string GetUrl(string api)
+		{
+			if (SingleApiConfiguration)
+			{
+				if (_setupBackedPropertieses[api].RequestDataFromBackend)
+				{
+					return _setupBackedPropertieses[api].DataSourcePath;
+				}
+				else
+				{
+					//TODO: safe result
+					return "";
+				}
+			}
+			else
+			{
+				if (MultiApiRequestDataFromBackend)
+				{
+					return MultiApiDataSourcePath + "/" + api;
+				}
+				else
+				{
+					//TODO: safe result
+					return "";
+				}
+			}
 		}
 	}
 }

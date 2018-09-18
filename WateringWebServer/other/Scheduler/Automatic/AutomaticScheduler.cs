@@ -19,8 +19,8 @@ namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler.Automatic
 									* GetGlobalOverride()
 									* GetWeatherMultiplicator(automaticJobContext.ChannelProgramData.ActivateWeatherInfo)
 									* GetHumidityMultiplicator(automaticJobContext.HumiditySensorEnabled, automaticJobContext.HumiditySensor);
-				RelaisControl.Activate(automaticJobContext.ChannelId, automaticJobContext.ChannelProgramData.EnableMasterChannel, "Automatic", duration);
-				BackgroundJob.Schedule(() => RelaisControl.Deactivate(automaticJobContext.ChannelId, "Automatic"), duration);
+				WaterRelaisControl.Activate(automaticJobContext.ChannelId, automaticJobContext.ChannelProgramData.EnableMasterChannel, "Automatic", duration);
+				BackgroundJob.Schedule(() => WaterRelaisControl.Deactivate(automaticJobContext.ChannelId, "Automatic"), duration);
 			}
 		}
 

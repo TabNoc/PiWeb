@@ -15,6 +15,35 @@ namespace TabNoc.PiWeb.WateringWebServer.other.Hardware
 			// TODO: implement lock, manual is not allowed to disable automatic entries
 		}
 
+		//TODO: move http query into method, change to https, move uri to static context
+		public static void Activate(int channelId, bool activateWithMasterChannel, string operatingMode, TimeSpan duration)
+		{
+			if (WaterRelaisControl.Instance.Activate(channelId, activateWithMasterChannel, operatingMode, duration, out bool activateMasterChannel))
+			{
+				RelaisControl2.Activate(channelId, activateMasterChannel, operatingMode);
+			}
+		}
+
+		public static void Deactivate(int channelId, string operatingMode)
+		{
+			if (WaterRelaisControl.Instance.Deactivate(channelId, operatingMode, out bool deactivateMasterChannel))
+			{
+				RelaisControl2.Deactivate(channelId, operatingMode);
+			}
+			else if (deactivateMasterChannel)
+			{
+				RelaisControl2.Deactivate(0, operatingMode);
+			}
+		}
+
+		public static void DeactivateAll(string operatingMode)
+		{
+			if (WaterRelaisControl.Instance.DeactivateAllConnections(operatingMode))
+			{
+				RelaisControl2.DeactivateAll(operatingMode);
+			}
+		}
+
 		public bool Activate(int channelId, bool activateWithMasterChannel, string operatingMode, TimeSpan duration, out bool activateMasterChannel)
 		{
 			activateMasterChannel = activateWithMasterChannel;
@@ -66,6 +95,11 @@ namespace TabNoc.PiWeb.WateringWebServer.other.Hardware
 			throw new NotImplementedException();
 		}
 
+		public bool DeactivateAllConnections(string operatingMode)
+		{
+			return true;
+		}
+
 		// Ignore Items where the Endtime is only 10s in the future
 		private static List<WaterRelaisControlData.WaterRelaisControlDataItem> GetCurrentlyActiveActions(
 			List<WaterRelaisControlData.WaterRelaisControlDataItem> waterRelaisControlDataItems) =>
@@ -95,13 +129,6 @@ namespace TabNoc.PiWeb.WateringWebServer.other.Hardware
 					StartTime = startTime;
 				}
 			}
-		}
-
-		// ReSharper restore FieldCanBeMadeReadOnly.Local
-
-		public bool DeactivateAll(string operatingMode)
-		{
-			return true;
 		}
 	}
 }

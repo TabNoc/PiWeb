@@ -65,15 +65,15 @@ namespace TabNoc.PiWeb
 
 			UI.HeadHtml += "<link rel=\"stylesheet\" href=\"https://use.fontawesome.com/releases/v5.1.0/css/all.css\" integrity=\"sha384-lKuwvrZot6UHsBSfcMvOkWwlCMgc0TaWr+30HWe3a4ltaBwTZhyTEggF5tJv8tbt\" crossorigin=\"anonymous\">";
 
-			BackendData.Setup(new Dictionary<string, BackedProperties>()
+			BackendData.Setup(new Dictionary<string, BackendProperty>()
 			{
-				{ "Humidity", new BackedProperties("", false) },
-				{ "Settings", new BackedProperties("", false) },
-				{ "Manual", new BackedProperties("", false) },
-				{ "Overview", new BackedProperties("", false) },
-				{ "ManualActionExecution", new BackedProperties("", false) },
-				{ "History", new BackedProperties("", false) },
-				{ "Channels", new BackedProperties("", false) }
+				{ "Humidity", new BackendProperty("", false) },
+				{ "Settings", new BackendProperty("", false) },
+				{ "Manual", new BackendProperty("", false) },
+				{ "Overview", new BackendProperty("", false) },
+				{ "ManualActionExecution", new BackendProperty("", false) },
+				{ "History", new BackendProperty("", false) },
+				{ "Channels", new BackendProperty("", false) }
 			});
 
 			#region WateringWeb

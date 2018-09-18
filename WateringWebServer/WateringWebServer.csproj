@@ -3,6 +3,11 @@
 	<PropertyGroup>
 		<TargetFramework>netcoreapp2.1</TargetFramework>
 		<RootNamespace>TabNoc.PiWeb.WateringWebServer</RootNamespace>
+		<Configurations>Debug;Release;DebugWithoutHangfire</Configurations>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugWithoutHangfire|AnyCPU'">
+	  <DefineConstants>DEBUG;TRACE;DebugWithoutHangfire</DefineConstants>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
