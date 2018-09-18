@@ -78,7 +78,7 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
 
 			#region StartButton
 
-			Button startButton = new Button(StylingColor.Success, true, text: "Starten!", fontAwesomeIcon: "play", asBlock: true);
+			Button startButton = new Button(StylingColor.Success, true, text: "Einreihen!", fontAwesomeIcon: "plus-circle", asBlock: true);
 			firstContainer.AppendChild(startButton);
 			startButton.Click += (o, args) =>
 			{
@@ -94,18 +94,18 @@ namespace TabNoc.PiWeb.Pages.WateringWeb.Manual
 					{
 						CreateChannelAction(channel, TimeSpan.Parse(durationTextInput.Value), masterEnabledTwoStateButtonGroup.FirstButtonActive, 100);
 
-						startButton.Text = "Gestartet";
+						startButton.Text = "Wurde Eingereiht";
 						Task.Run(() =>
 						{
-							startButton.Text = "Starten!";
-							startButton.SetFontAwesomeIcon("play");
 							System.Threading.Thread.Sleep(5000);
+							startButton.Text = "Einreihen!";
+							startButton.SetFontAwesomeIcon("plus-circle");
 							return startButton.IsDisabled = false;
 						});
 					}
 					catch (Exception)
 					{
-						startButton.Text = "Start fehlgeschlagen";
+						startButton.Text = "Einreihen fehlgeschlagen";
 						throw;
 					}
 				}
