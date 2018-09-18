@@ -63,7 +63,7 @@ namespace TabNoc.PiWeb.WateringWebServer.Controllers
 		[HttpDelete("stopall")]
 		public ActionResult StopAllChannels()
 		{
-			RelaisControl.DeactivateAll("Manual");
+			WaterRelaisControl.DeactivateAll("Manual");
 			return Ok(true);
 		}
 

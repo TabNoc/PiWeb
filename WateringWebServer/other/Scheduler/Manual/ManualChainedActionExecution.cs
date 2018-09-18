@@ -21,8 +21,8 @@ namespace TabNoc.PiWeb.WateringWebServer.other.Scheduler.Manual
 			ManualActionExecution = manualActionExecution;
 		}
 
-		public override void ActivateAction(TimeSpan duration) => RelaisControl.Activate(ManualActionExecution.ChannelId, ManualActionExecution.ActivateMasterChannel, "Manual", duration);
+		public override void ActivateAction(TimeSpan duration) => WaterRelaisControl.Activate(ManualActionExecution.ChannelId, ManualActionExecution.ActivateMasterChannel, "Manual", duration);
 
-		public override void DeactivateAction() => RelaisControl.Deactivate(ManualActionExecution.ChannelId, "Manual");
+		public override void DeactivateAction() => WaterRelaisControl.Deactivate(ManualActionExecution.ChannelId, "Manual");
 	}
 }
