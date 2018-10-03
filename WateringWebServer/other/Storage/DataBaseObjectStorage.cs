@@ -1,9 +1,9 @@
-﻿using System;
-using System.Linq;
-using Microsoft.EntityFrameworkCore.Internal;
+﻿using Microsoft.EntityFrameworkCore.Internal;
 using Newtonsoft.Json;
 using Npgsql;
 using NpgsqlTypes;
+using System;
+using System.Linq;
 
 namespace TabNoc.PiWeb.WateringWebServer.other.Storage
 {
@@ -57,6 +57,7 @@ namespace TabNoc.PiWeb.WateringWebServer.other.Storage
 								reader.Dispose();
 								System.Threading.Thread.Sleep(10);
 								sleepCounter += 10;
+								Console.WriteLine("Database is Locked!");
 							}
 							else
 							{
